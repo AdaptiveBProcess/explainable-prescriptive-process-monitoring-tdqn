@@ -21,14 +21,14 @@ tracking:
   log_config: true
 
 paths:
-  data_raw: "/home/andrew/Documents/asistencia-graduada-phd-oscar/paper1/a_prescriptive-process-monitoring/SimBank/data/loan_log_[_time_contact_HQ_]_10000_train_normal"
+  data_raw: "data/raw/loan_log_[_time_contact_HQ_]_100000_train_normal"
   data_interim_dir: "data/interim"
   data_processed_dir: "data/processed"
   artifacts_dir: "artifacts"
 
 data:
   format: pickle      # csv | xes | pickle
-  raw_path: "/home/andrew/Documents/asistencia-graduada-phd-oscar/paper1/a_prescriptive-process-monitoring/SimBank/data/loan_log_[_time_contact_HQ_]_10000_train_normal"
+  raw_path: "data/raw/loan_log_[_time_contact_HQ_]_100000_train_normal"
   output_clean_path: "data/interim/clean.parquet"
 
 # Schema mapping for SimBank logs (case_nr -> case_id)
