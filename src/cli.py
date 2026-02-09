@@ -77,6 +77,7 @@ def main() -> None:
             deterministic=deterministic,
             config_hash=config_obj.config_hash,
             metadata_output=cfg["experiment"].get("metadata_path"),
+            tracking_config=cfg.get("tracking", {}),
         )
     elif args.command == "ope":
         metrics = doubly_robust_estimate(

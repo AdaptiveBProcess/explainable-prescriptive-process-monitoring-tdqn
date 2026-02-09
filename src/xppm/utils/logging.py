@@ -122,3 +122,169 @@ def save_run_metadata(metadata: dict[str, Any], output_path: str | Path) -> None
         json.dump(metadata, f, indent=2)
 
 
+# Tracking wrapper (MLflow/W&B)
+class Tracker:
+    """Unified tracking wrapper for MLflow or W&B."""
+    
+    def __init__(self, config: dict[str, Any]) -> None:
+        """Initialize tracker from config.
+        
+        Args:
+            config: Tracking config dict with 'enabled', 'backend', etc.
+        """
+        self.config = config
+        self.enabled = config.get("enabled", False)
+        self.backend = config.get("backend", "mlflow")
+        self.run = None
+        self._mlflow_run = None
+        self._wandb_run = None
+        
+        if not self.enabled:
+            return
+        
+        if self.backend == "mlflow":
+            try:
+                import mlflow
+                self.mlflow = mlflow
+            except ImportError:
+                get_logger(__name__).warning("MLflow not installed, tracking disabled")
+                self.enabled = False
+        elif self.backend == "wandb":
+            try:
+                import wandb
+                self.wandb = wandb
+            except ImportError:
+                get_logger(__name__).warning("W&B not installed, tracking disabled")
+                self.enabled = False
+    
+    def init_run(
+        self,
+        run_name: str,
+        stage: str,
+        tags: dict[str, str] | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> None:
+        """Initialize a new tracking run.
+        
+        Args:
+            run_name: Name for this run
+            stage: Stage name (train, ope, xai, etc.)
+            tags: Optional tags dict
+            params: Optional params dict (will be merged with metadata)
+        """
+        if not self.enabled:
+            return
+        
+        logger = get_logger(__name__)
+        
+        if self.backend == "mlflow":
+            mlflow_cfg = self.config.get("mlflow", {})
+            self.mlflow.set_experiment(mlflow_cfg.get("experiment_name", "xppm-tdqn"))
+            self._mlflow_run = self.mlflow.start_run(run_name=run_name)
+            self.run = self._mlflow_run
+            
+            # Set tags
+            all_tags = {"stage": stage}
+            if tags:
+                all_tags.update(tags)
+            for key, value in all_tags.items():
+                self.mlflow.set_tag(key, str(value))
+            
+            # Set params
+            if params:
+                for key, value in params.items():
+                    self.mlflow.log_param(key, value)
+            
+            logger.info("MLflow run started: %s", run_name)
+        
+        elif self.backend == "wandb":
+            wandb_cfg = self.config.get("wandb", {})
+            self._wandb_run = self.wandb.init(
+                project=wandb_cfg.get("project", "xppm-tdqn"),
+                entity=wandb_cfg.get("entity"),
+                name=run_name,
+                tags=self.config.get("wandb", {}).get("tags", []) + [stage],
+            )
+            self.run = self._wandb_run
+            
+            # Set config (params)
+            if params:
+                self.wandb.config.update(params)
+            
+            logger.info("W&B run started: %s", run_name)
+    
+    def log_metrics(self, metrics: dict[str, float], step: int | None = None) -> None:
+        """Log metrics to tracker.
+        
+        Args:
+            metrics: Dict of metric name -> value
+            step: Optional step/epoch number
+        """
+        if not self.enabled:
+            return
+        
+        if self.backend == "mlflow":
+            self.mlflow.log_metrics(metrics, step=step)
+        elif self.backend == "wandb":
+            self.wandb.log(metrics, step=step)
+    
+    def log_artifact(self, local_path: str | Path, artifact_path: str | None = None) -> None:
+        """Log artifact (file) to tracker.
+        
+        Args:
+            local_path: Path to local file
+            artifact_path: Optional path within artifacts (for organization)
+        """
+        if not self.enabled:
+            return
+        
+        path = Path(local_path)
+        if not path.exists():
+            get_logger(__name__).warning("Artifact not found: %s", local_path)
+            return
+        
+        if self.backend == "mlflow":
+            self.mlflow.log_artifact(str(local_path), artifact_path=artifact_path)
+        elif self.backend == "wandb":
+            self.wandb.log_artifact(str(local_path), name=artifact_path or path.name)
+    
+    def set_tags(self, tags: dict[str, str]) -> None:
+        """Set tags on the run.
+        
+        Args:
+            tags: Dict of tag name -> value
+        """
+        if not self.enabled:
+            return
+        
+        if self.backend == "mlflow":
+            for key, value in tags.items():
+                self.mlflow.set_tag(key, str(value))
+        elif self.backend == "wandb":
+            # W&B tags are a list, so we update config
+            for key, value in tags.items():
+                self.wandb.config[key] = value
+    
+    def finish(self) -> None:
+        """Finish/close the tracking run."""
+        if not self.enabled:
+            return
+        
+        if self.backend == "mlflow" and self._mlflow_run:
+            self.mlflow.end_run()
+        elif self.backend == "wandb" and self._wandb_run:
+            self.wandb.finish()
+
+
+def init_tracker(config: dict[str, Any]) -> Tracker:
+    """Initialize tracker from config.
+    
+    Args:
+        config: Tracking config dict
+    
+    Returns:
+        Tracker instance
+    """
+    return Tracker(config)
+
+

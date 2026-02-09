@@ -13,8 +13,13 @@ dist/
 build/
 *.egg-info/
 
-# Data & artifacts (ideally DVC-tracked)
-data/
-artifacts/
+# Data + artifacts (kept by DVC/MLflow)
+data/**/*
+!data/**/*.dvc
+!data/**/.gitkeep
+
+artifacts/**/*
+mlruns/**/*
+.wandb/
 
 

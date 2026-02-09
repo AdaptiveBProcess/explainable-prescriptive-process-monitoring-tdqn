@@ -95,3 +95,45 @@ def fingerprint_data(paths: list[str | Path], use_dvc: bool = True) -> str:
     return hasher.hexdigest()[:16]
 
 
+def dvc_out_hash(dvc_file: str | Path) -> str:
+    """Read DVC hash from .dvc file.
+    
+    Args:
+        dvc_file: Path to .dvc file (e.g., "data/interim/clean.parquet.dvc")
+    
+    Returns:
+        MD5/hash string from DVC, or "UNKNOWN" if not found
+    """
+    try:
+        import yaml
+        
+        dvc_path = Path(dvc_file)
+        if not dvc_path.exists():
+            return "UNKNOWN"
+        
+        with open(dvc_path, "r", encoding="utf-8") as f:
+            dvc_data = yaml.safe_load(f)
+        
+        # DVC structure: {"outs": [{"path": "...", "md5": "...", ...}]}
+        if "outs" in dvc_data and len(dvc_data["outs"]) > 0:
+            out = dvc_data["outs"][0]
+            return out.get("md5") or out.get("etag") or out.get("hash") or "UNKNOWN"
+        
+        return "UNKNOWN"
+    except Exception:
+        return "UNKNOWN"
+
+
+def get_dvc_hashes(data_paths: dict[str, str]) -> dict[str, str]:
+    """Get DVC hashes for multiple data files.
+    
+    Args:
+        data_paths: Dict mapping names to .dvc file paths
+                   e.g., {"clean_parquet": "data/interim/clean.parquet.dvc"}
+    
+    Returns:
+        Dict mapping names to DVC hashes
+    """
+    return {name: dvc_out_hash(path) for name, path in data_paths.items()}
+
+

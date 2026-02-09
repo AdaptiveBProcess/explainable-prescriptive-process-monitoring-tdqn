@@ -64,3 +64,48 @@ pip install -e .[dev]
 ```
 
 **Nota:** Para reproducibilidad completa, usa `uv.lock` o `poetry.lock` en lugar de instalar desde rangos sueltos.
+
+## Data versioning (DVC)
+
+Large data files are versioned with DVC (not in Git). Set up remote storage:
+
+### Set remote (example local):
+```bash
+mkdir -p /mnt/dvc-store
+dvc remote add -d storage /mnt/dvc-store
+dvc remote modify storage type local
+```
+
+### Get exact data for this commit:
+```bash
+dvc pull
+```
+
+### Recompute pipeline:
+```bash
+dvc repro
+dvc push
+```
+
+### Tracked files:
+- `data/interim/clean.parquet`
+- `data/processed/D_offline.npz`
+- `data/processed/splits.json`
+
+See `dvc.yaml` for the full pipeline definition.
+
+## Experiment tracking
+
+Configure tracking in `configs/config.yaml`:
+
+```yaml
+tracking:
+  enabled: true
+  backend: wandb  # or mlflow
+  wandb:
+    project: "xppm-tdqn"
+  mlflow:
+    experiment_name: "xppm-tdqn"
+```
+
+Each run logs: git commit, config hash, DVC data hashes, metrics, and artifacts.

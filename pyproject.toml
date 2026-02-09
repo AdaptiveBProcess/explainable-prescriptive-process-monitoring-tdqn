@@ -25,6 +25,10 @@ dev = [
     "black",
     "types-PyYAML",
 ]
+tracking = [
+    "mlflow",
+    "wandb",
+]
 
 [build-system]
 requires = ["setuptools", "wheel"]
