@@ -1,0 +1,23 @@
+defaults:
+  - params: ../params.yaml
+
+experiment:
+  name: "xppm_tdqn_default"
+  output_dir: "artifacts"
+
+data:
+  event_log_path: "data/raw/event_log.xes"
+  cleaned_log_path: "data/interim/clean.parquet"
+  prefixes_path: "data/interim/prefixes.npy"
+  offline_dataset_path: "data/processed/D_offline.npz"
+  splits_path: "data/processed/splits.json"
+
+model:
+  hidden_dim: 128
+  n_layers: 2
+  dropout: 0.1
+
+policy:
+  action_space: ["start_standard", "start_priority", "contact_headquarters", "do_nothing", "set_ir_low", "set_ir_mid", "set_ir_high"]
+
+

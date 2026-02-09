@@ -1,0 +1,49 @@
+stages:
+  preprocess:
+    cmd: python scripts/01_preprocess_log.py --config configs/config.yaml
+    deps:
+      - scripts/01_preprocess_log.py
+      - src/xppm/data/preprocess.py
+      - configs/config.yaml
+    outs:
+      - data/interim/clean.parquet
+
+  encode_prefixes:
+    cmd: python scripts/02_encode_prefixes.py --config configs/config.yaml
+    deps:
+      - scripts/02_encode_prefixes.py
+      - src/xppm/data/encode_prefixes.py
+      - data/interim/clean.parquet
+    outs:
+      - data/interim/prefixes.npy
+
+  build_mdp:
+    cmd: python scripts/03_build_mdp_dataset.py --config configs/config.yaml
+    deps:
+      - scripts/03_build_mdp_dataset.py
+      - src/xppm/data/build_mdp.py
+      - data/interim/prefixes.npy
+    outs:
+      - data/processed/D_offline.npz
+      - data/processed/splits.json
+
+  train_tdqn:
+    cmd: python scripts/04_train_tdqn_offline.py --config configs/config.yaml
+    deps:
+      - scripts/04_train_tdqn_offline.py
+      - src/xppm/rl/train_tdqn.py
+      - data/processed/D_offline.npz
+      - data/processed/splits.json
+    outs:
+      - artifacts/checkpoints/Q_theta.ckpt
+
+  ope_dr:
+    cmd: python scripts/05_run_ope_dr.py --config configs/config.yaml
+    deps:
+      - scripts/05_run_ope_dr.py
+      - src/xppm/ope/doubly_robust.py
+      - artifacts/checkpoints/Q_theta.ckpt
+    outs:
+      - artifacts/ope/ope_dr.json
+
+

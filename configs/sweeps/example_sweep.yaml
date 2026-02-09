@@ -1,0 +1,9 @@
+program: scripts/04_train_tdqn_offline.py
+method: grid
+parameters:
+  rl.learning_rate:
+    values: [1e-4, 3e-4, 1e-3]
+  rl.batch_size:
+    values: [64, 128]
+
+

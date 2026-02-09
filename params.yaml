@@ -1,0 +1,21 @@
+defaults:
+  seed: 42
+
+data:
+  raw_dir: data/raw
+  interim_dir: data/interim
+  processed_dir: data/processed
+
+rl:
+  gamma: 0.99
+  learning_rate: 3e-4
+  batch_size: 128
+  max_epochs: 50
+
+ope:
+  n_bootstrap: 1000
+
+xai:
+  n_samples: 200
+
+
