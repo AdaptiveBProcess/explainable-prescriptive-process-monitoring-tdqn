@@ -7,7 +7,6 @@ import pandas as pd
 from xppm.utils.io import load_parquet, save_parquet
 from xppm.utils.logging import get_logger
 
-
 logger = get_logger(__name__)
 
 

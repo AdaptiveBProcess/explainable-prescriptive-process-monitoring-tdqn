@@ -7,7 +7,6 @@ import numpy as np
 from xppm.utils.io import load_parquet, save_npz
 from xppm.utils.logging import get_logger
 
-
 logger = get_logger(__name__)
 
 

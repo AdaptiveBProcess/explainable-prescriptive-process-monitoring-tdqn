@@ -3,11 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-import jsonschema
-import yaml
-
-from xppm.utils.io import load_yaml
-
 
 def load_json(path: str | Path) -> Any:
     import json
