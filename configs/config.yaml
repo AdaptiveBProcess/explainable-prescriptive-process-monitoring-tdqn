@@ -1,9 +1,3 @@
-
----
-
-## 2) `configs/config.yaml` (plantilla alineada a tu figura)
-
-```yaml
 project:
   name: xppm-tdqn
   run_name: "simbank_tdqn_seed42"
@@ -27,21 +21,42 @@ tracking:
   log_config: true
 
 paths:
-  data_raw: "data/raw/simbank_log.csv"      # o .xes
+  data_raw: "/home/andrew/Documents/asistencia-graduada-phd-oscar/paper1/a_prescriptive-process-monitoring/SimBank/data/loan_log_[_time_contact_HQ_]_10000_train_normal"
   data_interim_dir: "data/interim"
   data_processed_dir: "data/processed"
   artifacts_dir: "artifacts"
 
 data:
-  format: csv         # csv | xes
-  case_id_col: "case_id"
-  activity_col: "activity"
-  timestamp_col: "timestamp"
-  resource_col: null
-  categorical_cols: ["activity"]  # + resource etc
-  numeric_cols: ["amount", "est_quality", "unc_quality", "cum_cost", "elapsed_time"]
-  drop_cols: []
-  sort_by_time: true
+  format: pickle      # csv | xes | pickle
+  raw_path: "/home/andrew/Documents/asistencia-graduada-phd-oscar/paper1/a_prescriptive-process-monitoring/SimBank/data/loan_log_[_time_contact_HQ_]_10000_train_normal"
+  output_clean_path: "data/interim/clean.parquet"
+
+# Schema mapping for SimBank logs (case_nr -> case_id)
+schema:
+  case_id: "case_nr"    # SimBank uses 'case_nr', map to 'case_id'
+  activity: "activity"
+  timestamp: "timestamp"
+  # Optional mappings if needed:
+  # case_id: "case:concept:name"  # for XES
+  # activity: "concept:name"
+  # timestamp: "time:timestamp"
+
+# Timezone and sorting configuration
+time:
+  timezone: null        # SimBank timestamps are naive, assume UTC
+  output_timezone: "UTC"  # Store in UTC
+  sort: true
+  drop_duplicates: true
+
+# Legacy column names (for backward compatibility)
+case_id_col: "case_id"
+activity_col: "activity"
+timestamp_col: "timestamp"
+resource_col: null
+categorical_cols: ["activity"]
+numeric_cols: ["amount", "est_quality", "unc_quality", "cum_cost", "elapsed_time"]
+drop_cols: []
+sort_by_time: true
 
 preprocess:
   out_clean_parquet: "clean.parquet"
