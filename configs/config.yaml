@@ -233,23 +233,41 @@ ope:
 xai:
   enabled: true
   checkpoint_path: "artifacts/checkpoints/Q_theta.ckpt"
+  seed: 123
+  split: "test"
+  n_cases: 200
+  selection:
+    strategy: "random"                      # random | stratified
+    by: "reward_bin"                        # reward_bin | stage (only if stratified)
+    k_times_per_case: "last"               # "last" | "all" | integer
   methods:
     risk:
       attribution: "integrated_gradients"   # integrated_gradients | gradients | attention
+      baseline: "pad"                       # pad | zero_emb
+      n_steps_ig: 128                       # IG interpolation steps (increased for better completeness)
       top_k: 10
+      target: "Q_star"                      # "V" (max Q) or "Q_star" (Q(s,a*)) - Q_star is smoother for IG
     intervention:
       contrast:
         baseline_action: "NOOP"             # a' para deltaQ
+        action_id: 0                        # explicit contrast action ID
+        fallback: "first_valid"             # deterministic fallback
         compare_now_vs_delay: true
       delta_q:
         enabled: true
         top_k: 10
+  clustering:
+    method: "kmeans"
+    k: 8
+    seed: 123
+    n_prototypes: 3
   out_dir: "xai"
   outputs:
     risk_explanations_json: "risk_explanations.json"
     deltaq_explanations_json: "deltaQ_explanations.json"
-    attributions_npy: "ig_grad_attributions.npy"
+    attributions_npy: "ig_grad_attributions.npz"
     policy_summary_json: "policy_summary.json"
+    selection_json: "explanations_selection.json"
 
 fidelity:
   enabled: true
