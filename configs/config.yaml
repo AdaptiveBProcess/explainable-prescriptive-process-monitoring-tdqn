@@ -168,7 +168,7 @@ mdp:
 training:
   device: "cuda"        # cuda | cpu
   precision: "fp32"     # fp32 | fp16 (si usas amp)
-  batch_size: 256
+  batch_size: 128       # Reducido de 256 para RTX 3050 6GB
   max_steps: 200000
   eval_every: 5000
   save_every: 10000
@@ -208,16 +208,26 @@ training:
 ope:
   enabled: true
   method: "doubly_robust"
+  pi_e_temperature: 1.0  # Temperature for π_e softmax policy
+  evaluate_heuristic: false  # Set to true to evaluate heuristic baseline
   behavior_model:
     type: "multiclass_logreg"  # multiclass_logreg | mlp
     features: "state"          # state | tabular
     calibrate: true
+    batch_size: 1024
+    epochs: 1
+    learning_rate: 1e-3
+    label_smoothing: 0.1
   dr:
     # DR en secuencial: necesitas estimate model + IW; aquí dejas knobs
     bootstrap:
       enabled: true
       n: 200
     clip_importance_weights: 20.0
+  heuristic:
+    length_threshold: 5  # Prefix length threshold for heuristic
+    short_action_id: 0    # Action ID for short prefixes
+    long_action_id: 1     # Action ID for long prefixes
   out_json: "ope/ope_dr.json"
 
 xai:

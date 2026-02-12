@@ -433,11 +433,11 @@ def build_transitions(
     r = np.array(all_r, dtype=np.float32)
     s_next = np.array(all_s_next, dtype=np.int32)
     s_next_mask = np.array(all_s_next_mask, dtype=np.uint8)
-    done = np.array(all_done, dtype=np.uint8)
+    done_array = np.array(all_done, dtype=np.uint8)
     case_ptr = np.array(all_case_ptr, dtype=np.int32)
     t_ptr = np.array(all_t_ptr, dtype=np.int32)
-    valid_actions = np.array(all_valid_actions, dtype=np.uint8)
-    behavior_action = np.array(all_behavior_action, dtype=np.int32)
+    valid_actions_array = np.array(all_valid_actions, dtype=np.uint8)
+    behavior_action_array = np.array(all_behavior_action, dtype=np.int32)
     propensity = np.array(all_propensity, dtype=np.float32)
 
     logger.info(
@@ -454,11 +454,11 @@ def build_transitions(
         "r": r,
         "s_next": s_next,
         "s_next_mask": s_next_mask,
-        "done": done,
+        "done": done_array,
         "case_ptr": case_ptr,
         "t_ptr": t_ptr,
-        "valid_actions": valid_actions,
-        "behavior_action": behavior_action,
+        "valid_actions": valid_actions_array,
+        "behavior_action": behavior_action_array,
         "propensity": propensity,
     }
 
@@ -534,9 +534,12 @@ def build_mdp_dataset(
     transitions = build_transitions(prefixes, clean_df, vocab_path, config)
 
     # Validate (only if we have transitions)
+    # Get n_actions from config (needed for stats even if no transitions)
+    actions_cfg = config.get("actions", {})
+    n_actions = len(actions_cfg.get("id2name", ["NOOP"]))
+
+    # Validate transitions
     if len(transitions["a"]) > 0:
-        actions_cfg = config.get("actions", {})
-        n_actions = len(actions_cfg.get("id2name", ["NOOP"]))
         validate_transitions(transitions, n_actions)
     else:
         logger.warning("No transitions built! Check decision point configuration.")
@@ -548,16 +551,24 @@ def build_mdp_dataset(
 
     # Compute statistics
     n_transitions = len(transitions["a"])
-    n_cases_used = len(np.unique(transitions["case_ptr"]))
-    done = transitions["done"]
-    r = transitions["r"]
-    terminal_rewards = r[done == 1]
+    if n_transitions > 0:
+        n_cases_used = len(np.unique(transitions["case_ptr"]))
+        done = transitions["done"]
+        r = transitions["r"]
+        terminal_rewards = r[done == 1]
+        max_len = transitions["s"].shape[1]
+    else:
+        n_cases_used = 0
+        done = np.array([], dtype=np.uint8)
+        r = np.array([], dtype=np.float32)
+        terminal_rewards = np.array([], dtype=np.float32)
+        max_len = config.get("encoding", {}).get("max_len", 50)
 
     stats = {
         "n_transitions": n_transitions,
         "n_cases_used": n_cases_used,
         "n_actions": n_actions,
-        "max_len": transitions["s"].shape[1],
+        "max_len": max_len,
         "pct_done": float(done.mean() * 100),
         "reward_mean": float(r.mean()),
         "reward_std": float(r.std()),

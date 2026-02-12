@@ -5,13 +5,13 @@ import argparse
 from xppm.data.build_mdp import build_mdp_dataset
 from xppm.data.encode_prefixes import encode_prefixes
 from xppm.data.preprocess import preprocess_event_log
-from xppm.data.validate_split import validate_and_split
 from xppm.ope.doubly_robust import doubly_robust_estimate
 from xppm.ope.report import save_ope_report
-from xppm.rl.train_tdqn import TDQNConfig, train_tdqn
 from xppm.utils.config import Config
 from xppm.utils.logging import get_logger
 from xppm.utils.seed import set_seed
+
+# Training is done via scripts/04_train_tdqn_offline.py, not via CLI
 
 logger = get_logger(__name__)
 
@@ -46,39 +46,29 @@ def main() -> None:
 
     if args.command == "preprocess":
         preprocess_event_log(cfg["data"]["event_log_path"], cfg["data"]["cleaned_log_path"])
-        validate_and_split(cfg["data"]["cleaned_log_path"], cfg["data"]["splits_path"])
+        # Note: validate_and_split_dataset is called separately in step 01b
+        logger.info("Preprocessing completed. Run step 01b to validate and split.")
     elif args.command == "encode":
         encode_prefixes(cfg["data"]["cleaned_log_path"], cfg["data"]["prefixes_path"])
     elif args.command == "build_mdp":
+        # build_mdp_dataset requires clean_log_path, vocab_path, and config
+        mdp_cfg = cfg.get("mdp", {})
+        encoding_cfg = cfg.get("encoding", {})
+        vocab_default = "data/interim/vocab_activity.json"
+        vocab_path = encoding_cfg.get("output", {}).get("vocab_activity_path", vocab_default)
         build_mdp_dataset(
-            cfg["data"]["prefixes_path"],
-            cfg["data"]["offline_dataset_path"],
-            cfg["data"]["splits_path"],
+            prefixes_path=cfg["data"]["prefixes_path"],
+            clean_log_path=cfg["data"]["cleaned_log_path"],
+            vocab_path=vocab_path,
+            output_path=mdp_cfg.get("output", {}).get("path", cfg["data"]["offline_dataset_path"]),
+            config=mdp_cfg,
         )
     elif args.command == "train":
-        # Minimal mapping from config to TDQNConfig; adjust as you refine config structure.
-        tdqn_cfg = TDQNConfig(
-            state_dim=int(cfg.get("model", {}).get("state_dim", 1)),
-            n_actions=len(cfg.get("policy", {}).get("action_space", [])) or 1,
-            hidden_dim=int(cfg.get("model", {}).get("hidden_dim", 128)),
-            gamma=float(cfg.get("rl", {}).get("gamma", 0.99)),
-            learning_rate=float(cfg.get("rl", {}).get("learning_rate", 3e-4)),
-            batch_size=int(cfg.get("rl", {}).get("batch_size", 128)),
-            max_epochs=int(cfg.get("rl", {}).get("max_epochs", 1)),
+        # Use the training script directly instead of CLI
+        logger.warning(
+            "Training via CLI is deprecated. Use scripts/04_train_tdqn_offline.py instead."
         )
-        checkpoint_path = cfg["experiment"].get(
-            "checkpoint_path", "artifacts/checkpoints/Q_theta.ckpt"
-        )
-        train_tdqn(
-            tdqn_cfg,
-            cfg["data"]["offline_dataset_path"],
-            checkpoint_path,
-            seed=seed,
-            deterministic=deterministic,
-            config_hash=config_obj.config_hash,
-            metadata_output=cfg["experiment"].get("metadata_path"),
-            tracking_config=cfg.get("tracking", {}),
-        )
+        logger.info("Example: python scripts/04_train_tdqn_offline.py --config %s", args.config)
     elif args.command == "ope":
         metrics = doubly_robust_estimate(
             cfg["experiment"].get("checkpoint_path", "artifacts/checkpoints/Q_theta.ckpt"),
@@ -93,5 +83,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

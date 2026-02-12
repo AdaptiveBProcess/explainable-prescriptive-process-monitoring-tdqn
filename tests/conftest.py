@@ -28,3 +28,23 @@ def tmp_outdir(tmp_path: Path) -> Path:
     d = tmp_path / "out"
     d.mkdir()
     return d
+
+
+@pytest.fixture
+def test_config() -> dict:
+    """Minimal test configuration for MDP building."""
+    return {
+        "mdp": {
+            "actions": {
+                "n_actions": 2,
+                "id2name": {0: "do_nothing", 1: "contact_headquarters"},
+            },
+            "decision_points": {
+                "by_last_activity": {"A": [0, 1], "B": [0, 1]},
+            },
+            "reward": {
+                "terminal": "profit",
+                "non_terminal": 0.0,
+            },
+        },
+    }

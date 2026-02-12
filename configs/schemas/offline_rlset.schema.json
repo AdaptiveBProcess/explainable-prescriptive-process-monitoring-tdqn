@@ -1,15 +1,15 @@
 {
   "dataset_name": "D_offline",
   "version": "1.0",
-  "n_transitions": 8,
-  "max_len": 10,
+  "n_transitions": 998853,
+  "max_len": 50,
   "n_actions": 2,
   "arrays": {
     "s": {
       "dtype": "int32",
       "shape": [
         "N",
-        10
+        50
       ],
       "desc": "prefix token ids"
     },
@@ -17,7 +17,7 @@
       "dtype": "uint8",
       "shape": [
         "N",
-        10
+        50
       ],
       "desc": "1 real, 0 pad"
     },
@@ -39,14 +39,14 @@
       "dtype": "int32",
       "shape": [
         "N",
-        10
+        50
       ]
     },
     "s_next_mask": {
       "dtype": "uint8",
       "shape": [
         "N",
-        10
+        50
       ]
     },
     "done": {
@@ -75,7 +75,7 @@
       "shape": [
         "N"
       ],
-      "desc": "behavior propensity μ(a|s). Set to -1.0 as placeholder during dataset building. Will be estimated in 05_run_ope_dr.py using behavior_model.py"
+      "desc": "behavior propensity (estimated later, -1.0 if not estimated)"
     },
     "case_ptr": {
       "dtype": "int32",
