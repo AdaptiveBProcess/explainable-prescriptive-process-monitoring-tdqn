@@ -1,7 +1,7 @@
 """Decision Support System serving components."""
 
 from xppm.serve.guard import PolicyGuard
-from xppm.serve.logger import DecisionLogger
+from xppm.serve.logger import DecisionLogger, FeedbackLogger
 from xppm.serve.schemas import (
     CaseFeatures,
     DecisionRequest,
@@ -14,6 +14,7 @@ from xppm.serve.schemas import (
 __all__ = [
     "PolicyGuard",
     "DecisionLogger",
+    "FeedbackLogger",
     "CaseFeatures",
     "DecisionRequest",
     "DecisionResponse",
