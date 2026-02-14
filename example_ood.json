@@ -1,0 +1,16 @@
+{
+  "request_id": "demo-ood",
+  "case_id": "CASE_999",
+  "t": 5,
+  "features": {
+    "amount": 1000000.0,
+    "est_quality": 0.99,
+    "unc_quality": 0.01,
+    "cum_cost": 50000.0,
+    "elapsed_time": 100.0,
+    "prefix_len": 50,
+    "count_validate_application": 20,
+    "count_skip_contact": 10,
+    "count_contact_headquarters": 5
+  }
+}

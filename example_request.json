@@ -1,0 +1,16 @@
+{
+  "request_id": "demo-0001",
+  "case_id": "CASE_123",
+  "t": 10,
+  "features": {
+    "amount": 12000.0,
+    "est_quality": 0.72,
+    "unc_quality": 0.18,
+    "cum_cost": 340.0,
+    "elapsed_time": 5.8,
+    "prefix_len": 10,
+    "count_validate_application": 1,
+    "count_skip_contact": 0,
+    "count_contact_headquarters": 0
+  }
+}
