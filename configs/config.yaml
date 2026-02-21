@@ -5,6 +5,9 @@ project:
 # Default dataset — overridden by --dataset CLI arg or configs/datasets/<name>.yaml overlay
 dataset_name: "simbank"
 
+# Algorithm identifier — overridden by --algo CLI arg or configs/algos/<name>.yaml overlay
+algorithm: "tdqn"
+
 # Reproducibility settings
 repro:
   seed: 42

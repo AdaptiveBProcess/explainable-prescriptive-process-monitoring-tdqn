@@ -12,6 +12,7 @@ from torch import nn, optim
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader, TensorDataset
 
+from xppm.rl.base import RLTrainer
 from xppm.rl.models.masking import apply_action_mask
 from xppm.rl.models.transformer import SimpleTransformerEncoder
 from xppm.utils.io import load_json, load_npz
@@ -695,6 +696,7 @@ def save_checkpoint(
 
     torch.save(
         {
+            "algorithm": "tdqn",
             "model_state_dict": q_net.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
             "global_step": global_step,
@@ -724,3 +726,19 @@ def save_checkpoint(
         "q_theta": q_ckpt_path,
         "target_q": target_ckpt_path,
     }
+
+
+class TDQNTrainer(RLTrainer):
+    """Concrete ``RLTrainer`` implementation wrapping the TDQN training loop.
+
+    This thin wrapper makes TDQN pluggable via the same interface as future
+    algorithms (CQL, BCQ, SAC, …) without changing any internal training logic.
+    """
+
+    def train(self, config: Any, **kwargs: Any) -> dict[str, Any]:
+        """Delegate to :func:`train_tdqn`."""
+        return train_tdqn(config, **kwargs)
+
+    def save_checkpoint(self, path: Path, **kwargs: Any) -> dict[str, Path]:
+        """Delegate to :func:`save_checkpoint`."""
+        return save_checkpoint(**kwargs)

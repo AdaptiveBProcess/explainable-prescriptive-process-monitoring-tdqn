@@ -5,6 +5,7 @@ from typing import Any
 
 import numpy as np
 import torch
+from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
 from xppm.ope.baselines import (
@@ -13,8 +14,8 @@ from xppm.ope.baselines import (
     evaluate_baseline_policy,
 )
 from xppm.ope.behavior_model import BehaviorPolicy
+from xppm.rl.factory import AgentFactory
 from xppm.rl.models.masking import apply_action_mask
-from xppm.rl.train_tdqn import TransformerQNetwork
 from xppm.utils.io import load_json, load_npz
 
 
@@ -56,41 +57,13 @@ def _load_q_network(
     vocab_path: str | Path,
     config: dict[str, Any],
     device: torch.device,
-) -> TransformerQNetwork:
-    """Load TransformerQNetwork with the architecture used in training."""
-    data = load_npz(npz_path)
-    training_cfg = config.get("training", {})
-    transformer_cfg = training_cfg.get("transformer", {})
-
-    max_len = int(transformer_cfg.get("max_len", data["s"].shape[1]))
-    d_model = int(transformer_cfg.get("d_model", 128))
-    n_heads = int(transformer_cfg.get("n_heads", 4))
-    n_layers = int(transformer_cfg.get("n_layers", 3))
-    dropout = float(transformer_cfg.get("dropout", 0.1))
-
-    vocab = load_json(vocab_path)
-    token2id = vocab.get("token2id", {})
-    vocab_size = int(len(token2id)) if token2id else int(data["s"].max() + 1)
-    n_actions = int(data["valid_actions"].shape[1])
-
-    q_net = TransformerQNetwork(
-        vocab_size=vocab_size,
-        max_len=max_len,
-        d_model=d_model,
-        n_heads=n_heads,
-        n_layers=n_layers,
-        dropout=dropout,
-        n_actions=n_actions,
-    ).to(device)
-    raw_ckpt = torch.load(ckpt_path, map_location=device)
-    state_dict = raw_ckpt.get("model_state_dict", raw_ckpt)
-    q_net.load_state_dict(state_dict, strict=False)
-    q_net.eval()
-    return q_net
+) -> nn.Module:
+    """Load the trained RL agent via :class:`~xppm.rl.factory.AgentFactory`."""
+    return AgentFactory.load(ckpt_path, npz_path, vocab_path, config, device)
 
 
 def _compute_q_values(
-    q_net: TransformerQNetwork,
+    q_net: nn.Module,
     loader: DataLoader,
     device: torch.device,
 ) -> tuple[np.ndarray, np.ndarray]:

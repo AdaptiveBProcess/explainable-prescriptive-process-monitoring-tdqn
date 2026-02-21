@@ -9,7 +9,8 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
-from xppm.rl.train_tdqn import TDQNConfig, TransformerQNetwork
+from xppm.rl.factory import AgentFactory
+from xppm.rl.train_tdqn import TransformerQNetwork
 from xppm.utils.io import load_json, load_npz
 
 
@@ -71,68 +72,6 @@ class _BehaviorHead(nn.Module):
         return self.net(x)
 
 
-def _build_tdqn_from_config(
-    npz_path: str | Path,
-    splits_path: str | Path,
-    vocab_path: str | Path,
-    config: dict[str, Any],
-    device: torch.device,
-) -> tuple[TransformerQNetwork, TDQNConfig, int]:
-    """Instantiate TransformerQNetwork with the same architecture as training."""
-    data = load_npz(npz_path)
-
-    training_cfg = config.get("training", {})
-    transformer_cfg = training_cfg.get("transformer", {})
-
-    max_len = int(transformer_cfg.get("max_len", data["s"].shape[1]))
-    d_model = int(transformer_cfg.get("d_model", 128))
-    n_heads = int(transformer_cfg.get("n_heads", 4))
-    n_layers = int(transformer_cfg.get("n_layers", 3))
-    dropout = float(transformer_cfg.get("dropout", 0.1))
-
-    # Load vocabulary to get vocab_size
-    vocab = load_json(vocab_path)
-    token2id = vocab.get("token2id", {})
-    vocab_size = int(len(token2id)) if token2id else int(data["s"].max() + 1)
-
-    n_actions = int(data["valid_actions"].shape[1])
-
-    tdqn_config = TDQNConfig(
-        npz_path=npz_path,
-        splits_path=splits_path,
-        vocab_path=vocab_path,
-        max_len=max_len,
-        vocab_size=vocab_size,
-        d_model=d_model,
-        n_heads=n_heads,
-        n_layers=n_layers,
-        dropout=dropout,
-        n_actions=n_actions,
-        batch_size=int(training_cfg.get("batch_size", 256)),
-        learning_rate=float(training_cfg.get("tdqn", {}).get("learning_rate", 3e-4)),
-        gamma=float(training_cfg.get("tdqn", {}).get("gamma", 0.99)),
-        max_steps=int(training_cfg.get("max_steps", 200000)),
-        eval_every=int(training_cfg.get("eval_every", 5000)),
-        save_every=int(training_cfg.get("save_every", 10000)),
-        double_dqn=bool(training_cfg.get("tdqn", {}).get("double_dqn", True)),
-        target_update_every=int(training_cfg.get("tdqn", {}).get("target_update_every", 2000)),
-        grad_clip_norm=float(training_cfg.get("tdqn", {}).get("grad_clip_norm", 10.0)),
-        device=training_cfg.get("device", "cuda" if torch.cuda.is_available() else "cpu"),
-    )
-
-    q_net = TransformerQNetwork(
-        vocab_size=tdqn_config.vocab_size,
-        max_len=tdqn_config.max_len,
-        d_model=tdqn_config.d_model,
-        n_heads=tdqn_config.n_heads,
-        n_layers=tdqn_config.n_layers,
-        dropout=tdqn_config.dropout,
-        n_actions=tdqn_config.n_actions,
-    ).to(device)
-
-    return q_net, tdqn_config, n_actions
-
-
 def fit_behavior_policy_tdqn_encoder(
     npz_path: str | Path,
     splits_path: str | Path,
@@ -167,22 +106,14 @@ def fit_behavior_policy_tdqn_encoder(
     train_mask = np.isin(case_ids, list(train_cases))
     val_mask = np.isin(case_ids, list(val_cases))
 
-    # Build TDQN and load checkpoint (only encoder will be used, frozen)
-    q_net, tdqn_config, _ = _build_tdqn_from_config(
-        npz_path=npz_path,
-        splits_path=splits_path,
-        vocab_path=vocab_path,
-        config=config,
-        device=device,
+    # Load frozen encoder from checkpoint via factory (builds + loads weights)
+    q_net: TransformerQNetwork = AgentFactory.load(  # type: ignore[assignment]
+        ckpt_path, npz_path, vocab_path, config, device
     )
-    raw_ckpt = torch.load(ckpt_path, map_location=device)
-    state_dict = raw_ckpt.get("model_state_dict", raw_ckpt)
-    q_net.load_state_dict(state_dict, strict=False)
-    q_net.eval()
     for p in q_net.parameters():
         p.requires_grad = False
 
-    d_model = tdqn_config.d_model
+    d_model = q_net.d_model
     head = _BehaviorHead(d_model=d_model, n_actions=n_actions, dropout=0.1).to(device)
 
     # Training hyperparameters (can be tuned later)

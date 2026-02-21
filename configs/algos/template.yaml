@@ -1,0 +1,28 @@
+# configs/algos/template.yaml
+# Template for adding a new offline RL algorithm.
+# Copy this file to configs/algos/<your_algo>.yaml and fill in the blanks.
+#
+# Usage:
+#   python scripts/04_train_tdqn_offline.py --dataset simbank --algo <your_algo>
+#
+# Required steps to add a new algorithm:
+#   1. Copy this file to configs/algos/<your_algo>.yaml
+#   2. Implement a loader in src/xppm/rl/factory.py and register it:
+#        _REGISTRY["<your_algo>"] = _load_your_algo
+#   3. Implement a trainer class in src/xppm/rl/<your_algo>_trainer.py
+#      that subclasses RLTrainer (see src/xppm/rl/base.py).
+#   4. Register the trainer in scripts/04_train_tdqn_offline.py.
+
+# Algorithm identifier — MUST match the registry key in factory.py
+algorithm: "<your_algo>"
+
+training:
+  # Common keys (shared with other algos) stay in config.yaml.
+  # Only algo-specific keys belong here.
+
+  # Example for a hypothetical CQL implementation:
+  # cql:
+  #   alpha: 1.0           # CQL regularization weight
+  #   n_action_samples: 10 # Actions sampled for CQL lower bound
+  #   gamma: 0.99
+  #   learning_rate: 1.0e-4

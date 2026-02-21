@@ -14,7 +14,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
-from xppm.ope.doubly_robust import _load_q_network
+from xppm.rl.factory import AgentFactory
 from xppm.rl.models.masking import apply_action_mask
 from xppm.utils.io import fingerprint_data, load_json, load_npz, load_parquet, save_json
 from xppm.utils.logging import ensure_dir, get_logger
@@ -561,7 +561,7 @@ def distill_policy(config: dict[str, Any]) -> dict[str, Any]:
 
     # Load teacher model
     logger.info("Loading teacher Q-network from %s", ckpt_path)
-    q_net = _load_q_network(ckpt_path, dataset_path, vocab_path, config, device)
+    q_net = AgentFactory.load(ckpt_path, dataset_path, vocab_path, config, device)
 
     # Generate teacher labels
     logger.info("Generating teacher labels...")

@@ -35,15 +35,38 @@ def main() -> None:
         help="Dataset name. Loads configs/datasets/{name}.yaml on top of --config.",
     )
     parser.add_argument(
+        "--algo",
+        type=str,
+        default=None,
+        help=(
+            "Algorithm name. Loads configs/algos/{name}.yaml on top of the merged config "
+            "and sets config['algorithm']. Defaults to value in config.yaml (tdqn)."
+        ),
+    )
+    parser.add_argument(
         "--overwrite",
         action="store_true",
         help="Overwrite existing checkpoint directory if it exists",
     )
     args = parser.parse_args()
 
-    # Load config
+    # Load config: base → dataset overlay → algo overlay
     config_obj = Config.for_dataset(args.config, args.dataset)
     cfg = config_obj.raw
+
+    if args.algo is not None:
+        from xppm.utils.config import deep_merge
+        from xppm.utils.io import load_yaml
+
+        algo_yaml = Path(args.config).parent / "algos" / f"{args.algo}.yaml"
+        if algo_yaml.exists():
+            algo_overlay = load_yaml(algo_yaml)
+            cfg = deep_merge(cfg, algo_overlay)
+            logger.info("Loaded algo overlay: %s", algo_yaml)
+        else:
+            logger.warning("Algo overlay not found: %s — using defaults", algo_yaml)
+        # Always stamp algorithm key, even if overlay not found
+        cfg["algorithm"] = args.algo
 
     # Setup reproducibility
     seed = cfg.get("repro", {}).get("seed", 42)
