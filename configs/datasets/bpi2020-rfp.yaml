@@ -1,0 +1,62 @@
+# BPI Challenge 2020 — Request for Payment
+# 6,886 cases, 36,796 events
+# Intervention: Request Payment (explicitly requesting payment from the claimant)
+# Positive outcome: Payment Handled
+
+dataset_name: "bpi2020-rfp"
+
+data:
+  format: xes
+  raw_path: "data/raw/bpi2020-request-for-payment.xes.gz"
+  output_clean_path: "data/{dataset_name}/interim/clean.parquet"
+
+# XES standard column names as produced by pm4py.convert_to_dataframe()
+schema:
+  case_id: "case:concept:name"
+  activity: "concept:name"
+  timestamp: "time:timestamp"
+
+time:
+  timezone: null          # pm4py returns timezone-aware timestamps
+  output_timezone: "UTC"  # normalize to UTC
+  sort: true
+  drop_duplicates: false
+
+preprocess:
+  out_clean_parquet: "clean.parquet"
+  lifecycle_filter:
+    enabled: false  # BPI2020 rfp does not have lifecycle:transition events
+  # Keep only essential columns (XES logs have many extra case:* attributes)
+  select_cols: ["case_id", "activity", "timestamp"]
+
+outcome_engineering:
+  enabled: true
+  type: "activity_presence"
+  positive_activities: ["Payment Handled"]
+  outcome_col: "outcome"
+
+validation_split:
+  range_checks:
+    enabled: false
+
+# BPI2020 rfp: 21k train transitions. 30k steps ≈ 184 epochs at batch_size=128.
+training:
+  max_steps: 30000
+  eval_every: 1000
+  save_every: 10000
+
+mdp:
+  behavior_trigger_activity: "Request Payment"
+  decision_points:
+    mode: "all"
+  actions:
+    id2name: ["do_nothing", "Request Payment"]
+    noop_action: "do_nothing"
+  action_mask:
+    default_valid: ["do_nothing", "Request Payment"]
+  reward:
+    type: "terminal_profit_delayed"
+    intermediate_reward: 0.0
+    terminal_column: "outcome"
+  output:
+    path: "data/{dataset_name}/processed/D_offline.npz"

@@ -201,7 +201,11 @@ def generate_prefix_rows(
         X_list.append(seq_arr)
         mask_list.append(mask_arr)
         case_ptr_list.append(case_id)
-        t_ptr_list.append(true_len)
+        # Use actual trace position t (not true_len which is capped at max_len).
+        # For cases longer than max_len, t_ptr keeps growing while the encoded
+        # sequence stays at max_len tokens (truncated). This preserves monotonicity
+        # per case and allows build_mdp to correctly locate events in the trace.
+        t_ptr_list.append(t)
         # Convert timestamp to Unix seconds (handle overflow for far-future dates)
         ts = timestamps[t - 1]
         if isinstance(ts, pd.Timestamp):

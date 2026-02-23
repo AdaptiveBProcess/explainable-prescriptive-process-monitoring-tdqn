@@ -1,0 +1,64 @@
+# BPI Challenge 2017 — Loan Application Process
+# 31,509 cases, ~1.2M events (after lifecycle filter: ~200k complete events)
+# Intervention: W_Call after offers (calling applicant after an offer is made)
+# Positive outcome: A_Accepted (loan application accepted)
+
+dataset_name: "bpi2017"
+
+data:
+  format: xes
+  raw_path: "data/raw/bpi2017.xes.gz"
+  output_clean_path: "data/{dataset_name}/interim/clean.parquet"
+
+# XES standard column names as produced by pm4py.convert_to_dataframe()
+schema:
+  case_id: "case:concept:name"
+  activity: "concept:name"
+  timestamp: "time:timestamp"
+
+time:
+  timezone: null          # pm4py returns timezone-aware timestamps
+  output_timezone: "UTC"  # normalize to UTC
+  sort: true
+  drop_duplicates: false  # lifecycle filter handles de-duplication
+
+preprocess:
+  out_clean_parquet: "clean.parquet"
+  lifecycle_filter:
+    enabled: true
+    column: "lifecycle:transition"
+    keep: ["complete", "COMPLETE"]  # keep only completed events
+  # Keep only essential columns (XES logs have many extra case:* attributes)
+  select_cols: ["case_id", "activity", "timestamp"]
+
+outcome_engineering:
+  enabled: true
+  type: "activity_presence"
+  positive_activities: ["A_Accepted"]
+  outcome_col: "outcome"
+
+validation_split:
+  range_checks:
+    enabled: false  # BPI2017 has no amount/elapsed_time numeric ranges to check
+
+# BPI2017: 311k train transitions. 100k steps ≈ 41 epochs at batch_size=128.
+training:
+  max_steps: 100000
+  eval_every: 5000
+  save_every: 20000
+
+mdp:
+  behavior_trigger_activity: "W_Call after offers"
+  decision_points:
+    mode: "all"  # every prefix is a potential decision point
+  actions:
+    id2name: ["do_nothing", "W_Call after offers"]
+    noop_action: "do_nothing"
+  action_mask:
+    default_valid: ["do_nothing", "W_Call after offers"]
+  reward:
+    type: "terminal_profit_delayed"
+    intermediate_reward: 0.0
+    terminal_column: "outcome"
+  output:
+    path: "data/{dataset_name}/processed/D_offline.npz"

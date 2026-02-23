@@ -1,0 +1,62 @@
+# BPI Challenge 2020 — Travel Permit Data
+# 7,065 cases, 86,581 events
+# Intervention: Send Reminder (sending a payment reminder)
+# Positive outcome: Payment Handled
+
+dataset_name: "bpi2020-travel"
+
+data:
+  format: xes
+  raw_path: "data/raw/bpi2020-travel-permit-data.xes.gz"
+  output_clean_path: "data/{dataset_name}/interim/clean.parquet"
+
+# XES standard column names as produced by pm4py.convert_to_dataframe()
+schema:
+  case_id: "case:concept:name"
+  activity: "concept:name"
+  timestamp: "time:timestamp"
+
+time:
+  timezone: null          # pm4py returns timezone-aware timestamps
+  output_timezone: "UTC"  # normalize to UTC
+  sort: true
+  drop_duplicates: false
+
+preprocess:
+  out_clean_parquet: "clean.parquet"
+  lifecycle_filter:
+    enabled: false  # BPI2020 travel does not have lifecycle:transition events
+  # Keep only essential columns (XES logs have many extra case:* attributes)
+  select_cols: ["case_id", "activity", "timestamp"]
+
+outcome_engineering:
+  enabled: true
+  type: "activity_presence"
+  positive_activities: ["Payment Handled"]
+  outcome_col: "outcome"
+
+validation_split:
+  range_checks:
+    enabled: false
+
+# BPI2020 travel: 56k train transitions. 50k steps ≈ 115 epochs at batch_size=128.
+training:
+  max_steps: 50000
+  eval_every: 2000
+  save_every: 10000
+
+mdp:
+  behavior_trigger_activity: "Send Reminder"
+  decision_points:
+    mode: "all"
+  actions:
+    id2name: ["do_nothing", "Send Reminder"]
+    noop_action: "do_nothing"
+  action_mask:
+    default_valid: ["do_nothing", "Send Reminder"]
+  reward:
+    type: "terminal_profit_delayed"
+    intermediate_reward: 0.0
+    terminal_column: "outcome"
+  output:
+    path: "data/{dataset_name}/processed/D_offline.npz"

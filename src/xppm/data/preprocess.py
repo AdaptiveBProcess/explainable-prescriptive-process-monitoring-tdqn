@@ -23,9 +23,11 @@ def load_event_log(path: str | Path, fmt: str = "auto") -> pd.DataFrame:
     """
     path = Path(path)
     if fmt == "auto":
+        # Handle double extensions like .xes.gz
+        suffixes = "".join(path.suffixes).lower()
         if path.suffix == ".csv":
             fmt = "csv"
-        elif path.suffix == ".xes":
+        elif path.suffix == ".xes" or suffixes.endswith(".xes.gz"):
             fmt = "xes"
         elif path.suffix in (".pkl", ".pickle"):
             fmt = "pickle"
@@ -117,6 +119,92 @@ def normalize_timestamps(
         df[timestamp_col] = df[timestamp_col].dt.tz_localize(None)
 
     logger.debug("Normalized timestamps: tz_in=%s, tz_out=%s", tz_in, tz_out)
+    return df
+
+
+def filter_lifecycle_transitions(
+    df: pd.DataFrame,
+    lifecycle_col: str = "lifecycle:transition",
+    keep: list[str] | None = None,
+) -> pd.DataFrame:
+    """Filter events to specific lifecycle transition types.
+
+    Useful for XES logs (e.g., BPI challenge) that record both 'start' and
+    'complete' lifecycle events per activity. Keeping only 'complete' gives
+    one event per activity execution.
+
+    Args:
+        df: Input DataFrame
+        lifecycle_col: Name of the lifecycle column (default: 'lifecycle:transition')
+        keep: List of lifecycle values to keep (default: ['complete', 'COMPLETE'])
+
+    Returns:
+        Filtered DataFrame
+    """
+    if lifecycle_col not in df.columns:
+        logger.debug("Lifecycle column '%s' not found, skipping filter", lifecycle_col)
+        return df
+
+    if keep is None:
+        keep = ["complete", "COMPLETE"]
+
+    keep_lower = {k.lower() for k in keep}
+    before = len(df)
+    df = df[df[lifecycle_col].str.lower().isin(keep_lower)].copy()
+    dropped = before - len(df)
+    logger.info(
+        "Lifecycle filter: kept %s → dropped %d events, %d remaining", keep, dropped, len(df)
+    )
+    return df
+
+
+def compute_outcome_from_activities(
+    df: pd.DataFrame,
+    positive_activities: list[str],
+    case_id_col: str = "case_id",
+    activity_col: str = "activity",
+    outcome_col: str = "outcome",
+) -> pd.DataFrame:
+    """Compute binary outcome column from activity presence in trace.
+
+    For each case, outcome=1.0 if any activity in positive_activities appears
+    in the case trace; outcome=0.0 otherwise. The value is broadcast to all
+    events of the case so downstream MDP builder can read it from the last event.
+
+    Args:
+        df: Input DataFrame (with case_id_col and activity_col)
+        positive_activities: List of activities that signal a positive outcome
+        case_id_col: Name of case ID column
+        activity_col: Name of activity column
+        outcome_col: Name of output column to create
+
+    Returns:
+        DataFrame with new outcome_col column
+    """
+    if not positive_activities:
+        logger.warning("No positive_activities specified; %s will be 0 for all cases", outcome_col)
+        df = df.copy()
+        df[outcome_col] = 0.0
+        return df
+
+    positive_set = set(positive_activities)
+    df = df.copy()
+
+    # For each case, check if any positive activity appears
+    case_has_positive = df.groupby(case_id_col)[activity_col].transform(
+        lambda acts: 1.0 if any(a in positive_set for a in acts) else 0.0
+    )
+    df[outcome_col] = case_has_positive
+
+    n_cases = df[case_id_col].nunique()
+    n_positive = int(df.groupby(case_id_col)[outcome_col].first().sum())
+    logger.info(
+        "Outcome engineering: %d/%d cases positive (%.1f%%) → column '%s'",
+        n_positive,
+        n_cases,
+        100.0 * n_positive / n_cases if n_cases > 0 else 0.0,
+        outcome_col,
+    )
     return df
 
 
@@ -236,14 +324,57 @@ def preprocess_event_log(
     if schema_mapping:
         df = normalize_schema(df, schema_mapping)
 
-    # Normalize timestamps
+    # Normalize timestamps — always use the standard column name ("timestamp")
+    # because normalize_schema() has already renamed the original column.
     time_config = config.get("time", {})
     df = normalize_timestamps(
         df,
         tz_in=time_config.get("timezone"),
         tz_out=time_config.get("output_timezone", "UTC"),
-        timestamp_col=config.get("schema", {}).get("timestamp", "timestamp"),
+        timestamp_col="timestamp",
     )
+
+    # Filter lifecycle transitions (e.g., keep only 'complete' events in BPI XES logs)
+    preprocess_filters = config.get("preprocess", {})
+    lifecycle_cfg = preprocess_filters.get("lifecycle_filter", {})
+    if lifecycle_cfg.get("enabled", False):
+        lifecycle_col = lifecycle_cfg.get("column", "lifecycle:transition")
+        keep = lifecycle_cfg.get("keep", ["complete", "COMPLETE"])
+        df = filter_lifecycle_transitions(df, lifecycle_col, keep)
+
+    # Compute binary outcome column from activity presence in trace
+    outcome_eng_cfg = config.get("outcome_engineering", {})
+    if outcome_eng_cfg.get("enabled", False):
+        positive_activities = outcome_eng_cfg.get("positive_activities", [])
+        outcome_col = outcome_eng_cfg.get("outcome_col", "outcome")
+        df = compute_outcome_from_activities(df, positive_activities, outcome_col=outcome_col)
+
+    # Encode case IDs as integer codes when they are non-integer (e.g., BPI string IDs)
+    # This is required by the downstream encode_prefixes / build_mdp pipeline.
+    if "case_id" in df.columns and not pd.api.types.is_integer_dtype(df["case_id"]):
+        unique_cases = sorted(df["case_id"].unique(), key=str)
+        case_id_map = {cid: i for i, cid in enumerate(unique_cases)}
+        df["case_id"] = df["case_id"].map(case_id_map)
+        logger.info(
+            "Encoded %d string case IDs to integer codes 0–%d",
+            len(case_id_map),
+            len(case_id_map) - 1,
+        )
+
+    # Select only specified columns (useful for XES logs with hundreds of case attributes)
+    select_cols = preprocess_filters.get("select_cols", None)
+    if select_cols is not None:
+        # Always include outcome column if engineering produced it
+        cols_to_keep = list(select_cols)
+        if outcome_eng_cfg.get("enabled", False):
+            oc = outcome_eng_cfg.get("outcome_col", "outcome")
+            if oc not in cols_to_keep:
+                cols_to_keep.append(oc)
+        existing = [c for c in cols_to_keep if c in df.columns]
+        dropped_cols = len(df.columns) - len(existing)
+        if dropped_cols > 0:
+            logger.info("select_cols: keeping %d columns, dropping %d", len(existing), dropped_cols)
+        df = df[existing]
 
     # Sort by case and timestamp
     if time_config.get("sort", True):

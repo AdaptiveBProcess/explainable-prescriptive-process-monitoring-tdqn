@@ -58,6 +58,8 @@ def main() -> None:
             "timestamp": schema_cfg.get("timestamp", data_cfg.get("timestamp_col", "timestamp")),
         },
         "time": cfg.get("time", {}),
+        "preprocess": cfg.get("preprocess", {}),
+        "outcome_engineering": cfg.get("outcome_engineering", {}),
     }
 
     # Initialize tracking
