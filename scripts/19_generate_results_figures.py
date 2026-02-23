@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import argparse
 import json
 from pathlib import Path
 
@@ -110,18 +111,33 @@ def plot_latency_from_decisions(decisions_jsonl: Path, out_path: Path) -> None:
 
 
 def main() -> None:
-    fidelity_csv = ARTIFACTS / "fidelity" / "fidelity.csv"
-    distill_metrics = ARTIFACTS / "distill" / "final" / "fidelity_metrics.json"
-    decisions_jsonl = ARTIFACTS / "deploy" / "v1" / "decisions.jsonl"
+    parser = argparse.ArgumentParser(description="Generate paper result figures")
+    parser.add_argument(
+        "--dataset",
+        default=None,
+        help="Dataset name (e.g. bpi2020-rfp). If omitted, uses SimBank defaults.",
+    )
+    args = parser.parse_args()
+
+    ds = args.dataset
+    prefix = Path(ds) if ds else Path("")
+
+    fidelity_csv = ARTIFACTS / "fidelity" / prefix / "fidelity.csv"
+    distill_metrics = ARTIFACTS / "distill" / prefix / "final" / "fidelity_metrics.json"
+    decisions_jsonl = ARTIFACTS / "deploy" / prefix / "v1" / "decisions.jsonl"
 
     if fidelity_csv.exists():
-        plot_qdrop(fidelity_csv, ARTIFACTS / "fidelity" / "q_drop_gap_final.png")
+        plot_qdrop(fidelity_csv, ARTIFACTS / "fidelity" / prefix / "q_drop_gap_final.png")
 
     if distill_metrics.exists():
-        plot_distillation(distill_metrics, ARTIFACTS / "distill" / "fidelity_stratified.png")
+        plot_distillation(
+            distill_metrics, ARTIFACTS / "distill" / prefix / "fidelity_stratified.png"
+        )
 
     if decisions_jsonl.exists():
-        plot_latency_from_decisions(decisions_jsonl, ARTIFACTS / "deploy" / "latency_hist.png")
+        plot_latency_from_decisions(
+            decisions_jsonl, ARTIFACTS / "deploy" / prefix / "latency_hist.png"
+        )
 
 
 if __name__ == "__main__":

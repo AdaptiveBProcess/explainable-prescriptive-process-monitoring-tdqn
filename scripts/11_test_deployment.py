@@ -14,7 +14,12 @@ from xppm.distill.distill_policy import extract_tabular_features
 from xppm.utils.io import load_npz, load_parquet
 
 
-def test_deployment(bundle_dir: Path, n_cases: int = 50, base_url: str = "http://localhost:8000"):
+def test_deployment(
+    bundle_dir: Path,
+    n_cases: int = 50,
+    base_url: str = "http://localhost:8000",
+    dataset_name: str | None = None,
+):
     """Test deployment with real cases from distill dataset."""
     # Load distill selection
     distill_selection_path = bundle_dir.parent / "distill" / "final" / "distill_selection.json"
@@ -25,9 +30,16 @@ def test_deployment(bundle_dir: Path, n_cases: int = 50, base_url: str = "http:/
     with open(distill_selection_path) as f:
         selection = json.load(f)
 
-    # Load dataset
-    dataset = load_npz("data/processed/D_offline.npz")
-    clean_df = load_parquet("data/interim/clean.parquet")
+    # Load dataset — paths differ when a named dataset is provided
+    if dataset_name:
+        npz_path = f"data/{dataset_name}/processed/D_offline.npz"
+        parquet_path = f"data/{dataset_name}/interim/clean.parquet"
+    else:
+        npz_path = "data/processed/D_offline.npz"
+        parquet_path = "data/interim/clean.parquet"
+
+    dataset = load_npz(npz_path)
+    clean_df = load_parquet(parquet_path)
 
     # Load config for feature extraction
     from xppm.utils.config import Config
@@ -114,6 +126,11 @@ if __name__ == "__main__":
     )
     parser.add_argument("--n-cases", type=int, default=50, help="Number of test cases")
     parser.add_argument("--base-url", default="http://localhost:8000", help="API base URL")
+    parser.add_argument(
+        "--dataset",
+        default=None,
+        help="Dataset name (e.g. bpi2020-rfp). If omitted, uses SimBank defaults.",
+    )
     args = parser.parse_args()
 
-    test_deployment(Path(args.bundle_dir), args.n_cases, args.base_url)
+    test_deployment(Path(args.bundle_dir), args.n_cases, args.base_url, args.dataset)
