@@ -62,3 +62,18 @@ mdp:
     terminal_column: "outcome"
   output:
     path: "data/{dataset_name}/processed/D_offline.npz"
+
+experiment:
+  checkpoint_path: "artifacts/models/tdqn/20260223_124657/Q_theta.ckpt"
+  ope_report_path: "artifacts/ope/{dataset_name}/ope_dr.json"
+
+xai:
+  checkpoint_path: "artifacts/models/tdqn/20260223_124657/Q_theta.ckpt"
+  out_dir: "xai/{dataset_name}"
+
+fidelity:
+  out_csv: "artifacts/fidelity/{dataset_name}/fidelity.csv"
+
+distill:
+  teacher_checkpoint: "artifacts/models/tdqn/20260223_124657/Q_theta.ckpt"
+  out_dir: "artifacts/distill/{dataset_name}"

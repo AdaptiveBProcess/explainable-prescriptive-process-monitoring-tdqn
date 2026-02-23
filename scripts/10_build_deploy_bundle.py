@@ -28,36 +28,39 @@ def get_git_commit() -> str:
         return "unknown"
 
 
-def extract_feature_stats(distill_selection_path: Path) -> dict:
+def extract_feature_stats(distill_selection_path: Path, cfg: dict | None = None) -> dict:
     """Extract feature statistics from distill selection for OOD detection."""
     import json
 
     import numpy as np
 
     from xppm.distill.distill_policy import extract_tabular_features
-    from xppm.utils.config import Config
     from xppm.utils.io import load_npz, load_parquet
 
     try:
         with open(distill_selection_path) as f:
             selection = json.load(f)
 
+        # Resolve paths from cfg when available
+        dataset_path = (
+            cfg.get("mdp", {}).get("output", {}).get("path") if cfg else None
+        ) or "data/processed/D_offline.npz"
+        clean_path = (
+            cfg.get("data", {}).get("output_clean_path") if cfg else None
+        ) or "data/interim/clean.parquet"
+
         # Load dataset
-        dataset = load_npz("data/processed/D_offline.npz")
-        clean_df = load_parquet("data/interim/clean.parquet")
+        dataset = load_npz(dataset_path)
+        clean_df = load_parquet(clean_path)
 
         # Load config for feature extraction
-        try:
-            cfg = Config.from_yaml("configs/config.yaml").raw
-        except Exception:
-            # Fallback minimal config
-            cfg = {
-                "encoding": {"output": {"vocab_activity_path": "data/interim/vocab_activity.json"}}
-            }
+        cfg_inner = cfg or {
+            "encoding": {"output": {"vocab_activity_path": "data/interim/vocab_activity.json"}}
+        }
 
         # Extract features for selected indices
         indices = np.array(selection["indices"])
-        features, _ = extract_tabular_features(dataset, clean_df, indices, cfg)
+        features, _ = extract_tabular_features(dataset, clean_df, indices, cfg_inner)
 
         # Compute stats
         feature_names = [
@@ -92,6 +95,7 @@ def build_deploy_bundle(
     fidelity_path: Path,
     config_path: Path,
     output_dir: Path,
+    dataset_name: str | None = None,
 ):
     """
     Build deploy bundle with all necessary artifacts.
@@ -110,6 +114,14 @@ def build_deploy_bundle(
         └── versions.json
     """
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Load resolved config for dataset-specific paths
+    try:
+        from xppm.utils.config import Config
+
+        cfg = Config.for_dataset(str(config_path), dataset_name).raw
+    except Exception:
+        cfg = {}
 
     # Copy artifacts
     print("📦 Building deploy bundle...")
@@ -144,10 +156,8 @@ def build_deploy_bundle(
     versions = {
         "model_version": compute_hash(distill_dir / "tree.pkl"),
         "surrogate_version": compute_hash(distill_dir / "tree.pkl"),
-        "data_version": (
-            compute_hash(Path("data/processed/D_offline.npz"))
-            if Path("data/processed/D_offline.npz").exists()
-            else "unknown"
+        "data_version": (lambda p: compute_hash(Path(p)) if Path(p).exists() else "unknown")(
+            cfg.get("mdp", {}).get("output", {}).get("path", "data/processed/D_offline.npz")
         ),
         "config_version": compute_hash(config_path),
         "git_commit": get_git_commit(),
@@ -163,7 +173,7 @@ def build_deploy_bundle(
     if not guard_config_path.exists():
         print("📊 Creating policy_guard_config.json...")
         distill_selection_path = distill_dir / "distill_selection.json"
-        feature_stats = extract_feature_stats(distill_selection_path)
+        feature_stats = extract_feature_stats(distill_selection_path, cfg)
 
         template = {
             "tau_uncertainty": 0.3,
@@ -215,4 +225,5 @@ if __name__ == "__main__":
         Path(args.fidelity),
         Path(args.config),
         Path(args.output_dir),
+        dataset_name=args.dataset,
     )
