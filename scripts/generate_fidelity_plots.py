@@ -4,7 +4,7 @@ Usage:
     python scripts/generate_fidelity_plots.py [--dataset DATASET]
 
 Requirements:
-    pip install matplotlib
+    pip install matplotlib scipy
 """
 
 import argparse
@@ -14,6 +14,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 
 def main() -> None:
@@ -61,23 +62,28 @@ def main() -> None:
     # Reference line
     ax.axhline(0, color="black", linestyle="--", linewidth=1, label="Neutral")
 
-    # Annotations
-    ax.text(
-        0.15,
-        50,
-        "Fidelity\nconfirmed",
-        ha="center",
-        fontsize=11,
-        bbox=dict(boxstyle="round", facecolor="lightgreen", alpha=0.3),
-    )
-    ax.text(
-        0.4,
-        -600,
-        "Expected\nreversal",
-        ha="center",
-        fontsize=11,
-        bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.3),
-    )
+    # Dynamic annotations based on data range
+    gap_max = float(np.max(gaps))
+    gap_min = float(np.min(gaps))
+
+    if gap_max > 0:
+        ax.text(
+            0.15,
+            gap_max * 0.55,
+            "Fidelity\nconfirmed",
+            ha="center",
+            fontsize=11,
+            bbox=dict(boxstyle="round", facecolor="lightgreen", alpha=0.3),
+        )
+    if gap_min < 0:
+        ax.text(
+            0.4,
+            gap_min * 0.55,
+            "Expected\nreversal",
+            ha="center",
+            fontsize=11,
+            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.3),
+        )
 
     ax.set_xlabel("Perturbation level (p_remove)", fontsize=13)
     ax.set_ylabel("Q-drop gap (top-k - random)", fontsize=13)
@@ -147,15 +153,17 @@ def main() -> None:
     ax.legend(fontsize=11)
     ax.grid(axis="y", alpha=0.3)
 
-    # Annotation
-    ax.text(
-        0.5,
-        0.04,
-        "0% flips with top-k\n→ Robust policy",
-        ha="center",
-        fontsize=10,
-        bbox=dict(boxstyle="round", facecolor="lightblue", alpha=0.5),
-    )
+    # Annotation: only show "robust policy" note when top-k flips are near zero
+    if all(v < 0.01 for v in flip_topk):
+        flip_max = max(max(flip_topk), max(flip_rand)) if len(flip_rand) > 0 else 0.1
+        ax.text(
+            0.5,
+            flip_max * 0.35,
+            "≈0% flips with top-k\n→ Robust policy",
+            ha="center",
+            fontsize=10,
+            bbox=dict(boxstyle="round", facecolor="lightblue", alpha=0.5),
+        )
 
     plt.tight_layout()
     plt.savefig(output_dir / "action_flip_final.png", dpi=300, bbox_inches="tight")
@@ -190,11 +198,12 @@ def main() -> None:
     ax.grid(alpha=0.3)
     ax.legend(fontsize=11)
 
-    # Interpretive text
+    # Spearman annotation computed from actual data
+    spearman_r, _ = stats.spearmanr(score_Q, score_margin)
     ax.text(
         0.05,
         0.95,
-        "Weak correlation:\nValue ≠ Confidence",
+        f"Spearman ρ = {spearman_r:.3f}",
         transform=ax.transAxes,
         fontsize=11,
         verticalalignment="top",
