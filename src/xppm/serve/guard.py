@@ -7,6 +7,8 @@ import logging
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
 
@@ -77,34 +79,27 @@ class PolicyGuard:
             (is_ood, ood_details)
         """
         if not self.feature_stats:
-            return False, {}  # No stats, skip OOD
+            return False, {}
 
-        z_scores = {}
-        ood_features = []
+        known = {k: v for k, v in features.items() if k in self.feature_stats}
+        if not known:
+            return False, {}
 
-        for feat_name, value in features.items():
-            if feat_name not in self.feature_stats:
-                continue
+        names = list(known.keys())
+        values = np.array([known[k] for k in names], dtype=np.float64)
+        means = np.array([self.feature_stats[k]["mean"] for k in names], dtype=np.float64)
+        stds = np.array([self.feature_stats[k]["std"] for k in names], dtype=np.float64)
 
-            stats = self.feature_stats[feat_name]
-            mean = stats["mean"]
-            std = stats["std"]
+        z_arr = np.where(stds > 0, np.abs(values - means) / stds, 0.0)
+        ood_mask = z_arr > self.tau_ood_z
 
-            if std == 0:
-                z = 0
-            else:
-                z = abs((value - mean) / std)
-
-            z_scores[feat_name] = z
-
-            if z > self.tau_ood_z:
-                ood_features.append(feat_name)
-
+        z_scores = dict(zip(names, z_arr.tolist()))
+        ood_features = [names[i] for i in range(len(names)) if ood_mask[i]]
         is_ood = len(ood_features) > self.max_ood_features
 
         if is_ood:
             logger.warning(
-                f"OOD detected: {len(ood_features)} features out of range: {ood_features}"
+                "OOD detected: %d features out of range: %s", len(ood_features), ood_features
             )
 
         return is_ood, {"ood_features": ood_features, "z_scores": z_scores}

@@ -150,13 +150,13 @@ def _perturb_states_mask_topk(
     """
     perturbed_states = states.copy()
     perturbed_masks = state_masks.copy()
+    max_len = states.shape[1]
 
-    for i, top_k_positions in enumerate(top_k_indices):
-        for pos in top_k_positions:
-            if 0 <= pos < states.shape[1]:
-                perturbed_states[i, pos] = pad_id
-                # Mark as padding (0) in mask
-                perturbed_masks[i, pos] = 0
+    for i, positions in enumerate(top_k_indices):
+        valid_pos = [p for p in positions if 0 <= p < max_len]
+        if valid_pos:
+            perturbed_states[i, valid_pos] = pad_id
+            perturbed_masks[i, valid_pos] = 0
 
     return perturbed_states, perturbed_masks
 

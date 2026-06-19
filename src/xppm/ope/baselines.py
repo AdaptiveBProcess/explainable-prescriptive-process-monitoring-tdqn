@@ -20,24 +20,20 @@ def compute_noop_policy_probs(
     Returns:
         (N, n_actions) probability array
     """
-    n_transitions = valid_actions.shape[0]
-    probs = np.zeros((n_transitions, n_actions), dtype=np.float32)
+    valid = valid_actions > 0  # (N, n_actions) bool
+    n_valid = valid.sum(axis=1, keepdims=True).astype(np.float32)  # (N, 1)
 
-    for i in range(n_transitions):
-        valid_mask = valid_actions[i] > 0
-        n_valid = valid_mask.sum()
+    # Base: uniform over valid actions; fall back to uniform over all if no valid action
+    n_valid_safe = np.where(n_valid > 0, n_valid, n_actions)
+    probs = valid.astype(np.float32) / n_valid_safe
+    probs = np.where(n_valid == 0, 1.0 / n_actions, probs)
 
-        if n_valid == 0:
-            # Fallback: uniform over all actions (shouldn't happen)
-            probs[i] = 1.0 / n_actions
-        else:
-            # Prefer noop if valid, otherwise uniform over valid
-            if valid_mask[noop_action_id]:
-                probs[i, noop_action_id] = 1.0
-            else:
-                probs[i, valid_mask] = 1.0 / n_valid
+    # Override: if noop is valid, concentrate all probability on noop
+    noop_valid = valid_actions[:, noop_action_id] > 0  # (N,) bool
+    probs[noop_valid] = 0.0
+    probs[noop_valid, noop_action_id] = 1.0
 
-    return probs
+    return probs.astype(np.float32)
 
 
 def compute_heuristic_policy_probs(
@@ -62,38 +58,36 @@ def compute_heuristic_policy_probs(
         (N, n_actions) probability array
     """
     n_transitions = valid_actions.shape[0]
-    probs = np.zeros((n_transitions, n_actions), dtype=np.float32)
-
-    # Get heuristic config
     heuristic_cfg = config.get("ope", {}).get("heuristic", {})
     length_threshold = int(heuristic_cfg.get("length_threshold", 5))
     short_action_id = int(heuristic_cfg.get("short_action_id", 0))
     long_action_id = int(heuristic_cfg.get("long_action_id", 1))
 
-    for i in range(n_transitions):
-        valid_mask = valid_actions[i] > 0
-        n_valid = valid_mask.sum()
-        prefix_len = int(prefix_lengths[i])
+    valid = valid_actions > 0  # (N, n_actions) bool
+    n_valid = valid.sum(axis=1, keepdims=True).astype(np.float32)  # (N, 1)
 
-        if n_valid == 0:
-            probs[i] = 1.0 / n_actions
-            continue
+    # Base: uniform over valid, fall back to uniform over all
+    n_valid_safe = np.where(n_valid > 0, n_valid, n_actions)
+    probs = valid.astype(np.float32) / n_valid_safe
+    probs = np.where(n_valid == 0, 1.0 / n_actions, probs)
 
-        # Choose action based on prefix length
-        if prefix_len < length_threshold:
-            preferred_action = short_action_id
-        else:
-            preferred_action = long_action_id
+    # Choose preferred action per row based on prefix length
+    preferred = np.where(prefix_lengths < length_threshold, short_action_id, long_action_id)  # (N,)
+    rows = np.arange(n_transitions)
 
-        # If preferred action is valid, use it; otherwise use first valid
-        if valid_mask[preferred_action]:
-            probs[i, preferred_action] = 1.0
-        else:
-            # Use first valid action
-            first_valid = np.nonzero(valid_mask)[0][0]
-            probs[i, first_valid] = 1.0
+    # Rows where preferred action is valid → put 1.0 on it
+    preferred_valid = valid_actions[rows, preferred] > 0
+    probs[preferred_valid] = 0.0
+    probs[rows[preferred_valid], preferred[preferred_valid]] = 1.0
 
-    return probs
+    # Rows where preferred is NOT valid but there are valid actions → use first valid
+    fallback_rows = ~preferred_valid & (n_valid.squeeze(1) > 0)
+    if fallback_rows.any():
+        first_valid = np.argmax(valid[fallback_rows], axis=1)
+        probs[fallback_rows] = 0.0
+        probs[rows[fallback_rows], first_valid] = 1.0
+
+    return probs.astype(np.float32)
 
 
 def evaluate_baseline_policy(

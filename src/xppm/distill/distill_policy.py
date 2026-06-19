@@ -11,7 +11,7 @@ import pandas as pd
 import torch
 from scipy.stats import spearmanr
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
 from xppm.rl.factory import AgentFactory
@@ -61,33 +61,20 @@ def select_common_states(
     len_bins = np.digitize(seq_lens, bins=[5, 10])
 
     # Combine strata: (len_bin, action)
-    strata = [f"{lb}_{a}" for lb, a in zip(len_bins, actions)]
+    strata_labels = np.array([f"{lb}_{a}" for lb, a in zip(len_bins, actions)])
 
-    # Stratified sampling
-    rng = np.random.default_rng(seed)
-    unique_strata = list(set(strata))
-    n_per_stratum = max(1, n_target // len(unique_strata))
+    if n_target >= len(test_indices):
+        return test_indices.copy()
 
-    selected_list: list[int] = []
-    for stratum in unique_strata:
-        stratum_mask = np.array([s == stratum for s in strata])
-        stratum_indices = test_indices[stratum_mask]
-        if len(stratum_indices) > 0:
-            n_select = min(n_per_stratum, len(stratum_indices))
-            chosen = rng.choice(stratum_indices, size=n_select, replace=False)
-            selected_list.extend(chosen.tolist())
-
-    # If we need more, fill randomly
-    if len(selected_list) < n_target:
-        remaining = n_target - len(selected_list)
-        remaining_indices = [idx for idx in test_indices if idx not in selected_list]
-        if len(remaining_indices) > 0:
-            additional = rng.choice(
-                remaining_indices, size=min(remaining, len(remaining_indices)), replace=False
-            )
-            selected_list.extend(additional.tolist())
-
-    return np.array(selected_list[:n_target])
+    try:
+        sss = StratifiedShuffleSplit(n_splits=1, train_size=n_target, random_state=seed)
+        selected_local_idx, _ = next(sss.split(np.zeros(len(strata_labels)), strata_labels))
+        return test_indices[selected_local_idx]
+    except ValueError:
+        # Fallback when a stratum has too few samples for the requested split
+        rng = np.random.default_rng(seed)
+        chosen = rng.choice(len(test_indices), size=min(n_target, len(test_indices)), replace=False)
+        return test_indices[chosen]
 
 
 def select_high_impact_states(
@@ -286,12 +273,10 @@ def extract_tabular_features(
     activity_names = [id2token[i] for i in range(len(id2token)) if isinstance(id2token[i], str)]
 
     # Map case_id -> sorted events DataFrame
-    case_events_map: dict[int, pd.DataFrame] = {}
-    for case_id in clean_df["case_id"].unique():
-        case_events = (
-            clean_df[clean_df["case_id"] == case_id].sort_values("timestamp").reset_index(drop=True)
-        )
-        case_events_map[case_id] = case_events
+    case_events_map: dict[int, pd.DataFrame] = {
+        case_id: group.sort_values("timestamp").reset_index(drop=True)
+        for case_id, group in clean_df.groupby("case_id")
+    }
 
     features_list: list[list[float]] = []
     feature_names = [
@@ -338,9 +323,8 @@ def extract_tabular_features(
 
         # Activity counts (from prefix up to this point)
         prefix_events = case_events.iloc[: event_pos + 1]
-        for act_name in activity_names[:10]:
-            count = int((prefix_events["activity"] == act_name).sum())
-            feat.append(float(count))
+        act_counts = prefix_events["activity"].value_counts()
+        feat.extend(float(act_counts.get(act_name, 0)) for act_name in activity_names[:10])
 
         features_list.append(feat)
 

@@ -98,14 +98,10 @@ def _compute_policy_probs_from_q(
     tau: float,
 ) -> np.ndarray:
     """Compute π_e(a|s) as softmax over Q with action masking."""
-    # Mask invalid actions
+    from scipy.special import softmax
+
     masked_q = np.where(valid_actions > 0, q_values, -1e9)
-    # Temperature softmax
-    logits = masked_q / max(tau, 1e-6)
-    logits = logits - logits.max(axis=1, keepdims=True)
-    exp_logits = np.exp(logits)
-    probs = exp_logits / np.clip(exp_logits.sum(axis=1, keepdims=True), 1e-12, None)
-    return probs
+    return softmax(masked_q / max(tau, 1e-6), axis=1)
 
 
 def doubly_robust_estimate(
