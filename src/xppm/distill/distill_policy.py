@@ -129,6 +129,7 @@ def select_high_impact_states(
 
     # Take top n_target, matching by case_id and t
     high_impact_idx: list[int] = []
+    n_no_match = 0
     for exp in sorted_exp[:n_target]:
         case_id = exp.get("case_id")
         t = exp.get("t")
@@ -137,15 +138,39 @@ def select_high_impact_states(
             if key in case_t_to_idx:
                 high_impact_idx.append(case_t_to_idx[key])
             else:
-                logger.debug("No match for case_id=%d, t=%d", case_id, t)
+                n_no_match += 1
         elif "transition_idx" in exp:
-            # Fallback: use transition_idx if available
             high_impact_idx.append(int(exp["transition_idx"]))
+        else:
+            n_no_match += 1
 
-    if len(high_impact_idx) < n_target:
+    if n_no_match > 0:
+        logger.debug(
+            "%d/%d high-impact explanation entries had no matching (case_id, t) in dataset",
+            n_no_match,
+            min(n_target, len(sorted_exp)),
+        )
+
+    found = len(high_impact_idx)
+    if found == 0 and n_target > 0:
+        raise RuntimeError(
+            f"No high-impact states could be matched from {deltaq_explanations_path}. "
+            "The explanations were likely computed on a different dataset or split. "
+            "Re-run scripts/06_explain_policy.py before distillation."
+        )
+    if found < n_target * 0.5:
+        logger.warning(
+            "Only matched %d/%d high-impact states (%.0f%%). "
+            "VIPER distillation quality may be degraded — consider re-running "
+            "scripts/06_explain_policy.py to refresh explanations.",
+            found,
+            n_target,
+            100.0 * found / n_target,
+        )
+    elif found < n_target:
         logger.warning(
             "Only found %d/%d high-impact states (missing case_id/t or transition_idx)",
-            len(high_impact_idx),
+            found,
             n_target,
         )
 

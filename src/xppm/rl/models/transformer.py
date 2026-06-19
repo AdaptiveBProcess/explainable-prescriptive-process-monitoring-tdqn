@@ -7,12 +7,16 @@ from torch import nn
 class SimpleTransformerEncoder(nn.Module):
     """Minimal transformer-style encoder as a placeholder for sequence encoding."""
 
-    def __init__(self, input_dim: int, hidden_dim: int, n_layers: int, dropout: float) -> None:
+    def __init__(
+        self, input_dim: int, hidden_dim: int, n_heads: int, n_layers: int, dropout: float
+    ) -> None:
         super().__init__()
+        if hidden_dim % n_heads != 0:
+            raise ValueError(f"hidden_dim ({hidden_dim}) must be divisible by n_heads ({n_heads})")
         self.input_proj = nn.Linear(input_dim, hidden_dim)
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=hidden_dim,
-            nhead=4,
+            nhead=n_heads,
             dim_feedforward=hidden_dim * 4,
             dropout=dropout,
             batch_first=True,
@@ -23,5 +27,3 @@ class SimpleTransformerEncoder(nn.Module):
         # x: (batch, seq_len, input_dim)
         h = self.input_proj(x)
         return self.encoder(h)  # (batch, seq_len, hidden_dim)
-
-

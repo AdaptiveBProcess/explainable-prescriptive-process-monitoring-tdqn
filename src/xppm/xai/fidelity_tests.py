@@ -297,6 +297,7 @@ def _test_q_drop(
     # Note: states and state_masks should already be aligned with explanations["items"]
     target_orig = []
     top_tokens_list = []
+    bottom_tokens_list = []
 
     for idx, item in enumerate(explanations["items"]):
         if idx >= len(states):
@@ -315,14 +316,13 @@ def _test_q_drop(
             continue
 
         target_orig.append(target_val)
-        # For delta_q, use top_drivers; for q_star, use top_tokens
+        # For delta_q, use top_drivers/bottom_drivers; for q_star, use top_tokens/bottom_tokens
         if target == "delta_q":
             top_tokens = item.get("top_drivers", [])
+            bottom_tokens = item.get("bottom_drivers", [])
         else:
             top_tokens = item.get("top_tokens", [])
-        # Extract positions from top_tokens/top_drivers
-        # Positions are absolute in the full sequence (0 to max_len-1)
-        # Filter to only include valid positions that are not PAD
+            bottom_tokens = item.get("bottom_tokens", [])
         max_len = states.shape[1]
         top_positions = [
             t.get("position")
@@ -330,10 +330,20 @@ def _test_q_drop(
             if isinstance(t, dict)
             and "position" in t
             and t.get("position") is not None
-            and 0 <= t.get("position") < max_len  # Within sequence bounds
-            and state_masks[idx][t.get("position")] > 0  # Not a PAD token
+            and 0 <= t.get("position") < max_len
+            and state_masks[idx][t.get("position")] > 0
+        ]
+        bottom_positions = [
+            t.get("position")
+            for t in bottom_tokens
+            if isinstance(t, dict)
+            and "position" in t
+            and t.get("position") is not None
+            and 0 <= t.get("position") < max_len
+            and state_masks[idx][t.get("position")] > 0
         ]
         top_tokens_list.append(top_positions)
+        bottom_tokens_list.append(bottom_positions)
 
     target_orig = np.array(target_orig)
     n_valid = len(target_orig)
@@ -439,6 +449,31 @@ def _test_q_drop(
         drop_rand_std = drop_rand_array.std(axis=0)
         drop_rand_norm = drop_rand_mean / (np.abs(target_orig) + 1e-6)
 
+        # Anti-guided removal (least important tokens)
+        has_bottom = any(len(b) > 0 for b in bottom_tokens_list)
+        if has_bottom:
+            bottom_k_indices_list = []
+            for i in range(n_valid):
+                bottom_positions = (
+                    bottom_tokens_list[i][: k_list[i]]
+                    if len(bottom_tokens_list[i]) >= k_list[i]
+                    else bottom_tokens_list[i]
+                )
+                bottom_k_indices_list.append(bottom_positions)
+
+            states_anti, masks_anti = _perturb_states_mask_topk(
+                states[:n_valid], state_masks[:n_valid], bottom_k_indices_list
+            )
+            _, v_s_anti, _ = _compute_q_values(
+                q_net, states_anti, masks_anti, valid_actions[:n_valid], device
+            )
+            target_anti = v_s_anti
+            drop_anti = target_orig - target_anti
+            gap_anti = drop_anti - drop_rand_mean  # should be < 0 for faithful attributions
+        else:
+            drop_anti = None
+            gap_anti = None
+
         # Gap
         gap = drop_topk - drop_rand_mean
         gap_norm = drop_topk_norm - drop_rand_norm
@@ -521,6 +556,33 @@ def _test_q_drop(
                 "baseline_type": "pad",
             }
         )
+        if drop_anti is not None:
+            results.append(
+                {
+                    "test": "q_drop",
+                    "split": "test",
+                    "target": target,
+                    "p_remove": p_remove,
+                    "metric": "drop_anti",
+                    "value": float(drop_anti.mean()),
+                    "n_items": n_valid,
+                    "seed": seed,
+                    "baseline_type": "pad",
+                }
+            )
+            results.append(
+                {
+                    "test": "q_drop",
+                    "split": "test",
+                    "target": target,
+                    "p_remove": p_remove,
+                    "metric": "gap_anti",
+                    "value": float(gap_anti.mean()),
+                    "n_items": n_valid,
+                    "seed": seed,
+                    "baseline_type": "pad",
+                }
+            )
 
     return results
 
@@ -575,17 +637,17 @@ def _test_action_flip(
         logger.info(f"  valid_actions[0]: {valid_actions[0]}")
         logger.info(f"  Num valid actions[0]: {valid_actions[0].sum()}")
 
-    # Extract top tokens from explanations (filter PAD positions)
+    # Extract top and bottom tokens from explanations (filter PAD positions)
     # Note: states and state_masks should already be aligned with explanations["items"]
     top_tokens_list = []
+    bottom_tokens_list = []
     for idx, item in enumerate(explanations["items"]):
         if idx >= len(states):
             logger.warning("More explanation items than states, stopping at %d", len(states))
             break
 
         top_tokens = item.get("top_tokens", [])
-        # Positions are absolute in the full sequence (0 to max_len-1)
-        # Filter to only include valid positions that are not PAD
+        bottom_tokens = item.get("bottom_tokens", [])
         max_len = states.shape[1]
         top_positions = [
             t.get("position")
@@ -593,10 +655,20 @@ def _test_action_flip(
             if isinstance(t, dict)
             and "position" in t
             and t.get("position") is not None
-            and 0 <= t.get("position") < max_len  # Within sequence bounds
-            and state_masks[idx][t.get("position")] > 0  # Not a PAD token
+            and 0 <= t.get("position") < max_len
+            and state_masks[idx][t.get("position")] > 0
+        ]
+        bottom_positions = [
+            t.get("position")
+            for t in bottom_tokens
+            if isinstance(t, dict)
+            and "position" in t
+            and t.get("position") is not None
+            and 0 <= t.get("position") < max_len
+            and state_masks[idx][t.get("position")] > 0
         ]
         top_tokens_list.append(top_positions)
+        bottom_tokens_list.append(bottom_positions)
 
     n_valid = len(top_tokens_list)
 
@@ -701,6 +773,34 @@ def _test_action_flip(
         # Filter random flips to only flip-possible cases
         flip_rand_filtered = flip_rand_array[:, flip_possible]  # (n_random, n_flip_possible)
         flip_rand_mean_filtered = float(flip_rand_filtered.mean()) if n_flip_possible > 0 else 0.0
+
+        # Anti-guided flip (least important tokens)
+        has_bottom = any(len(b) > 0 for b in bottom_tokens_list)
+        if has_bottom:
+            bottom_k_indices_list = []
+            for i in range(n_valid):
+                bottom_positions = (
+                    bottom_tokens_list[i][: k_list[i]]
+                    if len(bottom_tokens_list[i]) >= k_list[i]
+                    else bottom_tokens_list[i]
+                )
+                bottom_k_indices_list.append(bottom_positions)
+
+            states_anti, masks_anti = _perturb_states_mask_topk(
+                states[:n_valid], state_masks[:n_valid], bottom_k_indices_list
+            )
+            _, _, a_star_anti = _compute_q_values(
+                q_net, states_anti, masks_anti, valid_actions[:n_valid], device
+            )
+            flip_anti = (a_star_anti != a_star_orig[:n_valid]).astype(float)
+            flip_anti_pct = float(flip_anti.mean())
+            flip_anti_filtered = flip_anti[flip_possible]
+            flip_anti_pct_filtered = (
+                float(flip_anti_filtered.mean()) if n_flip_possible > 0 else 0.0
+            )
+        else:
+            flip_anti_pct = None
+            flip_anti_pct_filtered = None
 
         # Gap (overall and filtered)
         flip_gap = flip_topk_pct - flip_rand_mean
@@ -815,6 +915,33 @@ def _test_action_flip(
                 "baseline_type": "pad",
             }
         )
+        if flip_anti_pct is not None:
+            results.append(
+                {
+                    "test": "action_flip",
+                    "split": "test",
+                    "target": "-",
+                    "p_remove": p_remove,
+                    "metric": "flip_anti",
+                    "value": flip_anti_pct,
+                    "n_items": n_valid,
+                    "seed": seed,
+                    "baseline_type": "pad",
+                }
+            )
+            results.append(
+                {
+                    "test": "action_flip",
+                    "split": "test",
+                    "target": "-",
+                    "p_remove": p_remove,
+                    "metric": "flip_anti_on_possible",
+                    "value": flip_anti_pct_filtered,
+                    "n_items": n_flip_possible,
+                    "seed": seed,
+                    "baseline_type": "pad",
+                }
+            )
 
     return results
 

@@ -1,22 +1,17 @@
-from __future__ import annotations
+"""Deprecated: use xppm.serve.schemas instead."""
 
-from pydantic import BaseModel
+import warnings
 
+warnings.warn(
+    "xppm.serving.schemas is deprecated and will be removed in a future version. "
+    "Use xppm.serve.schemas instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-class Event(BaseModel):
-    activity: str
-    timestamp: str
-    amount: float | None = None
-
-
-class CaseRequest(BaseModel):
-    case_id: str
-    events: list[Event]
-
-
-class ActionRecommendation(BaseModel):
-    case_id: str
-    action: str
-    score: float
-
-
+from xppm.serve.schemas import (  # noqa: F401, E402
+    CaseFeatures,
+    DecisionRequest,
+    DecisionResponse,
+    PolicyVersions,
+)

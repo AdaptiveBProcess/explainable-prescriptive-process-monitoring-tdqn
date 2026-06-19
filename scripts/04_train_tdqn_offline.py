@@ -245,6 +245,13 @@ def main() -> None:
             vocab_hash=vocab_hash,
         )
 
+        # Write stable checkpoint for DVC and downstream scripts.
+        # The versioned copy stays in checkpoint_dir; this is the fixed path all stages depend on.
+        stable_ckpt_dir = artifacts_dir / "checkpoints"
+        ensure_dir(stable_ckpt_dir)
+        shutil.copy(checkpoint_paths["q_theta"], stable_ckpt_dir / "Q_theta.ckpt")
+        logger.info("Stable checkpoint written to %s", stable_ckpt_dir / "Q_theta.ckpt")
+
         # Copy artifacts to checkpoint directory
         shutil.copy(args.config, checkpoint_dir / "config.yaml")
         shutil.copy(splits_path, checkpoint_dir / "splits.json")

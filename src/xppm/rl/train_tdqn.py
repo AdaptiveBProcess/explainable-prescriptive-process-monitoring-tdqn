@@ -94,11 +94,16 @@ class TransformerQNetwork(nn.Module):
 
         # Transformer encoder
         self.encoder = SimpleTransformerEncoder(
-            input_dim=d_model, hidden_dim=d_model, n_layers=n_layers, dropout=dropout
+            input_dim=d_model,
+            hidden_dim=d_model,
+            n_heads=n_heads,
+            n_layers=n_layers,
+            dropout=dropout,
         )
 
-        # State representation: use last token or mean pooling
-        # For now, use last token (CLS-style)
+        # Pool at the last non-padded position: with left-padding this is the
+        # most recent event in the prefix, analogous to using the last hidden
+        # state of an autoregressive encoder.
         self.state_proj = nn.Linear(d_model, d_model)
 
         # Q-network head
@@ -349,9 +354,12 @@ def train_tdqn(
         logger.warning("   may degrade training quality.")
         logger.warning("")
         if oov_rate_s > 0.01 or oov_rate_s_next > 0.01:
-            logger.error("❌ OOV rate > 1%% - Training quality will be significantly degraded!")
-            logger.error("   RECOMMENDED: Regenerate prefixes.npz and D_offline.npz with the")
-            logger.error("   current vocabulary to ensure consistency.")
+            raise RuntimeError(
+                f"OOV rate exceeds 1% (s: {oov_rate_s:.4%}, s_next: {oov_rate_s_next:.4%}). "
+                "The dataset was built with a different vocabulary. "
+                "Regenerate prefixes.npz and D_offline.npz with the current vocab "
+                "and re-run this step."
+            )
         elif oov_rate_s > 0.001 or oov_rate_s_next > 0.001:
             logger.warning("⚠️  OOV rate > 0.1%% - Consider regenerating the dataset.")
         else:

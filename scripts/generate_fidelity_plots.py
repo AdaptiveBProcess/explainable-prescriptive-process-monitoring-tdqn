@@ -62,11 +62,19 @@ def main() -> None:
     # Reference line
     ax.axhline(0, color="black", linestyle="--", linewidth=1, label="Neutral")
 
-    # Dynamic annotations based on data range
+    # Dynamic annotations based on fidelity zones
     gap_max = float(np.max(gaps))
     gap_min = float(np.min(gaps))
 
-    if gap_max > 0:
+    low_p_mask = p_vals <= 0.2  # p=0.1 and p=0.2 (fidelity claim range)
+    high_p_mask = p_vals >= 0.3  # p=0.3 and p=0.5
+
+    low_p_all_positive = bool(np.all(gaps[low_p_mask] > 0))
+    high_p_all_positive = bool(np.all(gaps[high_p_mask] > 0))
+    low_p_all_nonpositive = bool(np.all(gaps[low_p_mask] <= 0))
+
+    if low_p_all_positive:
+        # Classical fidelity: Q-drop gap positive at p≤0.2
         ax.text(
             0.15,
             gap_max * 0.55,
@@ -75,7 +83,19 @@ def main() -> None:
             fontsize=11,
             bbox=dict(boxstyle="round", facecolor="lightgreen", alpha=0.3),
         )
-    if gap_min < 0:
+    elif high_p_all_positive and low_p_all_nonpositive:
+        # Fidelity emerges only at higher p (dataset-specific onset)
+        ax.text(
+            0.40,
+            gap_max * 0.55,
+            "Fidelity\nconfirmed\n(p≥0.3)",
+            ha="center",
+            fontsize=11,
+            bbox=dict(boxstyle="round", facecolor="lightgreen", alpha=0.3),
+        )
+
+    # Expected OOD reversal: only when fidelity holds at p≤0.2 but flips at high p
+    if low_p_all_positive and any(gaps[high_p_mask] < 0):
         ax.text(
             0.4,
             gap_min * 0.55,

@@ -1,11 +1,12 @@
-from __future__ import annotations
+"""Deprecated: use xppm.serve.guard instead."""
 
-"""Policy guard and safety checks (stub)."""
+import warnings
 
+warnings.warn(
+    "xppm.serving.guard is deprecated and will be removed in a future version. "
+    "Use xppm.serve.guard instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-def guard_action(action: str) -> str:
-    """Placeholder guard: simply returns the same action."""
-    # TODO: implement constraints, forbidden actions, thresholds, etc.
-    return action
-
-
+from xppm.serve.guard import PolicyGuard  # noqa: F401, E402

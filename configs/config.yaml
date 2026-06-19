@@ -302,7 +302,7 @@ fidelity:
 distill:
   enabled: true
   seed: 42                   # Random seed for reproducibility
-  teacher_checkpoint: "artifacts/models/tdqn/20260209_191903/Q_theta.ckpt"
+  teacher_checkpoint: "artifacts/checkpoints/Q_theta.ckpt"
   method: "viper"            # viper | behavioral_cloning
   surrogate:
     type: "decision_tree"    # decision_tree | rule_list

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from xppm.data.build_mdp import build_mdp_dataset
 from xppm.data.encode_prefixes import encode_prefixes
@@ -9,6 +10,7 @@ from xppm.rl.train_tdqn import TDQNConfig
 from xppm.utils.io import load_npz
 
 
+@pytest.mark.slow
 def test_training_smoke(tiny_log_with_outcome_path, tmp_outdir, test_config):
     """Smoke test: training should run end-to-end without errors."""
     # Build minimal dataset

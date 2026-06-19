@@ -467,6 +467,12 @@ def explain_policy(
     for i in range(n_selected):
         token_imp = risk_results["token_importance"][i]
         top_indices = np.argsort(token_imp)[::-1][:top_k_risk]
+        # Anti-guided: least important non-PAD positions (for anti-guided fidelity baseline)
+        nonpad_pos = np.where(sm_sel[i] > 0)[0]
+        if len(nonpad_pos) > 0:
+            bottom_indices = nonpad_pos[np.argsort(token_imp[nonpad_pos])[:top_k_risk]]
+        else:
+            bottom_indices = np.array([], dtype=int)
         q_star_val = float(risk_results["v_s"][i])  # V = Q(s,a*)
         risk_items.append(
             {
@@ -494,6 +500,15 @@ def explain_policy(
                     for idx in top_indices
                     if token_imp[idx] > 0
                 ],
+                "bottom_tokens": [
+                    {
+                        "position": int(idx),
+                        "token_id": int(s_sel[i, idx]),
+                        "token_name": _token_name(int(s_sel[i, idx])),
+                        "importance": float(token_imp[idx]),
+                    }
+                    for idx in bottom_indices
+                ],
             }
         )
     risk_path = out_dir / outputs_cfg.get("risk_explanations_json", "risk_explanations.json")
@@ -506,6 +521,12 @@ def explain_policy(
     for i in range(n_selected):
         token_imp = dq_results["token_importance"][i]
         top_indices = np.argsort(token_imp)[::-1][:top_k_dq]
+        # Anti-guided: least important non-PAD positions
+        nonpad_pos = np.where(sm_sel[i] > 0)[0]
+        if len(nonpad_pos) > 0:
+            bottom_indices = nonpad_pos[np.argsort(token_imp[nonpad_pos])[:top_k_dq]]
+        else:
+            bottom_indices = np.array([], dtype=int)
         dq_items.append(
             {
                 "case_id": int(cp_sel[i]),
@@ -536,6 +557,15 @@ def explain_policy(
                     }
                     for idx in top_indices
                     if token_imp[idx] > 0
+                ],
+                "bottom_drivers": [
+                    {
+                        "position": int(idx),
+                        "token_id": int(s_sel[i, idx]),
+                        "token_name": _token_name(int(s_sel[i, idx])),
+                        "importance": float(token_imp[idx]),
+                    }
+                    for idx in bottom_indices
                 ],
             }
         )

@@ -1,10 +1,12 @@
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from xppm.rl.train_tdqn import TDQNConfig
 
 
+@pytest.mark.slow
 def test_tdqn_smoke(tmp_path: Path) -> None:
     # Minimal 1-sample dataset to ensure the training loop runs.
     # Create minimal NPZ with required fields

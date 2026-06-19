@@ -1,18 +1,12 @@
-from __future__ import annotations
+"""Deprecated: use xppm.serve.server instead."""
 
-from fastapi import FastAPI
+import warnings
 
-from xppm.serving.guard import guard_action
-from xppm.serving.schemas import ActionRecommendation, CaseRequest
+warnings.warn(
+    "xppm.serving.server is deprecated and will be removed in a future version. "
+    "Use xppm.serve.server instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-app = FastAPI(title="xPPM TDQN Policy Server")
-
-
-@app.post("/recommend", response_model=ActionRecommendation)
-def recommend_action(req: CaseRequest) -> ActionRecommendation:
-    # TODO: load trained policy, compute state, choose action
-    dummy_action = guard_action("start_standard")
-    return ActionRecommendation(case_id=req.case_id, action=dummy_action, score=0.0)
-
-
-
+from xppm.serve.server import app, load_bundle, set_bundle_dir  # noqa: F401, E402

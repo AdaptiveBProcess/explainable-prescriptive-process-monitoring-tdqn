@@ -1,6 +1,6 @@
 import uvicorn
 
-from xppm.serving.server import app
+from xppm.serve.server import app
 
 
 def main() -> None:
@@ -9,5 +9,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

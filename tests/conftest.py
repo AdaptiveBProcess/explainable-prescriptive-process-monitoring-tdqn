@@ -32,19 +32,31 @@ def tmp_outdir(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def test_config() -> dict:
-    """Minimal test configuration for MDP building."""
+    """Minimal test configuration matching the structure of configs/config.yaml."""
     return {
         "mdp": {
-            "actions": {
-                "n_actions": 2,
-                "id2name": {0: "do_nothing", 1: "contact_headquarters"},
-            },
+            "behavior_trigger_activity": "contact_headquarters",
             "decision_points": {
-                "by_last_activity": {"A": [0, 1], "B": [0, 1]},
+                "mode": "all",
+            },
+            "actions": {
+                "id2name": ["do_nothing", "contact_headquarters"],
+                "noop_action": "do_nothing",
+            },
+            "action_mask": {
+                "default_valid": ["do_nothing"],
+                "by_last_activity": {
+                    "A": ["do_nothing", "contact_headquarters"],
+                    "B": ["do_nothing", "contact_headquarters"],
+                },
             },
             "reward": {
-                "terminal": "profit",
-                "non_terminal": 0.0,
+                "type": "terminal_profit_delayed",
+                "intermediate_reward": 0.0,
+                "terminal_column": "outcome",
+            },
+            "output": {
+                "path": "D_offline.npz",
             },
         },
     }

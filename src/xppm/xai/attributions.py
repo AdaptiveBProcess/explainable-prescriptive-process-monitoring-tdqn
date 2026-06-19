@@ -138,15 +138,21 @@ def integrated_gradients_embedding(
         expected_diff = f_input - f_base
         ig_sum = ig_attr.sum(dim=(1, 2))
         abs_err = (ig_sum - expected_diff).abs()
-        denom = expected_diff.abs().clamp(min=1.0)
-        rel_err = (abs_err / denom).mean().item()
         abs_err_mean = abs_err.mean().item()
         expected_diff_mean = expected_diff.mean().item()
-        logger.info(
-            "IG completeness: abs_err=%.2f, rel_err=%.4f, " "E[f(x)-f(base)]=%.2f",
+        # Use the actual Q-value scale for the denominator so rel_err is
+        # meaningful. Clamp to 1e-3 to avoid division by zero on trivial states
+        # where f(x) ≈ f(baseline), but do NOT force a minimum of 1.0 which
+        # would hide large errors when Q-values are small.
+        denom = expected_diff.abs().clamp(min=1e-3)
+        rel_err = (abs_err / denom).mean().item()
+        log_fn = logger.warning if abs_err_mean > 0.5 else logger.info
+        log_fn(
+            "IG completeness: abs_err=%.4f, rel_err=%.4f, E[f(x)-f(base)]=%.4f%s",
             abs_err_mean,
             rel_err,
             expected_diff_mean,
+            " — HIGH ABSOLUTE ERROR: attributions may be inaccurate" if abs_err_mean > 0.5 else "",
         )
 
     # Return attributions and completeness stats

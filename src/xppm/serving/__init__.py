@@ -1,3 +1,1 @@
-"""Online serving for xPPM TDQN policies."""
-
-
+"""Deprecated: use xppm.serve instead."""
