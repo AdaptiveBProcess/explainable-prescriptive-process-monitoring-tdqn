@@ -1,0 +1,77 @@
+# BPI Challenge 2017 — Loan Application Process, CYCLE-TIME reward variant (T2.1)
+# Same log, MDP and intervention as bpi2017.yaml; only the terminal reward changes:
+#   outcome = 1.0 if case duration <= 21 days (SLA), else 0.0  → on-time rate 53.9%
+# Rationale: the activity-presence outcome (A_Accepted) fires in 100% of cases
+# (intermediate workflow step), which is the root of the saturated-KPI finding.
+# Cycle time: median 19.1d, CV 0.60, modal-bin share 8.2% (EDA 2026-08-06).
+# NOTE: the continuous variant (-duration/30) makes offline Double DQN diverge
+# upward (all rewards <=0 but Q -> +20); the bounded SLA reward trains stably.
+# Continuous-run audit trail: artifacts/models/tdqn/<run 2026-08-06 08:34>.
+
+dataset_name: "bpi2017ct"
+
+data:
+  format: xes
+  raw_path: "data/raw/bpi2017.xes.gz"
+  output_clean_path: "data/{dataset_name}/interim/clean.parquet"
+
+schema:
+  case_id: "case:concept:name"
+  activity: "concept:name"
+  timestamp: "time:timestamp"
+
+time:
+  timezone: null
+  output_timezone: "UTC"
+  sort: true
+  drop_duplicates: false
+
+preprocess:
+  out_clean_parquet: "clean.parquet"
+  lifecycle_filter:
+    enabled: true
+    column: "lifecycle:transition"
+    keep: ["complete", "COMPLETE"]
+  select_cols: ["case_id", "activity", "timestamp"]
+
+outcome_engineering:
+  enabled: true
+  type: "cycle_time_sla"
+  sla_days: 21.0
+  outcome_col: "outcome"
+
+validation_split:
+  range_checks:
+    enabled: false
+
+training:
+  max_steps: 100000
+  eval_every: 5000
+  save_every: 20000
+
+mdp:
+  behavior_trigger_activity: "W_Call after offers"
+  decision_points:
+    mode: "all"
+  actions:
+    id2name: ["do_nothing", "W_Call after offers"]
+    noop_action: "do_nothing"
+  action_mask:
+    default_valid: ["do_nothing", "W_Call after offers"]
+  reward:
+    type: "terminal_profit_delayed"
+    intermediate_reward: 0.0
+    terminal_column: "outcome"
+  output:
+    path: "data/{dataset_name}/processed/D_offline.npz"
+
+experiment:
+  checkpoint_path: "artifacts/models/tdqn/20260806_105943/Q_theta.ckpt"
+  ope_report_path: "artifacts/ope/{dataset_name}/ope_dr.json"
+
+xai:
+  checkpoint_path: "artifacts/models/tdqn/20260806_105943/Q_theta.ckpt"
+  out_dir: "xai/{dataset_name}"
+
+fidelity:
+  out_csv: "artifacts/fidelity/{dataset_name}/fidelity.csv"

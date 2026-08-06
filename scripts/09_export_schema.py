@@ -6,7 +6,7 @@ import argparse
 import json
 from pathlib import Path
 
-from xppm.serve.schemas import DecisionRequest, DecisionResponse
+from xppm_serve.schemas import DecisionRequest, DecisionResponse
 
 
 def export_schema(output_path: Path):

@@ -7,17 +7,19 @@ requires-python = ">=3.10"
 dependencies = [
     "numpy",
     "pandas",
-    "pyarrow",  # Required for parquet support
+    "pyarrow",
     "pyyaml",
     "scikit-learn",
     "torch",
     "tqdm",
     "pydantic",
-    "fastapi",
-    "uvicorn",
 ]
 
 [project.optional-dependencies]
+serve = [
+    "fastapi",
+    "uvicorn",
+]
 dev = [
     "pytest",
     "pytest-cov",
@@ -30,10 +32,16 @@ tracking = [
     "mlflow",
     "wandb",
 ]
+xes = [
+    "pm4py",
+]
 
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 # Exclude slow tests by default (run with -m slow to include them)

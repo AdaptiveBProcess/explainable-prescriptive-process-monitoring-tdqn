@@ -228,6 +228,7 @@ def compute_attributions(
     all_dq = [] if target == "deltaQ" else None
     all_q_star = [] if target == "deltaQ" else None
     all_q_contrast = [] if target == "deltaQ" else None
+    all_a_contrast = [] if target == "deltaQ" else None
     # Accumulate completeness stats across batches
     completeness_stats_list: list[dict[str, Any]] = []
 
@@ -256,6 +257,50 @@ def compute_attributions(
         elif target == "deltaQ":
             assert contrast_action_id is not None
             cid = contrast_action_id
+
+            if cid == -1:
+                # Runner-up contrast: best VALID action other than a_star (per state).
+                # States with fewer than 2 valid actions get contrast = a_star
+                # (deltaQ = 0; filtered out downstream by a_star != a_contrast).
+                q_tmp = q_masked_input.clone()
+                q_tmp.scatter_(1, a_star_fixed.unsqueeze(1), float("-inf"))
+                a_contrast_fixed = q_tmp.argmax(dim=-1)
+                single = va_b.sum(dim=1) < 2
+                a_contrast_fixed[single] = a_star_fixed[single]
+
+                def target_fn(q: torch.Tensor) -> torch.Tensor:
+                    q_star = q.gather(1, a_star_fixed.unsqueeze(1)).squeeze(1)
+                    q_contrast = q.gather(1, a_contrast_fixed.unsqueeze(1)).squeeze(1)
+                    return q_star - q_contrast
+
+                attr, completeness_batch = integrated_gradients_embedding(
+                    q_net, s_b, sm_b, target_fn, baseline_emb, n_steps=n_steps
+                )
+                all_attr.append(attr.cpu().numpy())
+                completeness_stats_list.append(completeness_batch)
+                with torch.no_grad():
+                    q_vals = q_net(s_b, sm_b)
+                    q_masked = apply_action_mask(q_vals, va_b)
+                    v_s, _ = torch.max(q_masked, dim=-1)
+                    a_star = q_masked.argmax(dim=-1)
+                all_q.append(q_vals.cpu().numpy())
+                all_v.append(v_s.cpu().numpy())
+                all_a_star.append(a_star.cpu().numpy())
+                q_star_vals = q_vals.gather(1, a_star.unsqueeze(1)).squeeze(1)
+                q_contrast_vals = q_vals.gather(1, a_contrast_fixed.unsqueeze(1)).squeeze(1)
+                dq = q_star_vals - q_contrast_vals
+                all_dq.append(dq.cpu().numpy())
+                all_q_star.append(q_star_vals.cpu().numpy())
+                all_q_contrast.append(q_contrast_vals.cpu().numpy())
+                all_a_contrast.append(a_contrast_fixed.cpu().numpy())
+                logger.info(
+                    "Attributions [%s/runner_up] batch %d-%d / %d done",
+                    target,
+                    start,
+                    end,
+                    n_items,
+                )
+                continue
 
             # For deltaQ, also fix contrast action (use provided ID if valid, else fallback)
             # Check if contrast is valid for all states in batch
@@ -336,6 +381,8 @@ def compute_attributions(
         result["delta_q"] = np.concatenate(all_dq, axis=0)
         result["q_star"] = np.concatenate(all_q_star, axis=0)
         result["q_contrast"] = np.concatenate(all_q_contrast, axis=0)
+        if all_a_contrast:
+            result["a_contrast"] = np.concatenate(all_a_contrast, axis=0)
 
     # Aggregate completeness stats across all batches
     if completeness_stats_list:

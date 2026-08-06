@@ -1,6 +1,6 @@
 import uvicorn
 
-from xppm.serve.server import app
+from xppm_serve.server import app
 
 
 def main() -> None:

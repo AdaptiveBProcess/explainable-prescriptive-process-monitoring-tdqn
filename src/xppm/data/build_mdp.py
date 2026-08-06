@@ -146,33 +146,35 @@ def extract_behavior_action_optimized(
     case_id: int,
     current_t: int,
     next_t: int,
-    case_activity_map: dict[tuple[int, int], bool],
+    case_activity_map: dict[tuple[int, int], str],
     action_names: list[str],
     trigger_activity: str = "contact_headquarters",
 ) -> int:
     """Extract behavior action from log data (optimized version).
 
-    If the event at position next_t-1 matches the trigger activity the
-    corresponding action is returned; otherwise the NOOP/do_nothing action
-    is returned.
+    If the activity of the event at position next_t-1 is itself an action name
+    (e.g. 'contact_headquarters', or the relabeled 'calculate_offer_ir7' in the
+    w=3 SimBank variant) the corresponding action is returned; otherwise the
+    NOOP/do_nothing action is returned. For the binary time_contact_HQ setting
+    this is equivalent to the original trigger_activity check.
 
     Args:
         case_id: Case ID
         current_t: Current prefix length (1-indexed)
         next_t: Next prefix length (1-indexed)
-        case_activity_map: Pre-computed map of (case_id, position) -> has_trigger_activity
+        case_activity_map: Pre-computed map of (case_id, position) -> activity name
         action_names: List of action names
-        trigger_activity: Activity name that signals the intervention action
+        trigger_activity: Kept for backward compatibility (unused)
 
     Returns:
         Action ID
     """
-    # Check if the event at position next_t-1 (0-indexed) has the trigger activity
+    # Check if the event at position next_t-1 (0-indexed) is an action activity
     # next_t is 1-indexed (prefix length), so event position is next_t-1
     event_pos = next_t - 1
-    if case_activity_map.get((case_id, event_pos), False):
-        if trigger_activity in action_names:
-            return action_names.index(trigger_activity)
+    next_activity = case_activity_map.get((case_id, event_pos))
+    if next_activity is not None and next_activity in action_names:
+        return action_names.index(next_activity)
 
     # Default: do_nothing
     if "do_nothing" in action_names:
@@ -307,15 +309,13 @@ def build_transitions(
         )
 
     # Pre-compute case activity positions (for faster action extraction)
-    # Map: (case_id, event_position) -> has_trigger_activity
+    # Map: (case_id, event_position) -> activity name
     # event_position is 0-indexed (0 = first event, 1 = second event, etc.)
     behavior_trigger_activity = config.get("behavior_trigger_activity", "contact_headquarters")
-    case_activity_map: dict[tuple[int, int], bool] = {}
+    case_activity_map: dict[tuple[int, int], str] = {}
     for case_id, case_events in case_events_map.items():
         for pos in range(len(case_events)):
-            case_activity_map[(case_id, pos)] = (
-                case_events.iloc[pos]["activity"] == behavior_trigger_activity
-            )
+            case_activity_map[(case_id, pos)] = case_events.iloc[pos]["activity"]
 
     # Group prefixes by case
     case_groups = group_by_case(prefixes)
@@ -386,7 +386,25 @@ def build_transitions(
                 continue
 
             # Build action mask
-            valid_actions = build_action_mask(last_activity, action_names, config)
+            mask_cfg = config.get("action_mask", {})
+            if mask_cfg.get("mode") == "by_next_event_action":
+                # Process-triggered intervention point (e.g. w=3 set_ir_3_levels):
+                # when the NEXT event is one of the intervention action activities,
+                # the valid actions are exactly those (mandatory choice, no noop);
+                # everywhere else only the noop action is valid. This mirrors the
+                # simulator semantics: the process signals the intervention point,
+                # the agent chooses among the intervention actions.
+                noop_name = actions_cfg.get("noop_action", "do_nothing")
+                next_activity = case_activity_map.get((case_id, next_prefix_t - 1))
+                valid_actions = np.zeros(len(action_names), dtype=np.uint8)
+                if next_activity in action_names and next_activity != noop_name:
+                    for ai, name in enumerate(action_names):
+                        if name != noop_name:
+                            valid_actions[ai] = 1
+                else:
+                    valid_actions[action_names.index(noop_name)] = 1
+            else:
+                valid_actions = build_action_mask(last_activity, action_names, config)
 
             # Extract behavior action (optimized with pre-computed maps)
             behavior_action = extract_behavior_action_optimized(

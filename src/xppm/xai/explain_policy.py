@@ -152,12 +152,22 @@ def _resolve_contrast_action(
         # Priority 2: name lookup
         baseline_name = intervention_cfg.get("baseline_action", "NOOP")
         noop_names = {"NOOP", "noop", "do_nothing", "no_op"}
-        if baseline_name in noop_names:
+        if baseline_name == "runner_up":
+            # Sentinel: per-state contrast = best valid action other than a_star
+            # (resolved inside compute_attributions; needs >= 2 valid actions).
+            contrast_id = -1
+        elif baseline_name in noop_names:
             contrast_id = 0
         elif baseline_name in action_names:
             contrast_id = action_names.index(baseline_name)
         else:
             contrast_id = 0  # Fallback
+
+    if contrast_id == -1:
+        if valid_actions is not None:
+            contrast_valid = valid_actions.sum(axis=1) >= 2
+            return contrast_id, contrast_valid, ~contrast_valid
+        return contrast_id, np.array([True]), np.array([False])
 
     # Validate and track fallback usage
     if valid_actions is not None:
@@ -367,7 +377,7 @@ def explain_policy(
 
     logger.info(
         "Computing DELTAQ attributions (contrast_action=%s [id=%d], " "valid in %d/%d states)...",
-        action_names[contrast_action_id],
+        "runner_up" if contrast_action_id == -1 else action_names[contrast_action_id],
         contrast_action_id,
         int(contrast_valid_mask.sum()),
         len(contrast_valid_mask),
@@ -534,8 +544,16 @@ def explain_policy(
                 "transition_idx": int(selected_indices[i]),  # Index in test split
                 "a_star": int(dq_results["a_star"][i]),
                 "a_star_name": action_names[int(dq_results["a_star"][i])],
-                "a_contrast": contrast_action_id,
-                "a_contrast_name": action_names[contrast_action_id],
+                "a_contrast": (
+                    int(dq_results["a_contrast"][i])
+                    if contrast_action_id == -1
+                    else contrast_action_id
+                ),
+                "a_contrast_name": action_names[
+                    int(dq_results["a_contrast"][i])
+                    if contrast_action_id == -1
+                    else contrast_action_id
+                ],
                 "contrast_valid": bool(contrast_valid_mask[i]),
                 "contrast_fallback_used": bool(fallback_used_mask[i]),
                 "q_star": float(dq_results["q_star"][i]),

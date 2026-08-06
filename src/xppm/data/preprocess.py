@@ -2,11 +2,15 @@ from __future__ import annotations
 
 import pickle
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pandas as pd
 
 from xppm.utils.io import save_parquet
 from xppm.utils.logging import get_logger
+
+if TYPE_CHECKING:
+    from xppm.data.schemas import EventLogSchema
 
 logger = get_logger(__name__)
 
@@ -158,6 +162,81 @@ def filter_lifecycle_transitions(
     return df
 
 
+def compute_outcome_cycle_time(
+    df: pd.DataFrame,
+    scale_days: float = 30.0,
+    case_id_col: str = "case_id",
+    timestamp_col: str = "timestamp",
+    outcome_col: str = "outcome",
+) -> pd.DataFrame:
+    """Compute continuous outcome column as negative normalized cycle time.
+
+    For each case, outcome = -(max(ts) - min(ts)) / scale_days, so shorter cases
+    receive higher (less negative) terminal reward. The value is broadcast to all
+    events of the case so the downstream MDP builder can read it from the last
+    event (same contract as compute_outcome_from_activities).
+
+    Args:
+        df: Input DataFrame (with case_id_col and timestamp_col)
+        scale_days: Normalization constant in days (default 30 = reward in -months)
+        case_id_col: Name of case ID column
+        timestamp_col: Name of timestamp column
+        outcome_col: Name of output column to create
+
+    Returns:
+        DataFrame with new outcome_col column
+    """
+    df = df.copy()
+    span = df.groupby(case_id_col)[timestamp_col].transform("max") - df.groupby(case_id_col)[
+        timestamp_col
+    ].transform("min")
+    df[outcome_col] = -(span.dt.total_seconds() / 86400.0) / scale_days
+
+    per_case = df.groupby(case_id_col)[outcome_col].first()
+    logger.info(
+        "Cycle-time outcome: %d cases, reward mean=%.3f std=%.3f p50=%.3f min=%.3f "
+        "(scale_days=%.1f)",
+        len(per_case),
+        per_case.mean(),
+        per_case.std(),
+        per_case.median(),
+        per_case.min(),
+        scale_days,
+    )
+    return df
+
+
+def compute_outcome_cycle_time_sla(
+    df: pd.DataFrame,
+    sla_days: float = 21.0,
+    case_id_col: str = "case_id",
+    timestamp_col: str = "timestamp",
+    outcome_col: str = "outcome",
+) -> pd.DataFrame:
+    """Compute binary outcome column: 1.0 if the case completes within the SLA.
+
+    outcome = 1.0 if (max(ts) - min(ts)) <= sla_days else 0.0, broadcast to all
+    events of the case (same contract as compute_outcome_from_activities).
+    Bounded 0/1 terminal reward — the regime in which offline Double DQN trains
+    stably in this pipeline (the continuous -duration variant diverges upward
+    without a conservatism mechanism; see notas-internas 2026-08-06).
+    """
+    df = df.copy()
+    span = df.groupby(case_id_col)[timestamp_col].transform("max") - df.groupby(case_id_col)[
+        timestamp_col
+    ].transform("min")
+    df[outcome_col] = (span.dt.total_seconds() / 86400.0 <= sla_days).astype(float)
+
+    per_case = df.groupby(case_id_col)[outcome_col].first()
+    logger.info(
+        "SLA outcome: %d cases, on-time rate=%.1f%% (sla_days=%.1f)",
+        len(per_case),
+        per_case.mean() * 100,
+        sla_days,
+    )
+    return df
+
+
 def compute_outcome_from_activities(
     df: pd.DataFrame,
     positive_activities: list[str],
@@ -302,18 +381,29 @@ def preprocess_event_log(
     input_path: str | Path,
     output_path: str | Path,
     config: dict | None = None,
+    schema: "EventLogSchema | None" = None,
 ) -> dict:
     """Preprocess event log: load, normalize, validate, and save.
 
     Args:
-        input_path: Path to input event log
-        output_path: Path to output clean parquet
+        input_path: Path to input event log (CSV, XES, or pickle).
+        output_path: Path to output clean parquet.
         config: Optional config dict with schema mapping, timezone, etc.
+            (legacy API — use ``schema`` instead for new code).
+        schema: Optional :class:`~xppm.data.schemas.EventLogSchema` that
+            specifies column mappings and preprocessing options.  When both
+            ``schema`` and ``config`` are given, the schema-derived values
+            take precedence.
 
     Returns:
-        Dictionary with ingest statistics
+        Dictionary with ingest statistics.
     """
-    config = config or {}
+    config = dict(config) if config else {}
+
+    if schema is not None:
+        from xppm.utils.config import deep_merge
+
+        config = deep_merge(config, schema.to_preprocess_config())
 
     # Load
     fmt = config.get("format", "auto")
@@ -345,9 +435,23 @@ def preprocess_event_log(
     # Compute binary outcome column from activity presence in trace
     outcome_eng_cfg = config.get("outcome_engineering", {})
     if outcome_eng_cfg.get("enabled", False):
-        positive_activities = outcome_eng_cfg.get("positive_activities", [])
         outcome_col = outcome_eng_cfg.get("outcome_col", "outcome")
-        df = compute_outcome_from_activities(df, positive_activities, outcome_col=outcome_col)
+        outcome_type = outcome_eng_cfg.get("type", "activity_presence")
+        if outcome_type == "cycle_time":
+            df = compute_outcome_cycle_time(
+                df,
+                scale_days=float(outcome_eng_cfg.get("scale_days", 30.0)),
+                outcome_col=outcome_col,
+            )
+        elif outcome_type == "cycle_time_sla":
+            df = compute_outcome_cycle_time_sla(
+                df,
+                sla_days=float(outcome_eng_cfg.get("sla_days", 21.0)),
+                outcome_col=outcome_col,
+            )
+        else:
+            positive_activities = outcome_eng_cfg.get("positive_activities", [])
+            df = compute_outcome_from_activities(df, positive_activities, outcome_col=outcome_col)
 
     # Encode case IDs as integer codes when they are non-integer (e.g., BPI string IDs)
     # This is required by the downstream encode_prefixes / build_mdp pipeline.

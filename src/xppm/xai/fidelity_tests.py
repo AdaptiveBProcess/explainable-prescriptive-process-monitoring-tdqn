@@ -298,6 +298,7 @@ def _test_q_drop(
     target_orig = []
     top_tokens_list = []
     bottom_tokens_list = []
+    action_pairs = []  # (a_star, a_contrast) per item, needed to recompute delta_q under masking
 
     for idx, item in enumerate(explanations["items"]):
         if idx >= len(states):
@@ -314,6 +315,14 @@ def _test_q_drop(
         if target_val is None:
             logger.warning("Missing target value for item %d, skipping", idx)
             continue
+
+        if target == "delta_q":
+            a_star_i = item.get("a_star")
+            a_con_i = item.get("a_contrast")
+            if a_star_i is None or a_con_i is None:
+                logger.warning("Missing a_star/a_contrast for item %d, skipping", idx)
+                continue
+            action_pairs.append((int(a_star_i), int(a_con_i)))
 
         target_orig.append(target_val)
         # For delta_q, use top_drivers/bottom_drivers; for q_star, use top_tokens/bottom_tokens
@@ -347,6 +356,18 @@ def _test_q_drop(
 
     target_orig = np.array(target_orig)
     n_valid = len(target_orig)
+    action_pairs_arr = np.array(action_pairs) if target == "delta_q" else None
+
+    def _target_from(q_vals: np.ndarray, v_s: np.ndarray) -> np.ndarray:
+        """Perturbed-state target: V(s) for q_star; Q(s,a*)-Q(s,a_contrast) for delta_q,
+        holding the original action pair fixed so the margin is recomputed, not proxied by V."""
+        if target == "q_star":
+            return v_s
+        rows = np.arange(q_vals.shape[0])
+        return (
+            q_vals[rows, action_pairs_arr[: q_vals.shape[0], 0]]
+            - q_vals[rows, action_pairs_arr[: q_vals.shape[0], 1]]
+        )
 
     results = []
 
@@ -386,16 +407,10 @@ def _test_q_drop(
                 vocab=vocab,
             )
 
-        _, v_s_topk, _ = _compute_q_values(
+        q_topk, v_s_topk, _ = _compute_q_values(
             q_net, states_topk, masks_topk, valid_actions[:n_valid], device
         )
-
-        # Compute target_topk from v_s_topk
-        if target == "q_star":
-            target_topk = v_s_topk
-        else:
-            # For delta_q, need to recompute (simplified: use V as proxy)
-            target_topk = v_s_topk
+        target_topk = _target_from(q_topk, v_s_topk)
 
         # Debug: check Q-values
         if debug:
@@ -432,14 +447,10 @@ def _test_q_drop(
             states_rand, masks_rand = _perturb_states_mask_topk(
                 states[:n_valid], state_masks[:n_valid], rand_indices_list
             )
-            _, v_s_rand, _ = _compute_q_values(
+            q_rand, v_s_rand, _ = _compute_q_values(
                 q_net, states_rand, masks_rand, valid_actions[:n_valid], device
             )
-
-            if target == "q_star":
-                target_rand = v_s_rand
-            else:
-                target_rand = v_s_rand
+            target_rand = _target_from(q_rand, v_s_rand)
 
             drop_rand = target_orig - target_rand
             drop_rand_list.append(drop_rand)
@@ -464,10 +475,10 @@ def _test_q_drop(
             states_anti, masks_anti = _perturb_states_mask_topk(
                 states[:n_valid], state_masks[:n_valid], bottom_k_indices_list
             )
-            _, v_s_anti, _ = _compute_q_values(
+            q_anti, v_s_anti, _ = _compute_q_values(
                 q_net, states_anti, masks_anti, valid_actions[:n_valid], device
             )
-            target_anti = v_s_anti
+            target_anti = _target_from(q_anti, v_s_anti)
             drop_anti = target_orig - target_anti
             gap_anti = drop_anti - drop_rand_mean  # should be < 0 for faithful attributions
         else:
@@ -599,6 +610,7 @@ def _test_action_flip(
     device: torch.device,
     debug: bool = False,
     vocab: dict[str, Any] | None = None,
+    attr_label: str = "-",
 ) -> list[dict[str, Any]]:
     """Test 2: Action-flip - measure action changes when removing top-k vs random tokens.
 
@@ -646,8 +658,10 @@ def _test_action_flip(
             logger.warning("More explanation items than states, stopping at %d", len(states))
             break
 
-        top_tokens = item.get("top_tokens", [])
-        bottom_tokens = item.get("bottom_tokens", [])
+        # risk explanations carry top_tokens/bottom_tokens; deltaQ explanations carry
+        # top_drivers/bottom_drivers — accept either so the flip test can target phi^{Delta Q}
+        top_tokens = item.get("top_tokens") or item.get("top_drivers", [])
+        bottom_tokens = item.get("bottom_tokens") or item.get("bottom_drivers", [])
         max_len = states.shape[1]
         top_positions = [
             t.get("position")
@@ -810,7 +824,7 @@ def _test_action_flip(
             {
                 "test": "action_flip",
                 "split": "test",
-                "target": "-",
+                "target": attr_label,
                 "p_remove": p_remove,
                 "metric": "flip_topk",
                 "value": flip_topk_pct,
@@ -823,7 +837,7 @@ def _test_action_flip(
             {
                 "test": "action_flip",
                 "split": "test",
-                "target": "-",
+                "target": attr_label,
                 "p_remove": p_remove,
                 "metric": "flip_rand_mean",
                 "value": flip_rand_mean,
@@ -836,7 +850,7 @@ def _test_action_flip(
             {
                 "test": "action_flip",
                 "split": "test",
-                "target": "-",
+                "target": attr_label,
                 "p_remove": p_remove,
                 "metric": "flip_rand_std",
                 "value": flip_rand_std,
@@ -849,7 +863,7 @@ def _test_action_flip(
             {
                 "test": "action_flip",
                 "split": "test",
-                "target": "-",
+                "target": attr_label,
                 "p_remove": p_remove,
                 "metric": "flip_gap",
                 "value": flip_gap,
@@ -880,7 +894,7 @@ def _test_action_flip(
             {
                 "test": "action_flip",
                 "split": "test",
-                "target": "-",
+                "target": attr_label,
                 "p_remove": p_remove,
                 "metric": "flip_topk_on_possible",
                 "value": flip_topk_pct_filtered,
@@ -893,7 +907,7 @@ def _test_action_flip(
             {
                 "test": "action_flip",
                 "split": "test",
-                "target": "-",
+                "target": attr_label,
                 "p_remove": p_remove,
                 "metric": "flip_rand_mean_on_possible",
                 "value": flip_rand_mean_filtered,
@@ -906,7 +920,7 @@ def _test_action_flip(
             {
                 "test": "action_flip",
                 "split": "test",
-                "target": "-",
+                "target": attr_label,
                 "p_remove": p_remove,
                 "metric": "flip_gap_on_possible",
                 "value": flip_gap_filtered,
@@ -1300,8 +1314,29 @@ def run_fidelity_tests(config: dict[str, Any], config_obj: Any = None) -> None:
             device,
             debug=debug_mode,
             vocab=vocab,
+            attr_label="phi_V",
         )
         all_results.extend(action_flip_results)
+
+        # Also run the flip test masking the intervention attribution's drivers: this is
+        # the variant that actually tests phi^{Delta Q} (previously only phi_V was tested
+        # here while the paper attributed the result to the intervention explanation).
+        if deltaq_explanations is not None:
+            action_flip_dq = _test_action_flip(
+                q_net,
+                s_selected,
+                sm_selected,
+                va_selected,
+                deltaq_explanations,
+                p_remove_list,
+                n_random,
+                seed,
+                device,
+                debug=debug_mode,
+                vocab=vocab,
+                attr_label="phi_dq",
+            )
+            all_results.extend(action_flip_dq)
 
     # Test 3: Rank-consistency
     if tests_cfg.get("rank_consistency", {}).get("enabled", True):

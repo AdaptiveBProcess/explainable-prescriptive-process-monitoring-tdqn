@@ -1,7 +1,11 @@
 import argparse
 from pathlib import Path
 
-from xppm.ope.behavior_model import BehaviorPolicy, fit_behavior_policy_tdqn_encoder
+from xppm.ope.behavior_model import (
+    BehaviorPolicy,
+    fit_behavior_policy_boa_logreg,
+    fit_behavior_policy_tdqn_encoder,
+)
 from xppm.ope.doubly_robust import doubly_robust_estimate
 from xppm.ope.report import save_ope_report
 from xppm.utils.config import Config
@@ -78,6 +82,16 @@ def main() -> None:
         default=None,
         help="Path to OPE report JSON. If not provided, taken from config.",
     )
+    parser.add_argument(
+        "--behavior",
+        type=str,
+        choices=["tdqn_encoder", "boa_logreg"],
+        default="tdqn_encoder",
+        help=(
+            "Behavior-policy estimator: tdqn_encoder (frozen Q_theta embeddings, default) "
+            "or boa_logreg (bag-of-activities + logistic regression, independent of Q_theta)."
+        ),
+    )
     args = parser.parse_args()
 
     config_obj = Config.for_dataset(args.config, args.dataset)
@@ -113,14 +127,21 @@ def main() -> None:
     logger.info("  Checkpoint:%s", ckpt_path)
     logger.info("  Vocab:     %s", vocab_path)
 
-    # 1) Fit behavior policy π_b(a|s) using TDQN encoder (train/val only)
-    behavior: BehaviorPolicy = fit_behavior_policy_tdqn_encoder(
-        npz_path=dataset_path,
-        splits_path=splits_path,
-        ckpt_path=ckpt_path,
-        vocab_path=vocab_path,
-        config=cfg,
-    )
+    # 1) Fit behavior policy π_b(a|s) (train/val only)
+    if args.behavior == "boa_logreg":
+        behavior: BehaviorPolicy = fit_behavior_policy_boa_logreg(
+            npz_path=dataset_path,
+            splits_path=splits_path,
+            config=cfg,
+        )
+    else:
+        behavior = fit_behavior_policy_tdqn_encoder(
+            npz_path=dataset_path,
+            splits_path=splits_path,
+            ckpt_path=ckpt_path,
+            vocab_path=vocab_path,
+            config=cfg,
+        )
     logger.info(
         "Behavior model fitted: val_nll=%.4f, val_acc=%.4f, val_entropy=%.4f",
         behavior.metrics.get("val_nll", 0.0),
@@ -149,6 +170,7 @@ def main() -> None:
     # 3) Enrich with metadata (hashes, config) if available
     metadata: dict[str, object] = {
         "run_id": cfg.get("experiment", {}).get("run_id"),
+        "behavior_estimator": args.behavior,
         "ckpt_path": str(ckpt_path),
         "dataset_path": str(dataset_path),
         "splits_path": str(splits_path),

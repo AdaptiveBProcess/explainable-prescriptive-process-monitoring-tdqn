@@ -287,3 +287,68 @@ def fit_behavior_policy_tdqn_encoder(
     }
 
     return BehaviorPolicy(probs=probs_all, n_actions=n_actions, metrics=metrics)
+
+
+def fit_behavior_policy_boa_logreg(
+    npz_path: str | Path,
+    splits_path: str | Path,
+    config: dict[str, Any],
+) -> BehaviorPolicy:
+    """Fit π_b(a|s) with a representation independent of Q_theta.
+
+    Features: bag-of-activities (token counts over the prefix, PAD excluded)
+    plus the prefix length. Model: multinomial logistic regression fitted on
+    the TRAIN split, validated on VAL. This removes the representation
+    circularity of fit_behavior_policy_tdqn_encoder (frozen TDQN embeddings).
+    """
+    from sklearn.linear_model import LogisticRegression
+
+    data = load_npz(npz_path)
+    splits = load_json(splits_path)
+
+    s = data["s"]
+    s_mask = data["s_mask"]
+    a = data["a"].astype(int)
+    valid = data["valid_actions"]
+    n_transitions, max_len = s.shape
+    n_actions = int(valid.shape[1])
+    vocab_size = int(s.max()) + 1
+
+    # Bag-of-activities counts (exclude PAD id 0) + prefix length
+    tokens = np.where(s_mask > 0, s, 0)
+    counts = np.zeros((n_transitions, vocab_size), dtype=np.float32)
+    for tid in range(1, vocab_size):
+        counts[:, tid] = (tokens == tid).sum(axis=1)
+    length = s_mask.sum(axis=1, keepdims=True).astype(np.float32)
+    x = np.concatenate([counts[:, 1:], length / max_len], axis=1)
+
+    case_ids = data["case_ptr"]
+    train_mask = np.isin(case_ids, list({int(c) for c in splits["cases"]["train"]}))
+    val_mask = np.isin(case_ids, list({int(c) for c in splits["cases"]["val"]}))
+
+    clf = LogisticRegression(max_iter=1000, C=1.0)
+    clf.fit(x[train_mask], a[train_mask])
+
+    # Class-complete probability matrix (classes absent from TRAIN get ~0)
+    probs_all = np.full((n_transitions, n_actions), 1e-8, dtype=np.float64)
+    proba = clf.predict_proba(x)
+    for j, cls in enumerate(clf.classes_):
+        probs_all[:, int(cls)] = proba[:, j]
+
+    # Mask invalid actions and renormalize
+    probs_all = probs_all * (valid > 0)
+    row_sum = probs_all.sum(axis=1, keepdims=True)
+    row_sum[row_sum == 0] = 1.0
+    probs_all = probs_all / row_sum
+
+    # VAL metrics (same definitions as the encoder-based fitter)
+    p_val = np.clip(probs_all[val_mask, :], 1e-8, None)
+    nll = float(-np.log(p_val[np.arange(val_mask.sum()), a[val_mask]]).mean())
+    acc = float((p_val.argmax(axis=1) == a[val_mask]).mean())
+    entropy = float(-(p_val * np.log(p_val)).sum(axis=1).mean())
+
+    return BehaviorPolicy(
+        probs=probs_all.astype(np.float32),
+        n_actions=n_actions,
+        metrics={"val_nll": nll, "val_acc": acc, "val_mean_entropy": entropy},
+    )
