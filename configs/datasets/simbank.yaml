@@ -31,3 +31,8 @@ encoding:
   output:
     prefixes_path: "data/{dataset_name}/interim/prefixes.npz"
     vocab_activity_path: "data/{dataset_name}/interim/vocab_activity.json"
+
+# Checkpoint pins — v2 encoder run (positional embeddings), launched 2026-08-07.
+experiment:
+  checkpoint_path: "artifacts/models/tdqn/20260807_170819/Q_theta.ckpt"
+  ope_report_path: "artifacts/ope/{dataset_name}/ope_dr.json"

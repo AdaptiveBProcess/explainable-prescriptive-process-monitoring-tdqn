@@ -18,10 +18,18 @@ logger = get_logger(__name__)
 def _resolve_checkpoint_path(cfg: dict, ckpt_arg: str | None) -> Path:
     if ckpt_arg:
         return Path(ckpt_arg)
-    ckpt_cfg = cfg.get("experiment", {}).get(
-        "checkpoint_path", "artifacts/models/tdqn/20260209_191903/Q_theta.ckpt"
-    )
-    return Path(ckpt_cfg)
+    ckpt_cfg = cfg.get("experiment", {}).get("checkpoint_path")
+    if not ckpt_cfg:
+        raise SystemExit(
+            "No checkpoint: pass --ckpt or set experiment.checkpoint_path in the "
+            "config. There is deliberately no hardcoded default — a silent stale "
+            "checkpoint here propagates through every downstream paper artifact "
+            "via ope_dr.json metadata."
+        )
+    path = Path(ckpt_cfg)
+    if not path.exists():
+        raise SystemExit(f"Checkpoint does not exist: {path}")
+    return path
 
 
 def _resolve_vocab_path(cfg: dict, ckpt_path: Path) -> Path:

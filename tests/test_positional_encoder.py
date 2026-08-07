@@ -109,3 +109,15 @@ def test_all_padded_row_does_not_produce_nan():
 )
 def test_encoder_version_is_inferred_from_the_checkpoint(ckpt, keys, expected):
     assert infer_encoder_version(ckpt, dict.fromkeys(keys, None)) == expected
+
+
+def test_env_guard_rejects_unexpected_encoder_version(monkeypatch):
+    from xppm.rl.factory import _enforce_expected_encoder_version
+
+    monkeypatch.setenv("XPPM_EXPECT_ENCODER_VERSION", "2")
+    with pytest.raises(RuntimeError, match="Encoder version guard"):
+        _enforce_expected_encoder_version("fake/Q_theta.ckpt", actual=1)
+    _enforce_expected_encoder_version("fake/Q_theta.ckpt", actual=2)  # no raise
+
+    monkeypatch.delenv("XPPM_EXPECT_ENCODER_VERSION")
+    _enforce_expected_encoder_version("fake/Q_theta.ckpt", actual=1)  # inactive

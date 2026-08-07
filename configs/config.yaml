@@ -252,7 +252,11 @@ ope:
 
 xai:
   enabled: true
-  checkpoint_path: "artifacts/checkpoints/Q_theta.ckpt"
+  # v2 encoder run (positional embeddings), simbank, launched 2026-08-07.
+  # Do NOT point this at artifacts/checkpoints/ — that dir held a stale copy
+  # of a bpi2012 v1 checkpoint and is exactly the silent-mixing hazard the
+  # loaders now guard against.
+  checkpoint_path: "artifacts/models/tdqn/20260807_170819/Q_theta.ckpt"
   seed: 123
   split: "test"
   n_cases: 200
@@ -312,7 +316,7 @@ fidelity:
 distill:
   enabled: true
   seed: 42                   # Random seed for reproducibility
-  teacher_checkpoint: "artifacts/checkpoints/Q_theta.ckpt"
+  teacher_checkpoint: "artifacts/models/tdqn/20260807_170819/Q_theta.ckpt"
   method: "viper"            # viper | behavioral_cloning
   surrogate:
     type: "decision_tree"    # decision_tree | rule_list

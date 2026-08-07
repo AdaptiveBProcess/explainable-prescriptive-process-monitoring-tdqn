@@ -30,6 +30,7 @@ The returned ``nn.Module`` must be in ``eval()`` mode and respond to
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any, Callable
 
@@ -170,8 +171,28 @@ def load_q_network(
             f"Checkpoint does not match the architecture: missing={critical}, "
             f"unexpected={list(unexpected)}"
         )
+    _enforce_expected_encoder_version(ckpt_path, q_net.encoder_version)
     q_net.eval()
     return q_net
+
+
+def _enforce_expected_encoder_version(ckpt_path: str | Path, actual: int) -> None:
+    """Fail loudly if XPPM_EXPECT_ENCODER_VERSION is set and the checkpoint differs.
+
+    Regeneration runs export ``XPPM_EXPECT_ENCODER_VERSION=2`` so that any stage
+    silently resolving a stale checkpoint (a hardcoded default, an old
+    ``ope_dr.json`` metadata pin, a dataset yaml not yet updated) aborts instead
+    of mixing encoder versions across the paper chain. Unset, the guard is
+    inactive and legacy v1 checkpoints load normally.
+    """
+    expected = os.environ.get("XPPM_EXPECT_ENCODER_VERSION")
+    if expected is not None and int(expected) != int(actual):
+        raise RuntimeError(
+            f"Encoder version guard: {ckpt_path} is v{actual} but "
+            f"XPPM_EXPECT_ENCODER_VERSION={expected}. A stale checkpoint is being "
+            f"loaded into a chain that expects v{expected}; update the pin that "
+            f"resolved this path (config yaml, --ckpt, or ope_dr.json metadata)."
+        )
 
 
 def _load_tdqn(

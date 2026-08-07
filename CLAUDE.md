@@ -145,6 +145,22 @@ target network (updated every 2000 steps), gradient clipping (norm=10), Huber lo
 Loaders raise instead of silently accepting a mismatch. Anything that mirrors the pooling rule must
 delegate to `q_net._pool_index` / `gather_last_position(..., q_net=...)` rather than reimplement it.
 
+**Chain-version guards (Fase 1).** Checkpoint pins propagate silently: `05_run_ope_dr.py` writes
+the checkpoint path into `ope_dr.json` metadata, and downstream paper scripts resolve it from
+there. Three guards prevent v1/v2 mixing during regeneration:
+
+- `05_run_ope_dr.py` has **no hardcoded default checkpoint** — it requires `--ckpt` or
+  `experiment.checkpoint_path` and fails loudly otherwise.
+- `export XPPM_EXPECT_ENCODER_VERSION=2` before regenerating: the canonical loader
+  (`factory.load_q_network`, used by every script) then aborts on any checkpoint of a different
+  version, wherever its path came from. Unset, legacy v1 checkpoints load normally.
+- `python scripts/34_audit_chain_versions.py --expect 2` walks every checkpoint reference in
+  configs and `artifacts/**/*.json` and reports which checkpoint/version produced each artifact.
+  Run it after every regeneration; `--expect` makes it exit 1 on stale pins.
+
+Do not point configs at `artifacts/checkpoints/Q_theta.ckpt` — that mutable alias has held
+checkpoints from different datasets over time and is unauditable.
+
 ## Code Style
 
 - **Ruff**: line-length=100, target Python 3.10, select rules E/F/I
