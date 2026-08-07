@@ -60,6 +60,18 @@ DATASETS = {
         "xai": REPO / "artifacts/xai/bpi2020-travel",
         "ope": REPO / "artifacts/ope/bpi2020-travel/ope_dr.json",
     },
+    "bpi2017ct": {
+        "npz": REPO / "data/bpi2017ct/processed/D_offline.npz",
+        "splits": REPO / "data/bpi2017ct/processed/splits.json",
+        "xai": REPO / "artifacts/xai/bpi2017ct",
+        "ope": REPO / "artifacts/ope/bpi2017ct/ope_dr.json",
+    },
+    "simbank-ir3": {
+        "npz": REPO / "data/simbank-ir3/processed/D_offline.npz",
+        "splits": REPO / "data/simbank-ir3/processed/splits.json",
+        "xai": REPO / "artifacts/xai/simbank-ir3",
+        "ope": REPO / "artifacts/ope/simbank-ir3/ope_dr.json",
+    },
 }
 
 CONFIG = {"training": {"transformer": {}}}  # defaults match params.yaml (d_model=128 etc.)
@@ -104,7 +116,11 @@ def main(ds_names):
         _, v_all, _ = batched_q(q_net, s, sm, va)
 
         # ---------- Part A (2.4): case-level V distribution (last transition per case)
-        res = {"n_test_transitions": int(len(s))}
+        res = {
+            "n_test_transitions": int(len(s)),
+            "prefix_len_mean_test": float(sm.sum(1).mean()),
+            "prefix_len_p50_test": float(np.percentile(sm.sum(1), 50)),
+        }
         if case_ptr is not None:
             # last transition per case = last occurrence of each case id
             last_idx = {}
@@ -216,12 +232,17 @@ def main(ds_names):
                     "signflip_guided": float((np.sign(dq_g) != np.sign(dq_orig)).mean()),
                     "signflip_random": float(np.mean(flip_r)),
                     "mean_abs_dq_orig": float(np.abs(dq_orig).mean()),
+                    "abs_red_guided": float(np.abs(np.abs(dq_orig) - np.abs(dq_g)).mean()),
+                    "abs_red_random": float(np.abs(red_r).mean()),
+                    "abs_red_anti": float(np.abs(np.abs(dq_orig) - np.abs(dq_a)).mean()),
+                    "prefix_len_mean_items": float(sm_i.sum(1).mean()),
+                    "k_mean": float(np.mean(k_list)),
                 }
             res["dq_margin_drop"] = part_b
         out[name] = res
         print(json.dumps(res, indent=1, default=str))
 
-    outpath = Path(__file__).parent / "diag_results.json"
+    outpath = Path(__file__).parent / "diag_fase0_results_b.json"
     json.dump(out, open(outpath, "w"), indent=1)
     print("saved ->", outpath)
 

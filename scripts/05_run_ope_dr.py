@@ -188,6 +188,7 @@ def main() -> None:
         "metadata": metadata,
         "results": metrics.get("results", {}),
         "diagnostics": metrics.get("diagnostics", {}),
+        "paired_diff": metrics.get("paired_diff", {}),
         "n_bootstrap": metrics.get("n_bootstrap", 0),
     }
 

@@ -19,7 +19,9 @@ from pathlib import Path
 import numpy as np
 import torch
 
-REPO = Path(__file__).resolve().parent.parent
+REPO = Path(
+    "/home/andrew/Documents/docs/3-resolver-problema-subtema/algorithms-explainability/xppm-tdqn"
+)
 sys.path.insert(0, str(REPO / "src"))
 
 from xppm.rl.train_tdqn import load_dataset_with_splits  # noqa: E402

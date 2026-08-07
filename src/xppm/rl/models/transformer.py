@@ -23,7 +23,19 @@ class SimpleTransformerEncoder(nn.Module):
         )
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=n_layers)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # x: (batch, seq_len, input_dim)
+    def forward(
+        self, x: torch.Tensor, key_padding_mask: torch.Tensor | None = None
+    ) -> torch.Tensor:
+        """Encode a batch of sequences.
+
+        Args:
+            x: (batch, seq_len, input_dim)
+            key_padding_mask: (batch, seq_len) bool, True at positions to ignore.
+                Rows that are entirely padding are passed through unmasked, since
+                masking every key makes attention undefined.
+        """
         h = self.input_proj(x)
-        return self.encoder(h)  # (batch, seq_len, hidden_dim)
+        if key_padding_mask is not None:
+            all_padded = key_padding_mask.all(dim=1, keepdim=True)
+            key_padding_mask = key_padding_mask & ~all_padded
+        return self.encoder(h, src_key_padding_mask=key_padding_mask)

@@ -41,21 +41,29 @@ def residual_hook_names(n_layers: int) -> list[str]:
     return ["proj"] + [f"resid_{i}" for i in range(n_layers)]
 
 
-def gather_last_position(activations: torch.Tensor, state_mask: torch.Tensor) -> torch.Tensor:
+def gather_last_position(
+    activations: torch.Tensor, state_mask: torch.Tensor, q_net=None
+) -> torch.Tensor:
     """Gather a (B, L, D) activation tensor at the pooling position of each sequence.
 
-    Mirrors the pooling rule of ``TransformerQNetwork.forward``: the last
-    non-padded position (with left-padding, the most recent event).
+    Mirrors the pooling rule of ``TransformerQNetwork.forward``. Pass the
+    ``q_net`` so the rule is delegated to ``q_net._pool_index`` and follows its
+    ``encoder_version`` (v1: ``mask.sum()-1``; v2: last real event). Without a
+    ``q_net`` the v1 count-based rule is applied.
 
     Args:
         activations: (B, L, D) tensor.
         state_mask: (B, L) tensor, 1 for real tokens and 0 for PAD.
+        q_net: the ``TransformerQNetwork`` whose pooling rule to mirror.
 
     Returns:
         (B, D) tensor.
     """
-    lengths = state_mask.sum(dim=1).long() - 1
-    lengths = torch.clamp(lengths, min=0, max=activations.size(1) - 1)
+    if q_net is not None:
+        lengths = q_net._pool_index(state_mask)
+    else:
+        lengths = state_mask.sum(dim=1).long() - 1
+        lengths = torch.clamp(lengths, min=0, max=activations.size(1) - 1)
     batch_indices = torch.arange(activations.size(0), device=activations.device)
     return activations[batch_indices, lengths]
 

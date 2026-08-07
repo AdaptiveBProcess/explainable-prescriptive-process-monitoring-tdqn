@@ -95,7 +95,7 @@ def test_pooled_matches_gather_rule():
     with torch.no_grad():
         _, cache = hooked.run_with_cache(s, m)
     last_layer = hooked.n_layers - 1
-    expected = gather_last_position(cache[f"resid_{last_layer}"], m)
+    expected = gather_last_position(cache[f"resid_{last_layer}"], m, q_net=hooked.q_net)
     assert torch.allclose(cache["pooled"], expected, atol=1e-6)
 
 

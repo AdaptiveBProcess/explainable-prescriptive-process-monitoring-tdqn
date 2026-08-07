@@ -66,7 +66,9 @@ def main() -> None:
             m = torch.as_tensor(mask[start:end], dtype=torch.float32, device=device)
             q, cache = hooked.run_with_cache(s, m, names=capture)
             for name in resid_hooks:
-                collected[name].append(gather_last_position(cache[name], m).cpu().numpy())
+                collected[name].append(
+                    gather_last_position(cache[name], m, q_net=hooked.q_net).cpu().numpy()
+                )
             for name in ("pooled", "state_repr"):
                 collected[name].append(cache[name].cpu().numpy())
             collected["q"].append(q.cpu().numpy())

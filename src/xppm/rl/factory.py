@@ -119,14 +119,19 @@ class AgentFactory:
 # ---------------------------------------------------------------------------
 
 
-def _load_tdqn(
+def load_q_network(
     ckpt_path: str | Path,
     npz_path: str | Path,
     vocab_path: str | Path,
     config: dict[str, Any],
     device: torch.device,
 ) -> nn.Module:
-    """Load a ``TransformerQNetwork`` from a TDQN checkpoint."""
+    """Load a ``TransformerQNetwork`` from a TDQN checkpoint.
+
+    Single canonical loader: infers ``encoder_version`` from the checkpoint
+    (``infer_encoder_version``) and raises on any state-dict mismatch beyond
+    a legitimately absent ``pos_embedding`` in v1 checkpoints.
+    """
     from xppm.rl.train_tdqn import TransformerQNetwork
 
     data = load_npz(npz_path)
@@ -144,6 +149,9 @@ def _load_tdqn(
     vocab_size = int(len(token2id)) if token2id else int(data["s"].max() + 1)
     n_actions = int(data["valid_actions"].shape[1])
 
+    raw_ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
+    state_dict = raw_ckpt.get("model_state_dict", raw_ckpt)
+
     q_net = TransformerQNetwork(
         vocab_size=vocab_size,
         max_len=max_len,
@@ -152,13 +160,43 @@ def _load_tdqn(
         n_layers=n_layers,
         dropout=dropout,
         n_actions=n_actions,
+        encoder_version=infer_encoder_version(raw_ckpt, state_dict),
     ).to(device)
 
-    raw_ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
-    state_dict = raw_ckpt.get("model_state_dict", raw_ckpt)
-    q_net.load_state_dict(state_dict, strict=False)
+    missing, unexpected = q_net.load_state_dict(state_dict, strict=False)
+    critical = [k for k in missing if not k.startswith("pos_embedding.")]
+    if critical or unexpected:
+        raise RuntimeError(
+            f"Checkpoint does not match the architecture: missing={critical}, "
+            f"unexpected={list(unexpected)}"
+        )
     q_net.eval()
     return q_net
+
+
+def _load_tdqn(
+    ckpt_path: str | Path,
+    npz_path: str | Path,
+    vocab_path: str | Path,
+    config: dict[str, Any],
+    device: torch.device,
+) -> nn.Module:
+    """Registry entry for the ``tdqn`` algorithm; delegates to ``load_q_network``."""
+    return load_q_network(ckpt_path, npz_path, vocab_path, config, device)
+
+
+def infer_encoder_version(ckpt: dict, state_dict: dict) -> int:
+    """Which encoder a checkpoint was trained with.
+
+    Checkpoints written before the encoder gained positional embeddings carry
+    neither the field nor the tensor. They must be rebuilt as v1: loading them
+    into v2 would leave ``pos_embedding`` randomly initialised *and* move the
+    pooling index off the position they were trained to read, silently changing
+    every prediction.
+    """
+    if isinstance(ckpt, dict) and "encoder_version" in ckpt:
+        return int(ckpt["encoder_version"])
+    return 2 if any(k.startswith("pos_embedding.") for k in state_dict) else 1
 
 
 # Register built-in algorithms

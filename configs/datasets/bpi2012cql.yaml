@@ -1,0 +1,78 @@
+dataset_name: bpi2012cql
+data:
+  format: csv
+  raw_path: data/raw/bpi2012.csv
+  output_clean_path: data/bpi2012/interim/clean.parquet
+schema:
+  case_id: case_id
+  activity: activity
+  timestamp: timestamp
+time:
+  timezone: null
+  output_timezone: UTC
+  sort: true
+  drop_duplicates: false
+preprocess:
+  out_clean_parquet: clean.parquet
+  lifecycle_filter:
+    enabled: true
+    column: lifecycle
+    keep:
+    - complete
+    - COMPLETE
+  select_cols:
+  - case_id
+  - activity
+  - timestamp
+outcome_engineering:
+  enabled: true
+  type: activity_presence
+  positive_activities:
+  - A_APPROVED
+  outcome_col: outcome
+validation_split:
+  range_checks:
+    enabled: false
+training:
+  max_steps: 60000
+  eval_every: 5000
+  save_every: 20000
+  tdqn:
+    cql_alpha: 0.1
+mdp:
+  behavior_trigger_activity: W_Nabellen incomplete dossiers
+  decision_points:
+    mode: all
+  actions:
+    id2name:
+    - do_nothing
+    - W_Nabellen incomplete dossiers
+    noop_action: do_nothing
+  action_mask:
+    default_valid:
+    - do_nothing
+    - W_Nabellen incomplete dossiers
+  reward:
+    type: terminal_profit_delayed
+    intermediate_reward: 0.0
+    terminal_column: outcome
+  output:
+    path: data/bpi2012/processed/D_offline.npz
+experiment:
+  checkpoint_path: null
+  ope_report_path: artifacts/ope/{dataset_name}/ope_dr.json
+xai:
+  checkpoint_path: null
+  out_dir: xai/{dataset_name}
+fidelity:
+  out_csv: artifacts/fidelity/{dataset_name}/fidelity.csv
+distill:
+  teacher_checkpoint: null
+  out_dir: artifacts/distill/{dataset_name}
+encoding:
+  output:
+    prefixes_path: data/bpi2012/interim/prefixes.npz
+    vocab_activity_path: data/bpi2012/interim/vocab_activity.json
+paths:
+  data_processed_dir: data/bpi2012/processed
+  data_interim_dir: data/bpi2012/interim

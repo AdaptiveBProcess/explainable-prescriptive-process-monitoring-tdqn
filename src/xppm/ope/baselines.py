@@ -36,6 +36,47 @@ def compute_noop_policy_probs(
     return probs.astype(np.float32)
 
 
+def compute_always_intervene_policy_probs(
+    valid_actions: np.ndarray,
+    noop_action_id: int,
+    n_actions: int,
+) -> np.ndarray:
+    """Compute π_always(a|s): put all mass on non-noop actions (uniform among them).
+
+    The mirror image of :func:`compute_noop_policy_probs`. Needed because C3 of the
+    paper compares the learned policy against *both* do-nothing and always-intervene;
+    without this the always-intervene arm is unsupported.
+
+    Falls back to the noop action when it is the only valid one.
+
+    Args:
+        valid_actions: (N, n_actions) binary mask
+        noop_action_id: ID of the no-op action
+        n_actions: Total number of actions
+
+    Returns:
+        (N, n_actions) probability array
+    """
+    valid = valid_actions > 0
+    non_noop = valid.copy()
+    non_noop[:, noop_action_id] = False
+    n_non_noop = non_noop.sum(axis=1, keepdims=True).astype(np.float32)
+
+    probs = np.zeros_like(valid, dtype=np.float32)
+    has_alt = n_non_noop.squeeze(1) > 0
+    # Uniform over the available interventions
+    probs[has_alt] = non_noop[has_alt] / n_non_noop[has_alt]
+    # No intervention available -> fall back to noop (or uniform if nothing is valid)
+    if (~has_alt).any():
+        fallback = ~has_alt
+        noop_ok = fallback & (valid_actions[:, noop_action_id] > 0)
+        probs[noop_ok, noop_action_id] = 1.0
+        nothing = fallback & ~(valid_actions[:, noop_action_id] > 0)
+        probs[nothing] = 1.0 / n_actions
+
+    return probs.astype(np.float32)
+
+
 def compute_heuristic_policy_probs(
     valid_actions: np.ndarray,
     prefix_lengths: np.ndarray,
