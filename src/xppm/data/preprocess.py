@@ -39,7 +39,11 @@ def load_event_log(path: str | Path, fmt: str = "auto") -> pd.DataFrame:
             raise ValueError(f"Cannot auto-detect format for {path.suffix}")
 
     if fmt == "csv":
-        df = pd.read_csv(path)
+        # Event-log labels are literal strings: the Sepsis log has a case named
+        # "NA", which pandas' default NA-token list would turn into NaN (the
+        # groupby then drops the case and its outcome/reward become NaN).
+        # Only truly empty cells count as missing.
+        df = pd.read_csv(path, keep_default_na=False, na_values=[""])
     elif fmt == "pickle":
         # SimBank format: can be DataFrame or list of dicts
         with open(path, "rb") as f:

@@ -96,11 +96,12 @@ def main() -> None:
         try:
             # 1. Data pipeline if needed
             if not (REPO / f"data/{ds}/processed/D_offline.npz").exists():
+                # 01b valida y particiona sobre D_offline.npz, así que va al final.
                 for script in (
                     ["scripts/01_preprocess_log.py"],
-                    ["scripts/01b_validate_and_split.py", "--overwrite"],
                     ["scripts/02_encode_prefixes.py"],
                     ["scripts/03_build_mdp_dataset.py", "--overwrite"],
+                    ["scripts/01b_validate_and_split.py", "--overwrite"],
                 ):
                     rc = sh([PY, *script, "--dataset", ds], log)
                     if rc != 0:

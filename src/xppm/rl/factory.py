@@ -139,19 +139,26 @@ def load_q_network(
     training_cfg = config.get("training", {})
     transformer_cfg = training_cfg.get("transformer", {})
 
-    max_len = int(transformer_cfg.get("max_len", data["s"].shape[1]))
-    d_model = int(transformer_cfg.get("d_model", 128))
-    n_heads = int(transformer_cfg.get("n_heads", 4))
-    n_layers = int(transformer_cfg.get("n_layers", 3))
+    raw_ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
+    state_dict = raw_ckpt.get("model_state_dict", raw_ckpt)
+
+    # Architecture hyperparameters: the checkpoint's own metadata wins over the
+    # caller's config — datasets with non-default transformers (e.g. sepsis,
+    # d_model=64/n_heads=2) would otherwise fail or, worse for n_heads (which
+    # leaves parameter shapes unchanged), load silently with wrong behaviour.
+    def _hp(key: str, cfg_default: Any) -> Any:
+        return raw_ckpt.get(key, transformer_cfg.get(key, cfg_default))
+
+    max_len = int(_hp("max_len", data["s"].shape[1]))
+    d_model = int(_hp("d_model", 128))
+    n_heads = int(_hp("n_heads", 4))
+    n_layers = int(_hp("n_layers", 3))
     dropout = float(transformer_cfg.get("dropout", 0.1))
 
     vocab = load_json(vocab_path)
     token2id = vocab.get("token2id", {})
     vocab_size = int(len(token2id)) if token2id else int(data["s"].max() + 1)
     n_actions = int(data["valid_actions"].shape[1])
-
-    raw_ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
-    state_dict = raw_ckpt.get("model_state_dict", raw_ckpt)
 
     q_net = TransformerQNetwork(
         vocab_size=vocab_size,

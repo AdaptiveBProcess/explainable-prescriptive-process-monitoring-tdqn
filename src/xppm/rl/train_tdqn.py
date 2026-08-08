@@ -765,6 +765,8 @@ def save_checkpoint(
             "max_len": config.max_len,
             "vocab_size": config.vocab_size,
             "d_model": config.d_model,
+            "n_heads": config.n_heads,
+            "n_layers": config.n_layers,
             "encoder_version": int(getattr(q_net, "encoder_version", 1)),
         },
         q_ckpt_path,
