@@ -1,0 +1,96 @@
+# Sepsis Cases (Mannhardt) — hospital emergency process, 1,050 cases, 15,214 events
+# (raw CSV exported from the screened EDA parquet; see
+#  datasets/eda/aptitud-datasets-2026-08-07.md for the aptitude analysis)
+#
+# Intervention: IV Antibiotics — fires in 78.4% of cases, exactly once, with the
+#   highest positional variance of every screened candidate (rel. pos 0.52 +/- 0.23):
+#   the "why act now" question is genuinely non-trivial here.
+# Outcome: NO "Return ER" within the case (72.0% positive; Return ER = 28.0% -> the
+#   non-saturated real-log outcome). outcome_engineering.invert handles the negation,
+#   and preprocess.drop_activities removes the marker from the state so the outcome
+#   activity never leaks into prefixes (the ESS pilot kept it in vocab; fixed here).
+# R6 pilot (datasets/eda/sepsis/pilot_ess.py, 2026-08-07): trajectory ESS policy
+#   0.140, do-nothing 0.216, both above the 0.10 gate — the only configuration in
+#   the study where RQ2 is genuinely answerable.
+# Size caveat: ~735 train cases -> reduced model (d_model 64, dropout 0.2) and wide
+#   bootstrap CIs; report with candor.
+
+dataset_name: "sepsis"
+
+data:
+  format: csv
+  raw_path: "data/raw/sepsis.csv"
+  output_clean_path: "data/{dataset_name}/interim/clean.parquet"
+
+schema:
+  case_id: "case_id"
+  activity: "activity"
+  timestamp: "timestamp"
+
+time:
+  timezone: null
+  output_timezone: "UTC"
+  sort: true
+  drop_duplicates: false
+
+preprocess:
+  out_clean_parquet: "clean.parquet"
+  lifecycle_filter:
+    enabled: false
+  drop_activities: ["Return ER"]
+  select_cols: ["case_id", "activity", "timestamp"]
+
+outcome_engineering:
+  enabled: true
+  type: "activity_presence"
+  positive_activities: ["Return ER"]
+  invert: true          # positive outcome = the patient does NOT return to ER
+  outcome_col: "outcome"
+
+validation_split:
+  range_checks:
+    enabled: false
+
+# ~14k transitions total, ~10k train. 20k steps ≈ 256 epochs at batch 128 — small
+# log, small model, early plateau expected; eval often.
+training:
+  max_steps: 20000
+  eval_every: 2000
+  save_every: 5000
+  transformer:
+    max_len: 50
+    d_model: 64
+    n_heads: 2
+    n_layers: 2
+    dropout: 0.2
+
+mdp:
+  behavior_trigger_activity: "IV Antibiotics"
+  decision_points:
+    mode: "all"
+  actions:
+    id2name: ["do_nothing", "IV Antibiotics"]
+    noop_action: "do_nothing"
+  action_mask:
+    default_valid: ["do_nothing", "IV Antibiotics"]
+  reward:
+    type: "terminal_profit_delayed"
+    intermediate_reward: 0.0
+    terminal_column: "outcome"
+  output:
+    path: "data/{dataset_name}/processed/D_offline.npz"
+
+experiment:
+  checkpoint_path: null  # filled after training
+  ope_report_path: "artifacts/ope/{dataset_name}/ope_dr.json"
+
+xai:
+  checkpoint_path: null  # filled after training
+  out_dir: "xai/{dataset_name}"
+
+fidelity:
+  out_csv: "artifacts/fidelity/{dataset_name}/fidelity.csv"
+
+distill:
+  teacher_checkpoint: null
+  out_dir: "artifacts/distill/{dataset_name}"

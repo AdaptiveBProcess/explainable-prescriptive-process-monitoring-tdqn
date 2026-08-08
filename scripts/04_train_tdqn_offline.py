@@ -247,12 +247,11 @@ def main() -> None:
             vocab_hash=vocab_hash,
         )
 
-        # Write stable checkpoint for DVC and downstream scripts.
-        # The versioned copy stays in checkpoint_dir; this is the fixed path all stages depend on.
-        stable_ckpt_dir = artifacts_dir / "checkpoints"
-        ensure_dir(stable_ckpt_dir)
-        shutil.copy(checkpoint_paths["q_theta"], stable_ckpt_dir / "Q_theta.ckpt")
-        logger.info("Stable checkpoint written to %s", stable_ckpt_dir / "Q_theta.ckpt")
+        # NOTE: the old "stable checkpoint" copy to artifacts/checkpoints/Q_theta.ckpt
+        # was removed deliberately: with per-dataset runs the mutable alias held
+        # whichever dataset trained last, making every artifact that recorded that
+        # path unauditable. Downstream stages must pin the versioned run directory
+        # (configs/datasets/*.yaml experiment.checkpoint_path).
 
         # Copy artifacts to checkpoint directory
         shutil.copy(args.config, checkpoint_dir / "config.yaml")

@@ -452,6 +452,20 @@ def preprocess_event_log(
         else:
             positive_activities = outcome_eng_cfg.get("positive_activities", [])
             df = compute_outcome_from_activities(df, positive_activities, outcome_col=outcome_col)
+        if outcome_eng_cfg.get("invert", False):
+            # e.g. sepsis: presence of "Return ER" is the BAD outcome
+            df[outcome_col] = 1.0 - df[outcome_col]
+            logger.info("Outcome inverted (outcome_engineering.invert): positive = absence")
+
+    # Drop marker activities from the state AFTER the outcome is computed, so an
+    # outcome-defining activity (e.g. sepsis "Return ER") never leaks into prefixes.
+    drop_acts = preprocess_filters.get("drop_activities", [])
+    if drop_acts:
+        before = len(df)
+        df = df[~df["activity"].isin(set(drop_acts))].copy()
+        logger.info(
+            "drop_activities: removed %d events of %s from the state", before - len(df), drop_acts
+        )
 
     # Encode case IDs as integer codes when they are non-integer (e.g., BPI string IDs)
     # This is required by the downstream encode_prefixes / build_mdp pipeline.
