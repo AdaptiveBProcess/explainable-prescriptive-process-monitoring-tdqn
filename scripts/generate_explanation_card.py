@@ -80,6 +80,18 @@ def main() -> None:
     share_v = pct_share([e["phi_v"] for e in events])
     share_q = pct_share([e["phi_dq"] for e in events])
 
+    def top3(key):
+        return sorted(range(len(events)), key=lambda i: -events[i][key])[:3]
+
+    # The narrative strings below state three facts about case 552; fail loudly
+    # if a regenerated artifact stops supporting them instead of printing a
+    # story the data contradicts.
+    top3_v, top3_q = top3("phi_v"), top3("phi_dq")
+    names_v = [events[i]["name"] for i in top3_v]
+    assert names_v.count("validate_application") == 2, names_v
+    assert top3_v[:2] == top3_q[:2], (top3_v, top3_q)
+    assert events[top3_q[2]]["name"] == "email_customer", events[top3_q[2]]["name"]
+
     fig = plt.figure(figsize=(11.0, 4.9), dpi=200)
     ax = fig.add_axes([0, 0, 1, 1])
     ax.set_xlim(0, 100)
@@ -127,8 +139,7 @@ def main() -> None:
         17,
         37.3,
         f"Value estimate V = {v_case:,.0f} (ordinal)  ·  percentile "
-        f"{r['_percentile_midrank']:.1f} (mid-rank), "
-        "at the $\\tau = p_{50}$ at-risk threshold (tie resolved by mode structure)",
+        f"{r['_percentile_midrank']:.1f} (mid-rank), at the $\\tau = p_{{50}}$ threshold",
         color="#b8c0cd",
         fontsize=8.2,
         va="center",
@@ -163,7 +174,7 @@ def main() -> None:
     ax.text(
         38.5,
         30.6,
-        "Same primary driver — different importance profiles",
+        "Same lead events — the levels diverge at rank 3",
         fontsize=8.4,
         fontweight="bold",
         va="center",
@@ -184,8 +195,8 @@ def main() -> None:
     ax.text(
         42.2,
         28.7,
-        f"skip_contact {share_v[8]:.0f}%  +  validate_appl. "
-        f"{share_v[2]+share_v[4]+share_v[6]+share_v[9]:.0f}%",
+        f"validate_appl. {share_v[2]+share_v[4]+share_v[6]+share_v[9]:.0f}% "
+        f"(top-3: two of its occurrences)",
         va="center",
         fontsize=8,
         zorder=6,
@@ -205,16 +216,16 @@ def main() -> None:
     ax.text(
         42.2,
         26.2,
-        f"skip_contact {share_q[8]:.0f}%  +  validate_appl. "
-        f"{share_q[2]+share_q[4]+share_q[6]+share_q[9]:.0f}%",
+        f"validate_appl. {share_q[2]+share_q[4]+share_q[6]+share_q[9]:.0f}% "
+        f"(top-3: email_customer enters)",
         va="center",
         fontsize=8,
         zorder=6,
     )
     ax.annotate(
         "",
-        xy=(80.5, 22.5),
-        xytext=(77, 25.2),
+        xy=(91.5, 23.6),
+        xytext=(77, 25.6),
         arrowprops=dict(arrowstyle="->", color="#4a5468", lw=1.4),
         zorder=5,
     )
@@ -283,9 +294,9 @@ def main() -> None:
     ax.text(
         5.2,
         6.1,
-        f"Why at risk?   skip_contact ({share_v[8]:.0f}%) leads, but the validate→email "
-        f"cycles also matter ({share_v[2]+share_v[4]+share_v[6]+share_v[9]:.0f}%).  "
-        "Risk reflects the full case history.",
+        f"Why at risk?   The validate/email review cycle carries the risk signal "
+        f"(validate_application {share_v[2]+share_v[4]+share_v[6]+share_v[9]:.0f}%); two of its "
+        "occurrences rank in the top three — position matters, not just the name.",
         fontsize=8.2,
         va="center",
         zorder=3,
@@ -294,8 +305,9 @@ def main() -> None:
     ax.text(
         5.2,
         3.4,
-        f"Why act now?   skip_contact ({share_q[8]:.0f}%) alone drives most of the "
-        "intervention margin.  The intervention signal is more concentrated than the risk signal.",
+        f"Why act now?   The same events top the margin "
+        f"(validate_application {share_q[2]+share_q[4]+share_q[6]+share_q[9]:.0f}%), but the "
+        "third-ranked driver changes: email_customer matters for timing, a repeat validation for risk.",
         fontsize=8.2,
         va="center",
         zorder=3,
