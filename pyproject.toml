@@ -49,3 +49,6 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]
 addopts = "-m \"not slow\""
+# experiments/generality_ppo has its own environment (stable-baselines3);
+# its tests run via `pytest experiments/generality_ppo` in that env.
+norecursedirs = ["experiments", ".venv", "artifacts", "data"]

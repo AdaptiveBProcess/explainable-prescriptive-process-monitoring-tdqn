@@ -59,6 +59,7 @@ per config: `risk_explanations.json → metadata.ig_completeness_{risk,deltaq}`
 | Claim | Artifact | Generator |
 |---|---|---|
 | Order sensitivity (Threats) | `artifacts/reports/order_sensitivity/<name>.json` | `scripts/33_check_order_sensitivity.py --out` |
+| Dossier-call selection effect (use sketch) | `artifacts/reports/selection_effect_bpi2012.json` | `scripts/29_selection_effect_bpi2012.py` |
 | Case 552 card + dossier numbers | `artifacts/xai/interp_pairs/` + `artifacts/explanation_example.pdf` | `scripts/27_build_interp_pairs.py`, `scripts/generate_explanation_card.py` |
 | Generality (Sec. 4.5, PPO transplant) | `artifacts/generality/{rl-prescriptive-monitoring,when-to-treat}.json` | `scripts/37_ppo_transplant.py` (see `experiments/generality_ppo/README.md`) |
 | Ranking overlap between levels | `artifacts/reports/ranking_separation.json` | `scripts/ranking_separation.py` |
