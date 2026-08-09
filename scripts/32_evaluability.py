@@ -62,6 +62,16 @@ DATASETS: dict[str, dict[str, str]] = {
         "artifacts/ope/bpi2020-travel/ope_dr.json",
         "artifacts/xai/bpi2020-travel",
     ),
+    "bpi2012-offertes": _entry(
+        "data/bpi2012-offertes/processed",
+        "artifacts/ope/bpi2012-offertes/ope_dr.json",
+        "artifacts/xai/bpi2012-offertes",
+    ),
+    "sepsis": _entry(
+        "data/sepsis/processed",
+        "artifacts/ope/sepsis/ope_dr.json",
+        "artifacts/xai/sepsis",
+    ),
 }
 
 

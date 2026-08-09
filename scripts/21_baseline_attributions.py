@@ -68,9 +68,14 @@ CONFIG = {"training": {"transformer": {}}}
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def _pool_indices(sm: torch.Tensor, max_len: int) -> torch.Tensor:
-    lengths = sm.sum(dim=1).long() - 1
-    return torch.clamp(lengths, min=0, max=max_len - 1)
+BATCH = 256  # chunk size; selections can reach thousands of items
+
+
+def _batched(fn, s, sm, *rest) -> np.ndarray:
+    outs = []
+    for i in range(0, len(s), BATCH):
+        outs.append(fn(s[i : i + BATCH], sm[i : i + BATCH], *(r[i : i + BATCH] for r in rest)))
+    return np.concatenate(outs, axis=0)
 
 
 def saliency_importance(q_net, s, sm, a_star, a_contrast=None) -> np.ndarray:
@@ -78,19 +83,29 @@ def saliency_importance(q_net, s, sm, a_star, a_contrast=None) -> np.ndarray:
 
     target = Q(s, a_star) if a_contrast is None else Q(s,a_star) - Q(s,a_contrast),
     with the action(s) held fixed (same convention as the IG pipeline).
+    Delegates the forward to q_net.encode so positional embeddings, the
+    attention padding mask and the pooling rule match the deployed encoder
+    version instead of replaying v1 semantics by hand.
     """
+    if len(s) > BATCH:
+        if a_contrast is None:
+            return _batched(
+                lambda s_, sm_, a_: saliency_importance(q_net, s_, sm_, a_), s, sm, a_star
+            )
+        return _batched(
+            lambda s_, sm_, a_, c_: saliency_importance(q_net, s_, sm_, a_, c_),
+            s,
+            sm,
+            a_star,
+            a_contrast,
+        )
     s_t = torch.from_numpy(s).long().to(DEVICE)
     sm_t = torch.from_numpy(sm).float().to(DEVICE)
     a_star_t = torch.from_numpy(a_star).long().to(DEVICE)
 
     s_clamped = torch.clamp(s_t, min=0, max=q_net.vocab_size - 1)
     emb = q_net.embedding(s_clamped).detach().requires_grad_(True)
-
-    encoded = q_net.encoder(emb)
-    idx = _pool_indices(sm_t, q_net.max_len)
-    batch_idx = torch.arange(encoded.size(0), device=DEVICE)
-    state_repr = torch.relu(q_net.state_proj(encoded[batch_idx, idx]))
-    q = q_net.q_head(state_repr)
+    q = q_net.encode(emb, sm_t)
 
     target = q.gather(1, a_star_t.unsqueeze(1)).squeeze(1)
     if a_contrast is not None:
@@ -111,22 +126,36 @@ def attention_rollout_importance(q_net, s, sm) -> np.ndarray:
     q_net.encoder, then rolls out A_hat = 0.5*A + 0.5*I across layers and reads
     the row of the pooled (last non-PAD) position. Target-agnostic by design.
     """
+    if len(s) > BATCH:
+        return _batched(lambda s_, sm_: attention_rollout_importance(q_net, s_, sm_), s, sm)
     s_t = torch.from_numpy(s).long().to(DEVICE)
     sm_t = torch.from_numpy(sm).float().to(DEVICE)
     with torch.no_grad():
         s_clamped = torch.clamp(s_t, min=0, max=q_net.vocab_size - 1)
-        emb = q_net.embedding(s_clamped)
-        h = q_net.encoder.input_proj(emb)
+        x = q_net.embedding(s_clamped)
+        if q_net.pos_embedding is not None:
+            pos = torch.arange(x.size(1), device=DEVICE).unsqueeze(0).expand(x.size(0), -1)
+            x = x + q_net.pos_embedding(pos)
+        key_padding = None
+        if q_net.encoder_version >= 2:
+            key_padding = sm_t <= 0
+            key_padding = key_padding & ~key_padding.all(dim=1, keepdim=True)
+        h = q_net.encoder.input_proj(x)
         attn_mats = []
         for layer in q_net.encoder.encoder.layers:
             attn_out, attn_w = layer.self_attn(
-                h, h, h, need_weights=True, average_attn_weights=True
+                h,
+                h,
+                h,
+                key_padding_mask=key_padding,
+                need_weights=True,
+                average_attn_weights=True,
             )
             attn_mats.append(attn_w)  # (batch, L, L)
             h = layer.norm1(h + layer.dropout1(attn_out))
             ff = layer.linear2(layer.dropout(layer.activation(layer.linear1(h))))
             h = layer.norm2(h + layer.dropout2(ff))
-        ref = q_net.encoder(emb)
+        ref = q_net.encoder(x, key_padding_mask=(sm_t <= 0) if key_padding is not None else None)
         replay_err = (h - ref).abs().max().item()
         if replay_err > 1e-3:
             raise RuntimeError(f"Manual encoder replay mismatch: {replay_err}")
@@ -138,7 +167,7 @@ def attention_rollout_importance(q_net, s, sm) -> np.ndarray:
             a_hat = a_hat / a_hat.sum(dim=-1, keepdim=True)
             rollout = a_hat if rollout is None else torch.bmm(a_hat, rollout)
 
-        idx = _pool_indices(sm_t, q_net.max_len)
+        idx = q_net._pool_index(sm_t)
         batch_idx = torch.arange(h.size(0), device=DEVICE)
         imp = rollout[batch_idx, idx]  # (batch, L): contribution of each pos
         imp = imp * sm_t

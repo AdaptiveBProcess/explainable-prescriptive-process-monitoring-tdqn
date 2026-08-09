@@ -34,7 +34,9 @@ MAX_JSON_BYTES = 5_000_000  # skip training histories and other bulk logs
 
 
 def looks_like_ckpt(value: str) -> bool:
-    return any(m in value for m in CKPT_MARKERS) and value.endswith(".ckpt")
+    # A bare filename (training.checkpoint_name: "Q_theta.ckpt") is a naming
+    # convention, not a resolvable pin — require a directory component.
+    return any(m in value for m in CKPT_MARKERS) and value.endswith(".ckpt") and "/" in value
 
 
 def walk_json(node, path, hits):
@@ -68,6 +70,15 @@ def collect_references() -> list[dict]:
             refs.append({"source": str(cfg_path.relative_to(REPO)), "where": where, "ckpt": ckpt})
     # 2) Artifact JSONs (OPE metadata, XAI outputs, reports)
     for jf in sorted((REPO / "artifacts").rglob("*.json")):
+        rel = jf.relative_to(REPO)
+        # Superseded v1-era artifacts live under _archive_v1; audit reports
+        # quote checkpoint paths as *data*, not as pins.
+        if rel.parts[1] == "_archive_v1" or "audit" in jf.name:
+            continue
+        # A run's own metadata referencing its own checkpoints is provenance,
+        # not a chain consumer.
+        if jf.name == "run_metadata.json" and rel.parts[:2] == ("artifacts", "models"):
+            continue
         try:
             if jf.stat().st_size > MAX_JSON_BYTES:
                 continue
@@ -77,7 +88,7 @@ def collect_references() -> list[dict]:
         hits = []
         walk_json(doc, "", hits)
         for where, ckpt in hits:
-            refs.append({"source": str(jf.relative_to(REPO)), "where": where, "ckpt": ckpt})
+            refs.append({"source": str(rel), "where": where, "ckpt": ckpt})
     return refs
 
 

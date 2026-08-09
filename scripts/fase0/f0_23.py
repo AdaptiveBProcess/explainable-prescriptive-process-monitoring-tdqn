@@ -156,23 +156,17 @@ def main():
         results[name] = {}
         methods = {
             "ig": p["xai_ig"] / "deltaQ_explanations.json",
-            "saliency": Path(
-                "/tmp/claude-1000/-home-andrew-Documents-docs/6f83e052-2b7a-4dcf-bb66-acd7e4cd9bed/scratchpad/baselines/saliency"
-            )
+            "saliency": Path("artifacts/xai/baselines/saliency")
             / name
             / "deltaQ_explanations.json",
-            "attention": Path(
-                "/tmp/claude-1000/-home-andrew-Documents-docs/6f83e052-2b7a-4dcf-bb66-acd7e4cd9bed/scratchpad/baselines/attention"
-            )
+            "attention": Path("artifacts/xai/baselines/attention")
             / name
             / "deltaQ_explanations.json",
         }
         for method, path in methods.items():
             print(f"== {name} / {method}")
             results[name][method] = margin_drop(q_net, test, path)
-    outpath = Path(
-        "/tmp/claude-1000/-home-andrew-Documents-docs/6f83e052-2b7a-4dcf-bb66-acd7e4cd9bed/scratchpad/margin_drop_compare_fase0.json"
-    )
+    outpath = Path("artifacts/reports/fase0/margin_drop_compare_fase0.json")
     outpath.parent.mkdir(parents=True, exist_ok=True)
     json.dump(results, open(outpath, "w"), indent=1)
     print("saved ->", outpath)

@@ -62,14 +62,8 @@ def run(ds):
     out = {}
     sources = {
         "ig": REPO / xai_ig,
-        "saliency": Path(
-            "/tmp/claude-1000/-home-andrew-Documents-docs/6f83e052-2b7a-4dcf-bb66-acd7e4cd9bed/scratchpad/baselines/saliency"
-        )
-        / ds,
-        "attention": Path(
-            "/tmp/claude-1000/-home-andrew-Documents-docs/6f83e052-2b7a-4dcf-bb66-acd7e4cd9bed/scratchpad/baselines/attention"
-        )
-        / ds,
+        "saliency": Path("artifacts/xai/baselines/saliency") / ds,
+        "attention": Path("artifacts/xai/baselines/attention") / ds,
     }
     for method, src in sources.items():
         risk = json.load(open(src / "risk_explanations.json"))
@@ -134,10 +128,7 @@ results = {ds: run(ds) for ds in DS}
 json.dump(
     results,
     open(
-        Path(
-            "%sabsgap_ir3.json"
-            % "/tmp/claude-1000/-home-andrew-Documents-docs/6f83e052-2b7a-4dcf-bb66-acd7e4cd9bed/scratchpad/"
-        ),
+        Path("%sabsgap_ir3.json" % "artifacts/reports/fase0/"),
         "w",
     ),
     indent=1,

@@ -128,7 +128,7 @@ for name, (proc, opep, xai) in DS.items():
 json.dump(
     res,
     open(
-        "/tmp/claude-1000/-home-andrew-Documents-docs/6f83e052-2b7a-4dcf-bb66-acd7e4cd9bed/scratchpad/t23_ablation.json",
+        "artifacts/reports/fase0/t23_ablation.json",
         "w",
     ),
     indent=1,
