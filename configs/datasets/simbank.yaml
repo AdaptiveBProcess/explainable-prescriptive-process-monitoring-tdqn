@@ -32,6 +32,16 @@ encoding:
     prefixes_path: "data/{dataset_name}/interim/prefixes.npz"
     vocab_activity_path: "data/{dataset_name}/interim/vocab_activity.json"
 
+# IG interpolation steps: SimBank's Q-magnitudes (thousands of $) gave the worst
+# completeness error of the 10 configs at the base 128 steps (mean rel. err 0.49);
+# 512 steps brings the integration error down. Other configs stay at 128 unless
+# their measured error warrants it (see artifacts/xai/*/risk_explanations.json
+# metadata.ig_completeness_risk).
+xai:
+  methods:
+    risk:
+      n_steps_ig: 512
+
 # Checkpoint pins — v2 encoder run (positional embeddings), launched 2026-08-07.
 experiment:
   checkpoint_path: "artifacts/models/tdqn/20260807_170819/Q_theta.ckpt"

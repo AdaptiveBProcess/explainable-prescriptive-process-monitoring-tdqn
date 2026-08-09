@@ -72,6 +72,11 @@ experiment:
 xai:
   checkpoint_path: "artifacts/models/tdqn/20260808_101900/Q_theta.ckpt"  # v2 (fase2 auto)
   out_dir: "xai/{dataset_name}"
+  # 512 IG steps: this config had the second-worst completeness error at the
+  # base 128 (mean rel. err 0.19, outlier-driven); see simbank.yaml note.
+  methods:
+    risk:
+      n_steps_ig: 512
 
 fidelity:
   out_csv: "artifacts/fidelity/{dataset_name}/fidelity.csv"

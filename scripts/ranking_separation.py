@@ -43,6 +43,7 @@ def per_case_metrics(risk_item, dq_item):
 
 
 def main():
+    results = {}
     for name, xai in DATASETS.items():
         rf, qf = xai / "risk_explanations.json", xai / "deltaQ_explanations.json"
         if not rf.exists():
@@ -60,12 +61,24 @@ def main():
                 sp.append(m["spearman"])
             if "jaccard3" in m:
                 jc.append(m["jaccard3"])
+        results[name] = {
+            "n_margin_cases": len(dq),
+            "spearman_median": float(np.median(sp)) if sp else None,
+            "n_spearman": len(sp),
+            "jaccard3_median": float(np.median(jc)) if jc else None,
+            "jaccard3_mean": float(np.mean(jc)) if jc else None,
+            "n_jaccard": len(jc),
+        }
         print(
             f"{name:18s} n_margin_cases={len(dq):4d}  "
             f"spearman_median={np.median(sp) if sp else float('nan'):+.3f} (n={len(sp)})  "
             f"jaccard3_median={np.median(jc) if jc else float('nan'):.2f} "
             f"jaccard3_mean={np.mean(jc) if jc else float('nan'):.2f} (n={len(jc)})"
         )
+    outpath = REPO / "artifacts/reports/ranking_separation.json"
+    outpath.parent.mkdir(parents=True, exist_ok=True)
+    json.dump(results, open(outpath, "w"), indent=1)
+    print("saved ->", outpath)
 
 
 if __name__ == "__main__":

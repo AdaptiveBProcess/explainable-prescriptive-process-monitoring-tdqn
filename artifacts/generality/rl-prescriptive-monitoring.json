@@ -1,0 +1,55 @@
+{
+ "n_states": 500,
+ "n_margin_states": 0,
+ "feature_names": [
+  "relative_position",
+  "reliability",
+  "deviation",
+  "available_resources"
+ ],
+ "reference": [
+  0.5198836922645569,
+  0.85881507396698,
+  0.984000027179718,
+  1.5
+ ],
+ "intervene_rate": 0.0,
+ "phi_v_mean_abs": [
+  0.0006066883215680718,
+  0.00017657098942436278,
+  0.000477938971016556,
+  0.005577597767114639
+ ],
+ "value_test": {
+  "phi_v": {
+   "1": {
+    "k": 1,
+    "abs_guided": 0.006335876416414976,
+    "abs_random": 0.0031380676269531253,
+    "abs_anti": 0.0009162597707472742,
+    "gap": 0.0031978088378906253,
+    "gap_se": 0.0006650498730480797
+   },
+   "2": {
+    "k": 2,
+    "abs_guided": 0.006338928360491991,
+    "abs_random": 0.004941632080078125,
+    "abs_anti": 0.0020006713457405567,
+    "gap": 0.001397296142578125,
+    "gap_se": 0.00016043144078202172
+   }
+  }
+ },
+ "margin_evaluable_sample": false,
+ "model_path": "experiments/generality_ppo/models/ppo_bpic2017_rl_prescriptive_monitoring.zip",
+ "n_pool": 1202267,
+ "pool_diagnostics": {
+  "frac_positive_te_pointwise": 0.6126941852350601,
+  "frac_positive_lower_cate": 0.10397274482290539
+ },
+ "pool_margin": {
+  "mean": -7.318116664886475,
+  "max": -1.7138752937316895,
+  "frac_positive": 0.0
+ }
+}

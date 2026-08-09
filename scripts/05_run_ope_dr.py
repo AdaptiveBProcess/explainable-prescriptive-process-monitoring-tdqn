@@ -94,10 +94,12 @@ def main() -> None:
         "--behavior",
         type=str,
         choices=["tdqn_encoder", "boa_logreg"],
-        default="tdqn_encoder",
+        default="boa_logreg",
         help=(
-            "Behavior-policy estimator: tdqn_encoder (frozen Q_theta embeddings, default) "
-            "or boa_logreg (bag-of-activities + logistic regression, independent of Q_theta)."
+            "Behavior-policy estimator: boa_logreg (bag-of-activities + logistic regression, "
+            "independent of Q_theta; the paper's primary estimator, default) or tdqn_encoder "
+            "(frozen Q_theta embeddings; robustness variant). Existing ope_dr.json files "
+            "record which one produced them in metadata.behavior_estimator."
         ),
     )
     args = parser.parse_args()

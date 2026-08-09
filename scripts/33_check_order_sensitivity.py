@@ -31,6 +31,12 @@ def main() -> None:
     ap.add_argument("--vocab", required=True)
     ap.add_argument("--n", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=123)
+    ap.add_argument(
+        "--out",
+        default=None,
+        help="Write the result JSON here (e.g. artifacts/reports/order_sensitivity/<ds>.json). "
+        "Stdout-only runs leave no artifact for the paper to cite.",
+    )
     args = ap.parse_args()
 
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -79,7 +85,15 @@ def main() -> None:
     out["verdict"] = (
         "USES ORDER" if out["relative_delta_q"] > 1e-4 else "ORDER-INVARIANT (multiset)"
     )
+    out["ckpt"] = str(args.ckpt)
+    out["n_requested"] = int(args.n)
+    out["seed"] = int(args.seed)
     print(json.dumps(out, indent=1))
+    if args.out:
+        out_path = Path(args.out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(out, indent=1))
+        print(f"saved -> {out_path}")
 
 
 if __name__ == "__main__":

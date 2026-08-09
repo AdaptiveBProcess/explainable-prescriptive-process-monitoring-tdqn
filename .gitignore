@@ -19,7 +19,9 @@ data/**/*
 !data/**/.gitkeep
 
 artifacts/**/*
+# The generality-study result JSONs are part of the paper's evidence (Sec 4.5)
+# and small; they travel with the code.
+!artifacts/generality/
+!artifacts/generality/*.json
 mlruns/**/*
 .wandb/
-
-
