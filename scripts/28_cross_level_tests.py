@@ -22,7 +22,11 @@ import torch
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "src"))
 from xppm.rl.train_tdqn import load_dataset_with_splits  # noqa: E402
-from xppm.xai.evaluability import DEFAULT_N_RANDOM, DEFAULT_SEED  # noqa: E402
+from xppm.xai.evaluability import (  # noqa: E402
+    DEFAULT_N_RANDOM,
+    DEFAULT_SEED,
+    _random_positions,
+)
 from xppm.xai.fidelity_tests import (  # noqa: E402
     _compute_q_values,
     _load_q_network,
@@ -112,7 +116,6 @@ def ranking_positions(item, key, s_width, sm_row, k):
 
 
 def main():
-    rng = np.random.default_rng(SEED)
     out = {}
     for ds, (proc, opep, xai) in DS.items():
         ope = json.load(open(REPO / opep))
@@ -157,13 +160,9 @@ def main():
             disp_v = np.abs(v0 - batched_v(qn, sv, mv, va))
             disp_q = np.abs(v0 - batched_v(qn, sq, mq, va))
             rnds = []
-            for _ in range(NR):
-                rnd = []
-                for i in range(len(pairs)):
-                    nonpad = np.where(sm[i] > 0)[0]
-                    rnd.append(
-                        list(rng.choice(nonpad, size=min(ks[i], len(nonpad)), replace=False))
-                    )
+            # shared null: same per-(item, rep) draws as scripts 23/26/32
+            for rep in range(NR):
+                rnd = _random_positions(sm, np.array(ks), SEED, rep)
                 sr, mr = _perturb_states_mask_topk(s, sm, rnd)
                 rnds.append(np.abs(v0 - batched_v(qn, sr, mr, va)))
             disp_r = np.stack(rnds).mean(0)
@@ -214,13 +213,8 @@ def main():
             dq_q = margin_after(pos_q)
             dq_v = margin_after(pos_v)
             red_r, flip_r = [], []
-            for _ in range(NR):
-                rnd = []
-                for i in range(len(margin_items)):
-                    nonpad = np.where(sm[i] > 0)[0]
-                    rnd.append(
-                        list(rng.choice(nonpad, size=min(ks[i], len(nonpad)), replace=False))
-                    )
+            for rep in range(NR):
+                rnd = _random_positions(sm, np.array(ks), SEED, rep)
                 dq_r = margin_after(rnd)
                 red_r.append(np.abs(dq0) - np.abs(dq_r))
                 flip_r.append((np.sign(dq_r) != np.sign(dq0)).mean())

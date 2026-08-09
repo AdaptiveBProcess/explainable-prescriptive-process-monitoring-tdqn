@@ -189,8 +189,12 @@
  "latency_simbank": {
   "device": "cuda",
   "n_steps_ig": 128,
-  "seconds_per_prefix_batch1": 3.0942362337500526,
-  "seconds_per_prefix_batch64": 0.056833754374999046,
-  "explanations_per_second_batch64": 17.595177566518398
+  "seconds_per_prefix_batch1": 2.1054015690001506,
+  "seconds_per_prefix_batch64": 0.04529414089063266,
+  "explanations_per_second_batch64": 22.07791074820477,
+  "n_steps_ig_512": 512,
+  "seconds_per_prefix_batch1_512": 8.201310264750191,
+  "seconds_per_prefix_batch64_512": 0.17780664990624473,
+  "explanations_per_second_batch64_512": 5.62408661614899
  }
 }

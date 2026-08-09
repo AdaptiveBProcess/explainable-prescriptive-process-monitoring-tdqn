@@ -17,6 +17,24 @@ This repository implements the PL-xPPM framework: a sequential offline intervent
 
 ---
 
+## Reproducing the paper
+
+**Start at [`docs/paper/MAPPING.md`](docs/paper/MAPPING.md)** — it maps every
+number in the ICPM paper to its artifact and generator script, and lists what
+is historical/non-citable. `make paper-tables` regenerates every cited JSON
+(OPE for the 10 configurations, both estimators, plus the fidelity /
+evaluability / statistics artifacts); `python scripts/34_audit_chain_versions.py
+--expect 2` verifies no stale checkpoint is referenced.
+
+⚠️ The operational pipeline's `07_fidelity_tests.py` output
+(`artifacts/fidelity/fidelity.csv`) uses the original **signed** Q-drop
+convention and does **not** back the paper's Table 2 — the paper's fidelity
+numbers come from scripts 23–26/28/32 under the |displacement| convention of
+its Defs. 3–4. See MAPPING.md's "Historical / non-citable" list before
+comparing anything against the paper.
+
+---
+
 ## Quick start
 
 ```bash

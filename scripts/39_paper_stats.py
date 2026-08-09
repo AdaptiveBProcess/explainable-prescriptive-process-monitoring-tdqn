@@ -165,7 +165,12 @@ def run(ds: str, do_argmax: bool) -> dict:
 
 
 def latency_benchmark() -> dict:
-    """Dual-level IG wall-clock on simbank at 128 steps (paper Sec. 3.4 footnote)."""
+    """Dual-level IG wall-clock on simbank (paper Sec. 3.4 footnote).
+
+    Measured at 128 steps (the default) AND at 512 (what simbank and bpi2017ct
+    actually run, incl. the case-552 card), so the cost cited for the
+    explanations the paper exhibits has an artifact behind it.
+    """
     from xppm.xai.attributions import compute_attributions
 
     proc, opep, _ = DS["simbank"]
@@ -180,12 +185,12 @@ def latency_benchmark() -> dict:
     test = load_dataset_with_splits(
         str(REPO / proc / "D_offline.npz"), str(REPO / proc / "splits.json"), "test"
     )
-    xai_cfg = {"methods": {"risk": {"baseline": "pad", "n_steps_ig": 128}}}
     s = np.asarray(test["s"])
     sm = np.asarray(test["s_mask"])
     va = np.asarray(test["valid_actions"])
 
-    def dual(n: int, batch_size: int) -> float:
+    def dual(n: int, batch_size: int, n_steps: int) -> float:
+        xai_cfg = {"methods": {"risk": {"baseline": "pad", "n_steps_ig": n_steps}}}
         t0 = time.perf_counter()
         for tgt, cid in (("V", None), ("deltaQ", -1)):
             compute_attributions(
@@ -201,16 +206,17 @@ def latency_benchmark() -> dict:
             )
         return time.perf_counter() - t0
 
-    dual(4, 4)  # warmup
-    t1 = dual(8, 1)
-    t64 = dual(64, 64)
-    return {
-        "device": str(DEV),
-        "n_steps_ig": 128,
-        "seconds_per_prefix_batch1": t1 / 8,
-        "seconds_per_prefix_batch64": t64 / 64,
-        "explanations_per_second_batch64": 64 / t64,
-    }
+    dual(4, 4, 128)  # warmup
+    out: dict = {"device": str(DEV)}
+    for n_steps in (128, 512):
+        t1 = dual(8, 1, n_steps)
+        t64 = dual(64, 64, n_steps)
+        suffix = "" if n_steps == 128 else f"_{n_steps}"
+        out[f"n_steps_ig{suffix}"] = n_steps
+        out[f"seconds_per_prefix_batch1{suffix}"] = t1 / 8
+        out[f"seconds_per_prefix_batch64{suffix}"] = t64 / 64
+        out[f"explanations_per_second_batch64{suffix}"] = 64 / t64
+    return out
 
 
 def main() -> None:

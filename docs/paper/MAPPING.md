@@ -20,6 +20,7 @@ checkpoint is referenced.
 | BPI 2020 Int-Decl | `bpi2020-int-decl` | `configs/datasets/bpi2020-int-decl.yaml` |
 | BPI 2020 Travel | `bpi2020-travel` | `configs/datasets/bpi2020-travel.yaml` |
 | Sepsis | `sepsis` | `configs/datasets/sepsis.yaml` |
+| — (CQL run, discarded; Threats) | `bpi2012cql` | `configs/datasets/bpi2012cql.yaml` |
 
 SimBank keeps the historical root layout (`artifacts/ope/ope_dr.json`,
 `artifacts/xai/*.json`, `artifacts/fidelity/fidelity.csv`); every other
@@ -81,8 +82,9 @@ per config: `risk_explanations.json → metadata.ig_completeness_{risk,deltaq}`
 ## Historical / non-citable
 
 - `artifacts/reports/fase0/` — exploratory phase-0 comparisons kept for
-  provenance only. Paper numbers must trace to the current-pipeline artifacts
-  listed above.
+  provenance only (incl. `diag_results.json` and `diag_fase0_results_b.json`,
+  moved out of `scripts/` 2026-08-09). Paper numbers must trace to the
+  current-pipeline artifacts listed above.
 - `artifacts/_archive_v1/` — artifacts produced by the discarded v1
   (permutation-invariant) encoder. Never cited. Includes
   `diag_paper_20260804.json` (pre-v2 diagnostics, moved here 2026-08-09).

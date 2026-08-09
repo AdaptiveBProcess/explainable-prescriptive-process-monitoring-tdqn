@@ -93,6 +93,11 @@ def main() -> None:
 
     run_fidelity_tests(cfg, config_obj=config_obj)
     logger.info("07_fidelity_tests completed.")
+    logger.warning(
+        "fidelity.csv uses the legacy SIGNED Q-drop convention and does not "
+        "back the paper's Table 2 (|displacement| convention, scripts 23-26/28/32); "
+        "see docs/paper/MAPPING.md before comparing against the paper."
+    )
 
 
 if __name__ == "__main__":

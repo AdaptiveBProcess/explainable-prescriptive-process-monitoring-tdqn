@@ -70,3 +70,33 @@ def test_declared_config_matches_the_paper():
 
     assert cfg["fidelity"]["n_random"] == DEFAULT_N_RANDOM
     assert cfg["fidelity"]["seed"] == DEFAULT_SEED
+
+
+def test_random_null_draws_are_shared_across_paper_scripts():
+    """Scripts 23/26/28/32 must produce the SAME random-deletion positions.
+
+    They all delegate to evaluability._random_positions (deterministic per
+    (item, repetition)); a script with its own RNG stream would give the same
+    nominal null two values across published artifacts (2nd/3rd-round review,
+    M5/M1). Checked at source level plus determinism of the shared sampler.
+    """
+    from pathlib import Path
+
+    from xppm.xai.evaluability import _random_positions
+
+    masks = np.array([[0, 0, 1, 1, 1], [1, 1, 1, 1, 0]], dtype=float)
+    k = np.array([2, 3])
+    a = _random_positions(masks, k, seed=123, rep=0)
+    b = _random_positions(masks, k, seed=123, rep=0)
+    assert [sorted(x) for x in a] == [sorted(x) for x in b]
+    assert all(masks[i][p] > 0 for i, row in enumerate(a) for p in row)
+
+    root = Path(__file__).resolve().parents[1] / "scripts"
+    for name in (
+        "23_margin_drop_compare.py",
+        "26_fidelity_bpi2017ct.py",
+        "28_cross_level_tests.py",
+    ):
+        src = (root / name).read_text()
+        assert "_random_positions" in src, name
+        assert "default_rng" not in src, f"{name} keeps a private RNG stream"
