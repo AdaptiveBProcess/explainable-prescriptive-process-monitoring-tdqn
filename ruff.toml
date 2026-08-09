@@ -4,4 +4,11 @@ target-version = "py310"
 [lint]
 select = ["E", "F", "I"]
 
-
+# One-off paper experiment scripts, kept as run: exempt from style-only rules.
+[lint.per-file-ignores]
+"scripts/fase0/*" = ["E402", "E501", "E702", "E741"]
+"scripts/2*.py" = ["E402", "E501"]
+"scripts/3*.py" = ["E402", "E501"]
+"scripts/ranking_separation.py" = ["E402", "E501", "E702"]
+"scripts/diagnostics_paper_20260804.py" = ["E402", "E501"]
+"scripts/generate_explanation_card.py" = ["E402", "E501"]

@@ -56,6 +56,9 @@ class TDQNConfig:
 
     # Loss
     loss_type: str = "huber"  # huber | mse
+    # Conservative Q-Learning regularizer (Kumar et al. 2020). 0.0 disables it;
+    # >0 adds alpha * E[logsumexp_a Q(s,a) - Q(s,a_data)] to the TD loss.
+    cql_alpha: float = 0.0
 
     # LR scheduler
     lr_scheduler_enabled: bool = True
@@ -64,6 +67,10 @@ class TDQNConfig:
 
     # Device
     device: str = "cuda"
+
+    # Encoder architecture. 1 = original (multiset, PAD-region pooling);
+    # 2 = learned positions + attention padding mask + last-real-event pooling.
+    encoder_version: int = 2
 
     # Reproducibility
     seed: int = 42
@@ -82,15 +89,35 @@ class TransformerQNetwork(nn.Module):
         n_layers: int,
         dropout: float,
         n_actions: int,
+        encoder_version: int = 2,
     ) -> None:
+        """
+        Args:
+            encoder_version: 1 reproduces the original encoder exactly --- no
+                positional embeddings (so the prefix is read as a *multiset*),
+                no attention padding mask, and pooling at ``mask.sum()-1``,
+                which under this pipeline's left padding lands in the PAD
+                region. Every checkpoint trained before this change is v1 and
+                must keep being run that way. 2 adds learned positions, masks
+                PAD out of attention, and pools at the last real event.
+        """
         super().__init__()
         self.vocab_size = vocab_size
         self.max_len = max_len
         self.d_model = d_model
         self.n_actions = n_actions
+        self.encoder_version = int(encoder_version)
+        use_positional = self.encoder_version >= 2
+        self.use_positional = use_positional
 
         # Embedding layer
         self.embedding = nn.Embedding(vocab_size, d_model)
+
+        # Learned positional embedding. Without it the encoder is
+        # permutation-equivariant and the state is a *multiset* of activities:
+        # event order informs neither the policy nor its attributions, and two
+        # occurrences of the same activity are indistinguishable.
+        self.pos_embedding = nn.Embedding(max_len, d_model) if use_positional else None
 
         # Transformer encoder
         self.encoder = SimpleTransformerEncoder(
@@ -101,51 +128,69 @@ class TransformerQNetwork(nn.Module):
             dropout=dropout,
         )
 
-        # Pool at the last non-padded position: with left-padding this is the
-        # most recent event in the prefix, analogous to using the last hidden
-        # state of an autoregressive encoder.
         self.state_proj = nn.Linear(d_model, d_model)
 
         # Q-network head
         self.q_head = nn.Linear(d_model, n_actions)
 
+    @staticmethod
+    def last_real_index(state_mask: torch.Tensor) -> torch.Tensor:
+        """Index of the last non-padded position of each row.
+
+        Works for left- or right-padding and for masks with interior holes (the
+        fidelity tests delete events by zeroing their mask entry).
+        """
+        max_len = state_mask.size(1)
+        positions = torch.arange(max_len, device=state_mask.device).unsqueeze(0)
+        masked_positions = torch.where(
+            state_mask > 0, positions.expand_as(state_mask), torch.full_like(positions, -1)
+        )
+        return masked_positions.max(dim=1).values.clamp(min=0)
+
+    def _pool_index(self, state_mask: torch.Tensor) -> torch.Tensor:
+        if self.encoder_version >= 2:
+            return self.last_real_index(state_mask)
+        # v1: count-based index, kept verbatim so old checkpoints reproduce
+        return torch.clamp(state_mask.sum(dim=1).long() - 1, min=0, max=self.max_len - 1)
+
+    def encode(
+        self, token_emb: torch.Tensor, state_mask: torch.Tensor | None = None
+    ) -> torch.Tensor:
+        """Q-values from *token* embeddings.
+
+        Positional information is added here rather than folded into
+        ``self.embedding``, so a caller that interpolates token embeddings (the
+        Integrated Gradients path) varies token content with positions held
+        fixed, and the all-PAD reference sits at the same positions as the input.
+        """
+        x = token_emb
+        if self.pos_embedding is not None:
+            pos = torch.arange(x.size(1), device=x.device).unsqueeze(0).expand(x.size(0), -1)
+            x = x + self.pos_embedding(pos)
+
+        key_padding = None
+        if state_mask is not None and self.encoder_version >= 2:
+            key_padding = state_mask <= 0
+        encoded = self.encoder(x, key_padding_mask=key_padding)
+
+        if state_mask is not None:
+            idx = self._pool_index(state_mask)
+            state_repr = encoded[torch.arange(encoded.size(0), device=encoded.device), idx]
+        else:
+            state_repr = encoded[:, -1]
+
+        state_repr = torch.relu(self.state_proj(state_repr))
+        return self.q_head(state_repr)
+
     def forward(self, states: torch.Tensor, state_mask: torch.Tensor | None = None) -> torch.Tensor:
-        """Forward pass.
+        """Q-values from token ids.
 
         Args:
             states: (batch, max_len) token IDs
             state_mask: (batch, max_len) 1 for real tokens, 0 for padding
-
-        Returns:
-            Q-values: (batch, n_actions)
         """
-        # Embed tokens (clamp indices to valid range)
-        # Clamp to [0, vocab_size-1] to avoid out-of-bounds errors
         states_clamped = torch.clamp(states, min=0, max=self.vocab_size - 1)
-        x = self.embedding(states_clamped)  # (batch, max_len, d_model)
-
-        # Encode with transformer
-        encoded = self.encoder(x)  # (batch, max_len, d_model)
-
-        # Pool: use last non-padded token
-        if state_mask is not None:
-            # Get last real token index per sequence
-            lengths = state_mask.sum(dim=1).long() - 1  # -1 for 0-indexing
-            lengths = torch.clamp(lengths, min=0, max=self.max_len - 1)
-            batch_indices = torch.arange(encoded.size(0), device=encoded.device)
-            state_repr = encoded[batch_indices, lengths]  # (batch, d_model)
-        else:
-            # Fallback: use last token
-            state_repr = encoded[:, -1]  # (batch, d_model)
-
-        # Project to state space
-        state_repr = self.state_proj(state_repr)
-        state_repr = torch.relu(state_repr)
-
-        # Q-values
-        q_values = self.q_head(state_repr)  # (batch, n_actions)
-
-        return q_values
+        return self.encode(self.embedding(states_clamped), state_mask)
 
 
 def load_dataset_with_splits(
@@ -429,25 +474,25 @@ def train_tdqn(
         )
 
     # Initialize models
-    q_net = TransformerQNetwork(
-        vocab_size=config.vocab_size,
-        max_len=config.max_len,
-        d_model=config.d_model,
-        n_heads=config.n_heads,
-        n_layers=config.n_layers,
-        dropout=config.dropout,
-        n_actions=config.n_actions,
-    ).to(device)
+    def _build() -> TransformerQNetwork:
+        return TransformerQNetwork(
+            vocab_size=config.vocab_size,
+            max_len=config.max_len,
+            d_model=config.d_model,
+            n_heads=config.n_heads,
+            n_layers=config.n_layers,
+            dropout=config.dropout,
+            n_actions=config.n_actions,
+            encoder_version=config.encoder_version,
+        ).to(device)
 
-    target_q_net = TransformerQNetwork(
-        vocab_size=config.vocab_size,
-        max_len=config.max_len,
-        d_model=config.d_model,
-        n_heads=config.n_heads,
-        n_layers=config.n_layers,
-        dropout=config.dropout,
-        n_actions=config.n_actions,
-    ).to(device)
+    q_net = _build()
+    target_q_net = _build()
+    logger.info(
+        "Encoder version: %d (positional=%s)",
+        config.encoder_version,
+        config.encoder_version >= 2,
+    )
 
     # Initialize target network with online network weights
     target_q_net.load_state_dict(q_net.state_dict())
@@ -519,6 +564,10 @@ def train_tdqn(
 
             # Loss
             loss = loss_fn(q_a, target)
+            if config.cql_alpha > 0:
+                q_masked_all = apply_action_mask(q_values, valid_actions)
+                cql_penalty = (torch.logsumexp(q_masked_all, dim=1) - q_a).mean()
+                loss = loss + config.cql_alpha * cql_penalty
 
             # Check for NaN/inf
             if torch.isnan(loss) or torch.isinf(loss):
@@ -716,6 +765,9 @@ def save_checkpoint(
             "max_len": config.max_len,
             "vocab_size": config.vocab_size,
             "d_model": config.d_model,
+            "n_heads": config.n_heads,
+            "n_layers": config.n_layers,
+            "encoder_version": int(getattr(q_net, "encoder_version", 1)),
         },
         q_ckpt_path,
     )

@@ -19,9 +19,10 @@ import pandas as pd
 import torch
 from scipy.stats import kendalltau, spearmanr
 
+from xppm.rl.factory import load_q_network
 from xppm.rl.models.masking import apply_action_mask
 from xppm.rl.train_tdqn import TransformerQNetwork, load_dataset_with_splits
-from xppm.utils.io import fingerprint_data, get_git_commit, load_json, load_npz
+from xppm.utils.io import fingerprint_data, get_git_commit, load_json
 from xppm.utils.logging import ensure_dir, get_logger
 from xppm.utils.seed import set_seed
 
@@ -35,36 +36,8 @@ def _load_q_network(
     config: dict[str, Any],
     device: torch.device,
 ) -> TransformerQNetwork:
-    """Load TransformerQNetwork from checkpoint (same as explain_policy)."""
-    data = load_npz(npz_path)
-    training_cfg = config.get("training", {})
-    transformer_cfg = training_cfg.get("transformer", {})
-
-    max_len = int(transformer_cfg.get("max_len", data["s"].shape[1]))
-    d_model = int(transformer_cfg.get("d_model", 128))
-    n_heads = int(transformer_cfg.get("n_heads", 4))
-    n_layers = int(transformer_cfg.get("n_layers", 3))
-    dropout = float(transformer_cfg.get("dropout", 0.1))
-
-    vocab = load_json(vocab_path)
-    token2id = vocab.get("token2id", {})
-    vocab_size = len(token2id) if token2id else int(data["s"].max() + 1)
-    n_actions = int(data["valid_actions"].shape[1])
-
-    q_net = TransformerQNetwork(
-        vocab_size=vocab_size,
-        max_len=max_len,
-        d_model=d_model,
-        n_heads=n_heads,
-        n_layers=n_layers,
-        dropout=dropout,
-        n_actions=n_actions,
-    ).to(device)
-    raw_ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
-    state_dict = raw_ckpt.get("model_state_dict", raw_ckpt)
-    q_net.load_state_dict(state_dict, strict=False)
-    q_net.eval()
-    return q_net
+    """Load TransformerQNetwork from checkpoint. Delegates to the canonical loader."""
+    return load_q_network(ckpt_path, npz_path, vocab_path, config, device)
 
 
 def _debug_perturbation(

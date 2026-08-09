@@ -6,8 +6,8 @@ import json
 
 import pytest
 
-from xppm.serve.guard import PolicyGuard
-from xppm.serve.schemas import CaseFeatures, DecisionRequest
+from xppm_serve.guard import PolicyGuard
+from xppm_serve.schemas import CaseFeatures, DecisionRequest
 
 
 @pytest.fixture

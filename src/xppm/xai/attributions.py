@@ -19,29 +19,23 @@ def _forward_from_embeddings(
     embeddings: torch.Tensor,
     state_mask: torch.Tensor | None,
 ) -> torch.Tensor:
-    """Forward pass from embedding space (bypassing q_net.embedding).
+    """Forward pass from *token* embedding space, bypassing q_net.embedding.
+
+    Delegates to :meth:`TransformerQNetwork.encode`, so positional embeddings,
+    the attention padding mask and the pooling index are applied exactly as in
+    the deployed forward pass. Interpolating here therefore varies token content
+    with positions held fixed, which is what makes the IG reference (all-PAD at
+    the same positions) meaningful.
 
     Args:
         q_net: Q-network
-        embeddings: (batch, max_len, d_model)
+        embeddings: (batch, max_len, d_model) token embeddings
         state_mask: (batch, max_len) 1=real, 0=pad
 
     Returns:
         q_values: (batch, n_actions)
     """
-    encoded = q_net.encoder(embeddings)
-
-    if state_mask is not None:
-        lengths = state_mask.sum(dim=1).long() - 1
-        lengths = torch.clamp(lengths, min=0, max=q_net.max_len - 1)
-        batch_idx = torch.arange(encoded.size(0), device=encoded.device)
-        state_repr = encoded[batch_idx, lengths]
-    else:
-        state_repr = encoded[:, -1]
-
-    state_repr = q_net.state_proj(state_repr)
-    state_repr = torch.relu(state_repr)
-    return q_net.q_head(state_repr)
+    return q_net.encode(embeddings, state_mask)
 
 
 def _build_baseline(

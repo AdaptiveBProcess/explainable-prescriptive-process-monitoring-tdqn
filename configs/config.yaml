@@ -178,6 +178,10 @@ mdp:
 training:
   device: "cuda"        # cuda | cpu
   precision: "fp32"     # fp32 | fp16 (si usas amp)
+  # Encoder architecture: 2 = learned positional embeddings + attention padding
+  # mask + pooling at the last real event. 1 reproduces the original
+  # permutation-equivariant (multiset) encoder of pre-existing checkpoints.
+  encoder_version: 2
   batch_size: 128       # Reducido de 256 para RTX 3050 6GB
   max_steps: 200000
   eval_every: 5000
@@ -220,6 +224,12 @@ ope:
   method: "doubly_robust"
   pi_e_temperature: 1.0  # Temperature for π_e softmax policy
   evaluate_heuristic: false  # Set to true to evaluate heuristic baseline
+  gamma: 1.0             # OPE discount; 1.0 = undiscounted per-case KPI
+  # Support gate for off-policy evaluation, declared BEFORE any arm is scored and
+  # applied identically to the learned policy and to every baseline. Arms whose
+  # trajectory-weight ESS fraction falls below it are reported with
+  # on_support=false; they are never silently dropped.
+  min_ess_fraction: 0.10
   behavior_model:
     type: "multiclass_logreg"  # multiclass_logreg | mlp
     features: "state"          # state | tabular
@@ -242,7 +252,11 @@ ope:
 
 xai:
   enabled: true
-  checkpoint_path: "artifacts/checkpoints/Q_theta.ckpt"
+  # v2 encoder run (positional embeddings), simbank, launched 2026-08-07.
+  # Do NOT point this at artifacts/checkpoints/ — that dir held a stale copy
+  # of a bpi2012 v1 checkpoint and is exactly the silent-mixing hazard the
+  # loaders now guard against.
+  checkpoint_path: "artifacts/models/tdqn/20260807_170819/Q_theta.ckpt"
   seed: 123
   split: "test"
   n_cases: 200
@@ -302,7 +316,7 @@ fidelity:
 distill:
   enabled: true
   seed: 42                   # Random seed for reproducibility
-  teacher_checkpoint: "artifacts/checkpoints/Q_theta.ckpt"
+  teacher_checkpoint: "artifacts/models/tdqn/20260807_170819/Q_theta.ckpt"
   method: "viper"            # viper | behavioral_cloning
   surrogate:
     type: "decision_tree"    # decision_tree | rule_list

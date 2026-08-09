@@ -1,0 +1,729 @@
+{
+ "bpi2012": {
+  "n_test_transitions": 30425,
+  "n_test_cases": 2619,
+  "v_case_percentiles": {
+   "1": -0.00695370975881815,
+   "5": -0.005487865302711725,
+   "10": -0.0040360866114497185,
+   "25": -0.0027011483907699585,
+   "50": 0.0008550882339477539,
+   "75": 0.7479820251464844,
+   "90": 1.013983964920044,
+   "99": 1.0535324811935425
+  },
+  "v_case_mean": 0.4315771460533142,
+  "v_case_std": 0.4468318521976471,
+  "lowest_V_explained": [
+   {
+    "case_id": 213897,
+    "V": 0.7479819059371948,
+    "pctile": 50.28636884306987,
+    "delta_q": 0.1456875205039978,
+    "a_star": "W_Nabellen incomplete dossiers",
+    "top_tokens": [
+     "A_SUBMITTED",
+     "A_PARTLYSUBMITTED"
+    ],
+    "top_drivers": [
+     "A_SUBMITTED",
+     "A_PARTLYSUBMITTED"
+    ]
+   },
+   {
+    "case_id": 174189,
+    "V": 0.7479819655418396,
+    "pctile": 50.28636884306987,
+    "delta_q": 0.14568758010864258,
+    "a_star": "W_Nabellen incomplete dossiers",
+    "top_tokens": [
+     "A_SUBMITTED",
+     "A_PARTLYSUBMITTED"
+    ],
+    "top_drivers": [
+     "A_SUBMITTED",
+     "A_PARTLYSUBMITTED"
+    ]
+   },
+   {
+    "case_id": 174267,
+    "V": 0.7479819655418396,
+    "pctile": 50.28636884306987,
+    "delta_q": 0.14568758010864258,
+    "a_star": "W_Nabellen incomplete dossiers",
+    "top_tokens": [
+     "A_SUBMITTED",
+     "A_PARTLYSUBMITTED"
+    ],
+    "top_drivers": [
+     "A_SUBMITTED",
+     "A_PARTLYSUBMITTED"
+    ]
+   }
+  ],
+  "nearest_5th_pct_explained": {
+   "case_id": 174189,
+   "V": 0.7479819655418396,
+   "pctile": 50.28636884306987,
+   "delta_q": 0.14568758010864258,
+   "a_star": "W_Nabellen incomplete dossiers",
+   "top_tokens": [
+    "A_SUBMITTED",
+    "A_PARTLYSUBMITTED"
+   ],
+   "top_drivers": [
+    "A_SUBMITTED",
+    "A_PARTLYSUBMITTED"
+   ]
+  },
+  "n_dq_items": 56,
+  "dq_margin_drop": {
+   "0.1": {
+    "red_guided": -0.00996252428740263,
+    "red_random": 0.025860773399472237,
+    "red_anti": 0.065974161028862,
+    "signflip_guided": 0.03571428571428571,
+    "signflip_random": 0.02857142857142857,
+    "mean_abs_dq_orig": 0.1277935802936554
+   },
+   "0.2": {
+    "red_guided": -0.02444487437605858,
+    "red_random": 0.02615312673151493,
+    "red_anti": 0.06563009321689606,
+    "signflip_guided": 0.017857142857142856,
+    "signflip_random": 0.024999999999999998,
+    "mean_abs_dq_orig": 0.1277935802936554
+   },
+   "0.3": {
+    "red_guided": -0.021402504295110703,
+    "red_random": 0.021617669612169266,
+    "red_anti": 0.06500809639692307,
+    "signflip_guided": 0.017857142857142856,
+    "signflip_random": 0.03749999999999999,
+    "mean_abs_dq_orig": 0.1277935802936554
+   },
+   "0.5": {
+    "red_guided": -0.02087547443807125,
+    "red_random": 0.021793369203805923,
+    "red_anti": 0.06469239294528961,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.03749999999999999,
+    "mean_abs_dq_orig": 0.1277935802936554
+   }
+  }
+ },
+ "simbank": {
+  "n_test_transitions": 199692,
+  "n_test_cases": 20000,
+  "v_case_percentiles": {
+   "1": -1780.9205322265625,
+   "5": -1751.633544921875,
+   "10": -1751.633544921875,
+   "25": -255.5380859375,
+   "50": 416.221435546875,
+   "75": 5419.34033203125,
+   "90": 5419.34033203125,
+   "99": 17341.90625
+  },
+  "v_case_mean": 1950.4576416015625,
+  "v_case_std": 4639.8837890625,
+  "lowest_V_explained": [
+   {
+    "case_id": 552,
+    "V": 416.2214660644531,
+    "pctile": 69.845,
+    "delta_q": 671.4552001953125,
+    "a_star": "contact_headquarters",
+    "top_tokens": [
+     "validate_application",
+     "initiate_application",
+     "validate_application"
+    ],
+    "top_drivers": [
+     "validate_application",
+     "initiate_application",
+     "email_customer"
+    ]
+   },
+   {
+    "case_id": 1341,
+    "V": 416.2214660644531,
+    "pctile": 69.845,
+    "delta_q": 671.4552001953125,
+    "a_star": "contact_headquarters",
+    "top_tokens": [
+     "validate_application",
+     "initiate_application",
+     "validate_application"
+    ],
+    "top_drivers": [
+     "validate_application",
+     "initiate_application",
+     "email_customer"
+    ]
+   },
+   {
+    "case_id": 1436,
+    "V": 416.2214660644531,
+    "pctile": 69.845,
+    "delta_q": 671.4552001953125,
+    "a_star": "contact_headquarters",
+    "top_tokens": [
+     "validate_application",
+     "initiate_application",
+     "validate_application"
+    ],
+    "top_drivers": [
+     "validate_application",
+     "initiate_application",
+     "email_customer"
+    ]
+   }
+  ],
+  "nearest_5th_pct_explained": {
+   "case_id": 552,
+   "V": 416.2214660644531,
+   "pctile": 69.845,
+   "delta_q": 671.4552001953125,
+   "a_star": "contact_headquarters",
+   "top_tokens": [
+    "validate_application",
+    "initiate_application",
+    "validate_application"
+   ],
+   "top_drivers": [
+    "validate_application",
+    "initiate_application",
+    "email_customer"
+   ]
+  },
+  "case_552": {
+   "case_id": 552,
+   "V": 416.2214660644531,
+   "pctile": 69.845,
+   "delta_q": 671.4552001953125,
+   "a_star": "contact_headquarters",
+   "top_tokens": [
+    "validate_application",
+    "initiate_application",
+    "validate_application"
+   ],
+   "top_drivers": [
+    "validate_application",
+    "initiate_application",
+    "email_customer"
+   ]
+  },
+  "n_dq_items": 69,
+  "dq_margin_drop": {
+   "0.1": {
+    "red_guided": -0.96135413646698,
+    "red_random": -67.25177001953125,
+    "red_anti": -0.29807448387145996,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0,
+    "mean_abs_dq_orig": 681.2418212890625
+   },
+   "0.2": {
+    "red_guided": -12.276410102844238,
+    "red_random": -127.60662841796875,
+    "red_anti": -617.732177734375,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0,
+    "mean_abs_dq_orig": 681.2418212890625
+   },
+   "0.3": {
+    "red_guided": -11.96500015258789,
+    "red_random": -176.57281494140625,
+    "red_anti": -836.094970703125,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.007246376811594203,
+    "mean_abs_dq_orig": 681.2418212890625
+   },
+   "0.5": {
+    "red_guided": -14.22181224822998,
+    "red_random": -205.31678771972656,
+    "red_anti": -391.5815124511719,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0608695652173913,
+    "mean_abs_dq_orig": 681.2418212890625
+   }
+  }
+ },
+ "bpi2017": {
+  "n_test_transitions": 88459,
+  "n_test_cases": 6303,
+  "v_case_percentiles": {
+   "1": 0.9971466660499573,
+   "5": 0.9994332790374756,
+   "10": 1.0002570152282715,
+   "25": 1.001094102859497,
+   "50": 1.0027523040771484,
+   "75": 1.0031378269195557,
+   "90": 1.0042177438735962,
+   "99": 1.0057432651519775
+  },
+  "v_case_mean": 1.0018651485443115,
+  "v_case_std": 0.005387161858379841,
+  "lowest_V_explained": [
+   {
+    "case_id": 26400,
+    "V": 1.002989411354065,
+    "pctile": 63.46184356655561,
+    "delta_q": 0.0002689361572265625,
+    "a_star": "W_Call after offers",
+    "top_tokens": [
+     "O_Accepted",
+     "A_Incomplete",
+     "A_Submitted"
+    ],
+    "top_drivers": [
+     "O_Accepted",
+     "A_Incomplete",
+     "W_Call incomplete files"
+    ]
+   },
+   {
+    "case_id": 26526,
+    "V": 1.003220796585083,
+    "pctile": 81.50087260034904,
+    "delta_q": 0.0003554821014404297,
+    "a_star": "W_Call after offers",
+    "top_tokens": [
+     "A_Pending",
+     "O_Accepted",
+     "W_Complete application"
+    ],
+    "top_drivers": [
+     "A_Pending",
+     "O_Accepted",
+     "W_Complete application"
+    ]
+   },
+   {
+    "case_id": 17079,
+    "V": 1.0033477544784546,
+    "pctile": 82.77010947168016,
+    "delta_q": 0.0004907846450805664,
+    "a_star": "W_Call after offers",
+    "top_tokens": [
+     "O_Accepted",
+     "A_Incomplete",
+     "O_Create Offer"
+    ],
+    "top_drivers": [
+     "O_Accepted",
+     "A_Incomplete",
+     "A_Validating"
+    ]
+   }
+  ],
+  "nearest_5th_pct_explained": {
+   "case_id": 26400,
+   "V": 1.002989411354065,
+   "pctile": 63.46184356655561,
+   "delta_q": 0.0002689361572265625,
+   "a_star": "W_Call after offers",
+   "top_tokens": [
+    "O_Accepted",
+    "A_Incomplete",
+    "A_Submitted"
+   ],
+   "top_drivers": [
+    "O_Accepted",
+    "A_Incomplete",
+    "W_Call incomplete files"
+   ]
+  },
+  "n_dq_items": 34,
+  "dq_margin_drop": {
+   "0.1": {
+    "red_guided": -0.01862284168601036,
+    "red_random": -0.001413974561728537,
+    "red_anti": -4.0517134038964286e-05,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.3941176470588235,
+    "mean_abs_dq_orig": 0.0009848090121522546
+   },
+   "0.2": {
+    "red_guided": -0.020826369524002075,
+    "red_random": -0.0026358850300312042,
+    "red_anti": -0.000552801531739533,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.4705882352941176,
+    "mean_abs_dq_orig": 0.0009848090121522546
+   },
+   "0.3": {
+    "red_guided": -0.021103784441947937,
+    "red_random": -0.00390985794365406,
+    "red_anti": -0.00040039594750851393,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.6352941176470589,
+    "mean_abs_dq_orig": 0.0009848090121522546
+   },
+   "0.5": {
+    "red_guided": -0.022380948066711426,
+    "red_random": -0.00733035197481513,
+    "red_anti": -0.0004262187867425382,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.776470588235294,
+    "mean_abs_dq_orig": 0.0009848090121522546
+   }
+  }
+ },
+ "bpi2020-rfp": {
+  "n_test_transitions": 6006,
+  "n_test_cases": 1364,
+  "v_case_percentiles": {
+   "1": 0.9798717498779297,
+   "5": 0.9798717498779297,
+   "10": 1.0067079067230225,
+   "25": 1.0076634883880615,
+   "50": 1.0084335803985596,
+   "75": 1.008457899093628,
+   "90": 1.008457899093628,
+   "99": 1.008457899093628
+  },
+  "v_case_mean": 1.0064892768859863,
+  "v_case_std": 0.00674929516389966,
+  "lowest_V_explained": [
+   {
+    "case_id": 2848,
+    "V": 0.9738272428512573,
+    "pctile": 0.07331378299120235,
+    "delta_q": 0.31936192512512207,
+    "a_star": "Request Payment",
+    "top_tokens": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ],
+    "top_drivers": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ]
+   },
+   {
+    "case_id": 2990,
+    "V": 0.9798717498779297,
+    "pctile": 0.5865102639296188,
+    "delta_q": 0.436881959438324,
+    "a_star": "Request Payment",
+    "top_tokens": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ],
+    "top_drivers": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ]
+   },
+   {
+    "case_id": 3564,
+    "V": 0.9798717498779297,
+    "pctile": 0.5865102639296188,
+    "delta_q": 0.436881959438324,
+    "a_star": "Request Payment",
+    "top_tokens": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ],
+    "top_drivers": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ]
+   }
+  ],
+  "nearest_5th_pct_explained": {
+   "case_id": 2990,
+   "V": 0.9798717498779297,
+   "pctile": 0.5865102639296188,
+   "delta_q": 0.436881959438324,
+   "a_star": "Request Payment",
+   "top_tokens": [
+    "Request For Payment REJECTED by ADMINISTRATION",
+    "Request For Payment SUBMITTED by EMPLOYEE"
+   ],
+   "top_drivers": [
+    "Request For Payment REJECTED by ADMINISTRATION",
+    "Request For Payment SUBMITTED by EMPLOYEE"
+   ]
+  },
+  "n_dq_items": 9,
+  "dq_margin_drop": {
+   "0.1": {
+    "red_guided": 0.025059984996914864,
+    "red_random": 0.02297358028590679,
+    "red_anti": 0.029239794239401817,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0,
+    "mean_abs_dq_orig": 0.42546308040618896
+   },
+   "0.2": {
+    "red_guided": 0.025059984996914864,
+    "red_random": 0.02287076599895954,
+    "red_anti": 0.029239794239401817,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0,
+    "mean_abs_dq_orig": 0.42546308040618896
+   },
+   "0.3": {
+    "red_guided": 0.02775120735168457,
+    "red_random": 0.03347550705075264,
+    "red_anti": 0.02569110505282879,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0,
+    "mean_abs_dq_orig": 0.42546308040618896
+   },
+   "0.5": {
+    "red_guided": 0.03612089902162552,
+    "red_random": 0.032634638249874115,
+    "red_anti": 0.039734695106744766,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0,
+    "mean_abs_dq_orig": 0.42546308040618896
+   }
+  }
+ },
+ "bpi2020-int-decl": {
+  "n_test_transitions": 13227,
+  "n_test_cases": 1291,
+  "v_case_percentiles": {
+   "1": 0.9549165964126587,
+   "5": 1.0080504417419434,
+   "10": 1.008995771408081,
+   "25": 1.0101733207702637,
+   "50": 1.0103466510772705,
+   "75": 1.0110324621200562,
+   "90": 1.0118017196655273,
+   "99": 1.0125067234039307
+  },
+  "v_case_mean": 1.003808856010437,
+  "v_case_std": 0.06316877901554108,
+  "lowest_V_explained": [
+   {
+    "case_id": 2766,
+    "V": 0.43433690071105957,
+    "pctile": 0.69713400464756,
+    "delta_q": 0.30340099334716797,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "Permit APPROVED by ADMINISTRATION",
+     "Declaration REJECTED by EMPLOYEE",
+     "Start trip"
+    ],
+    "top_drivers": [
+     "Permit APPROVED by ADMINISTRATION",
+     "Declaration REJECTED by EMPLOYEE",
+     "Start trip"
+    ]
+   },
+   {
+    "case_id": 2286,
+    "V": 0.9681428074836731,
+    "pctile": 1.9364833462432223,
+    "delta_q": 0.0365641713142395,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "Permit APPROVED by ADMINISTRATION",
+     "Declaration REJECTED by ADMINISTRATION",
+     "End trip"
+    ],
+    "top_drivers": [
+     "Permit APPROVED by ADMINISTRATION",
+     "Declaration REJECTED by ADMINISTRATION",
+     "End trip"
+    ]
+   },
+   {
+    "case_id": 2690,
+    "V": 0.9681428074836731,
+    "pctile": 1.9364833462432223,
+    "delta_q": 0.0365641713142395,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "Permit APPROVED by ADMINISTRATION",
+     "Declaration REJECTED by ADMINISTRATION",
+     "End trip"
+    ],
+    "top_drivers": [
+     "Permit APPROVED by ADMINISTRATION",
+     "Declaration REJECTED by ADMINISTRATION",
+     "End trip"
+    ]
+   }
+  ],
+  "nearest_5th_pct_explained": {
+   "case_id": 2790,
+   "V": 1.0046072006225586,
+   "pctile": 2.865995352439969,
+   "delta_q": 0.037290334701538086,
+   "a_star": "Send Reminder",
+   "top_tokens": [
+    "Declaration REJECTED by ADMINISTRATION",
+    "Permit APPROVED by BUDGET OWNER",
+    "End trip"
+   ],
+   "top_drivers": [
+    "Declaration REJECTED by ADMINISTRATION",
+    "Permit APPROVED by BUDGET OWNER",
+    "Permit APPROVED by ADMINISTRATION"
+   ]
+  },
+  "n_dq_items": 6,
+  "dq_margin_drop": {
+   "0.1": {
+    "red_guided": 0.012434512376785278,
+    "red_random": 0.009502866305410862,
+    "red_anti": 0.02517724595963955,
+    "signflip_guided": 0.3333333333333333,
+    "signflip_random": 0.09999999999999999,
+    "mean_abs_dq_orig": 0.08127906918525696
+   },
+   "0.2": {
+    "red_guided": 0.006356885191053152,
+    "red_random": 0.022443482652306557,
+    "red_anti": 0.021424099802970886,
+    "signflip_guided": 0.8333333333333334,
+    "signflip_random": 0.31666666666666665,
+    "mean_abs_dq_orig": 0.08127906918525696
+   },
+   "0.3": {
+    "red_guided": 0.030331134796142578,
+    "red_random": 0.007050854619592428,
+    "red_anti": 0.01751365326344967,
+    "signflip_guided": 0.8333333333333334,
+    "signflip_random": 0.35,
+    "mean_abs_dq_orig": 0.08127906918525696
+   },
+   "0.5": {
+    "red_guided": 0.015287230722606182,
+    "red_random": 0.024003950878977776,
+    "red_anti": 0.0017322400817647576,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.41666666666666663,
+    "mean_abs_dq_orig": 0.08127906918525696
+   }
+  }
+ },
+ "bpi2020-travel": {
+  "n_test_transitions": 15723,
+  "n_test_cases": 1414,
+  "v_case_percentiles": {
+   "1": 0.5974661111831665,
+   "5": 0.9501973390579224,
+   "10": 0.9703102111816406,
+   "25": 1.0087970495224,
+   "50": 1.0102804899215698,
+   "75": 1.0109058618545532,
+   "90": 1.011752963066101,
+   "99": 1.0131123065948486
+  },
+  "v_case_mean": 0.9953848123550415,
+  "v_case_std": 0.06337370723485947,
+  "lowest_V_explained": [
+   {
+    "case_id": 242,
+    "V": 0.37381651997566223,
+    "pctile": 0.0,
+    "delta_q": 0.0917007327079773,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "Permit SUBMITTED by EMPLOYEE",
+     "Permit REJECTED by BUDGET OWNER",
+     "End trip"
+    ],
+    "top_drivers": [
+     "Permit REJECTED by BUDGET OWNER",
+     "Permit SUBMITTED by EMPLOYEE",
+     "Start trip"
+    ]
+   },
+   {
+    "case_id": 3913,
+    "V": 0.6334824562072754,
+    "pctile": 1.3437057991513437,
+    "delta_q": 0.6410378813743591,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "Permit SAVED by EMPLOYEE",
+     "End trip"
+    ],
+    "top_drivers": [
+     "Permit SAVED by EMPLOYEE",
+     "End trip"
+    ]
+   },
+   {
+    "case_id": 126,
+    "V": 0.8933956027030945,
+    "pctile": 2.1216407355021216,
+    "delta_q": 0.21013164520263672,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "End trip",
+     "Permit REJECTED by ADMINISTRATION",
+     "Permit SUBMITTED by EMPLOYEE"
+    ],
+    "top_drivers": [
+     "Permit REJECTED by ADMINISTRATION",
+     "End trip",
+     "Permit SUBMITTED by EMPLOYEE"
+    ]
+   }
+  ],
+  "nearest_5th_pct_explained": {
+   "case_id": 126,
+   "V": 0.8933956027030945,
+   "pctile": 2.1216407355021216,
+   "delta_q": 0.21013164520263672,
+   "a_star": "Send Reminder",
+   "top_tokens": [
+    "End trip",
+    "Permit REJECTED by ADMINISTRATION",
+    "Permit SUBMITTED by EMPLOYEE"
+   ],
+   "top_drivers": [
+    "Permit REJECTED by ADMINISTRATION",
+    "End trip",
+    "Permit SUBMITTED by EMPLOYEE"
+   ]
+  },
+  "n_dq_items": 9,
+  "dq_margin_drop": {
+   "0.1": {
+    "red_guided": 0.11113373190164566,
+    "red_random": 0.07347797602415085,
+    "red_anti": 0.030044840648770332,
+    "signflip_guided": 0.6666666666666666,
+    "signflip_random": 0.17777777777777776,
+    "mean_abs_dq_orig": 0.13296397030353546
+   },
+   "0.2": {
+    "red_guided": 0.11087101697921753,
+    "red_random": 0.07148412615060806,
+    "red_anti": 0.0252157524228096,
+    "signflip_guided": 0.5555555555555556,
+    "signflip_random": 0.2666666666666667,
+    "mean_abs_dq_orig": 0.13296397030353546
+   },
+   "0.3": {
+    "red_guided": 0.11048813909292221,
+    "red_random": 0.08904801309108734,
+    "red_anti": 0.0596809908747673,
+    "signflip_guided": 0.5555555555555556,
+    "signflip_random": 0.32222222222222224,
+    "mean_abs_dq_orig": 0.13296397030353546
+   },
+   "0.5": {
+    "red_guided": 0.09732937812805176,
+    "red_random": 0.054980356246232986,
+    "red_anti": 0.0451546348631382,
+    "signflip_guided": 0.6666666666666666,
+    "signflip_random": 0.5777777777777777,
+    "mean_abs_dq_orig": 0.13296397030353546
+   }
+  }
+ }
+}

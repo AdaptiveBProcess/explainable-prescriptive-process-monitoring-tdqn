@@ -30,6 +30,7 @@ The returned ``nn.Module`` must be in ``eval()`` mode and respond to
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any, Callable
 
@@ -119,24 +120,39 @@ class AgentFactory:
 # ---------------------------------------------------------------------------
 
 
-def _load_tdqn(
+def load_q_network(
     ckpt_path: str | Path,
     npz_path: str | Path,
     vocab_path: str | Path,
     config: dict[str, Any],
     device: torch.device,
 ) -> nn.Module:
-    """Load a ``TransformerQNetwork`` from a TDQN checkpoint."""
+    """Load a ``TransformerQNetwork`` from a TDQN checkpoint.
+
+    Single canonical loader: infers ``encoder_version`` from the checkpoint
+    (``infer_encoder_version``) and raises on any state-dict mismatch beyond
+    a legitimately absent ``pos_embedding`` in v1 checkpoints.
+    """
     from xppm.rl.train_tdqn import TransformerQNetwork
 
     data = load_npz(npz_path)
     training_cfg = config.get("training", {})
     transformer_cfg = training_cfg.get("transformer", {})
 
-    max_len = int(transformer_cfg.get("max_len", data["s"].shape[1]))
-    d_model = int(transformer_cfg.get("d_model", 128))
-    n_heads = int(transformer_cfg.get("n_heads", 4))
-    n_layers = int(transformer_cfg.get("n_layers", 3))
+    raw_ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
+    state_dict = raw_ckpt.get("model_state_dict", raw_ckpt)
+
+    # Architecture hyperparameters: the checkpoint's own metadata wins over the
+    # caller's config — datasets with non-default transformers (e.g. sepsis,
+    # d_model=64/n_heads=2) would otherwise fail or, worse for n_heads (which
+    # leaves parameter shapes unchanged), load silently with wrong behaviour.
+    def _hp(key: str, cfg_default: Any) -> Any:
+        return raw_ckpt.get(key, transformer_cfg.get(key, cfg_default))
+
+    max_len = int(_hp("max_len", data["s"].shape[1]))
+    d_model = int(_hp("d_model", 128))
+    n_heads = int(_hp("n_heads", 4))
+    n_layers = int(_hp("n_layers", 3))
     dropout = float(transformer_cfg.get("dropout", 0.1))
 
     vocab = load_json(vocab_path)
@@ -152,13 +168,63 @@ def _load_tdqn(
         n_layers=n_layers,
         dropout=dropout,
         n_actions=n_actions,
+        encoder_version=infer_encoder_version(raw_ckpt, state_dict),
     ).to(device)
 
-    raw_ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
-    state_dict = raw_ckpt.get("model_state_dict", raw_ckpt)
-    q_net.load_state_dict(state_dict, strict=False)
+    missing, unexpected = q_net.load_state_dict(state_dict, strict=False)
+    critical = [k for k in missing if not k.startswith("pos_embedding.")]
+    if critical or unexpected:
+        raise RuntimeError(
+            f"Checkpoint does not match the architecture: missing={critical}, "
+            f"unexpected={list(unexpected)}"
+        )
+    _enforce_expected_encoder_version(ckpt_path, q_net.encoder_version)
     q_net.eval()
     return q_net
+
+
+def _enforce_expected_encoder_version(ckpt_path: str | Path, actual: int) -> None:
+    """Fail loudly if XPPM_EXPECT_ENCODER_VERSION is set and the checkpoint differs.
+
+    Regeneration runs export ``XPPM_EXPECT_ENCODER_VERSION=2`` so that any stage
+    silently resolving a stale checkpoint (a hardcoded default, an old
+    ``ope_dr.json`` metadata pin, a dataset yaml not yet updated) aborts instead
+    of mixing encoder versions across the paper chain. Unset, the guard is
+    inactive and legacy v1 checkpoints load normally.
+    """
+    expected = os.environ.get("XPPM_EXPECT_ENCODER_VERSION")
+    if expected is not None and int(expected) != int(actual):
+        raise RuntimeError(
+            f"Encoder version guard: {ckpt_path} is v{actual} but "
+            f"XPPM_EXPECT_ENCODER_VERSION={expected}. A stale checkpoint is being "
+            f"loaded into a chain that expects v{expected}; update the pin that "
+            f"resolved this path (config yaml, --ckpt, or ope_dr.json metadata)."
+        )
+
+
+def _load_tdqn(
+    ckpt_path: str | Path,
+    npz_path: str | Path,
+    vocab_path: str | Path,
+    config: dict[str, Any],
+    device: torch.device,
+) -> nn.Module:
+    """Registry entry for the ``tdqn`` algorithm; delegates to ``load_q_network``."""
+    return load_q_network(ckpt_path, npz_path, vocab_path, config, device)
+
+
+def infer_encoder_version(ckpt: dict, state_dict: dict) -> int:
+    """Which encoder a checkpoint was trained with.
+
+    Checkpoints written before the encoder gained positional embeddings carry
+    neither the field nor the tensor. They must be rebuilt as v1: loading them
+    into v2 would leave ``pos_embedding`` randomly initialised *and* move the
+    pooling index off the position they were trained to read, silently changing
+    every prediction.
+    """
+    if isinstance(ckpt, dict) and "encoder_version" in ckpt:
+        return int(ckpt["encoder_version"])
+    return 2 if any(k.startswith("pos_embedding.") for k in state_dict) else 1
 
 
 # Register built-in algorithms

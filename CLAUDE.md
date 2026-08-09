@@ -125,7 +125,41 @@ Hyperparameter defaults for DVC are in `params.yaml`. Sweep templates in `config
 
 ### Model Architecture
 
-Embedding → TransformerEncoder (d_model=128, 4 heads, 3 layers) → MLP Q-head → Q-values per action. Action masking sets invalid actions to -inf before argmax. Stabilized with Double-DQN, target network (updated every 2000 steps), gradient clipping (norm=10), Huber loss.
+Token embedding (+ learned positional embedding) → TransformerEncoder (d_model=128, 4 heads,
+3 layers, PAD masked out of attention) → pool at the last real event → MLP Q-head → Q-values per
+action. Action masking sets invalid actions to -inf before argmax. Stabilized with Double-DQN,
+target network (updated every 2000 steps), gradient clipping (norm=10), Huber loss.
+
+**Encoder versions.** `TransformerQNetwork(encoder_version=...)`, recorded in every checkpoint:
+
+- **v2** (default, `training.encoder_version: 2`): learned positional embeddings, attention padding
+  mask, pooling at the last real event.
+- **v1** (all checkpoints trained before this change): none of the three. The encoder is
+  permutation-equivariant, so the state is a *multiset* of activities — event order informs neither
+  the policy nor its attributions, and two occurrences of one activity are indistinguishable. Its
+  pooling index `mask.sum()-1` lands in the PAD region under left padding, which was harmless only
+  because every PAD position then carried the same representation.
+
+`infer_encoder_version()` reads the version from the checkpoint (falling back to the presence of
+`pos_embedding.weight`), so old checkpoints keep reproducing their trained behaviour exactly.
+Loaders raise instead of silently accepting a mismatch. Anything that mirrors the pooling rule must
+delegate to `q_net._pool_index` / `gather_last_position(..., q_net=...)` rather than reimplement it.
+
+**Chain-version guards (Fase 1).** Checkpoint pins propagate silently: `05_run_ope_dr.py` writes
+the checkpoint path into `ope_dr.json` metadata, and downstream paper scripts resolve it from
+there. Three guards prevent v1/v2 mixing during regeneration:
+
+- `05_run_ope_dr.py` has **no hardcoded default checkpoint** — it requires `--ckpt` or
+  `experiment.checkpoint_path` and fails loudly otherwise.
+- `export XPPM_EXPECT_ENCODER_VERSION=2` before regenerating: the canonical loader
+  (`factory.load_q_network`, used by every script) then aborts on any checkpoint of a different
+  version, wherever its path came from. Unset, legacy v1 checkpoints load normally.
+- `python scripts/34_audit_chain_versions.py --expect 2` walks every checkpoint reference in
+  configs and `artifacts/**/*.json` and reports which checkpoint/version produced each artifact.
+  Run it after every regeneration; `--expect` makes it exit 1 on stale pins.
+
+Do not point configs at `artifacts/checkpoints/Q_theta.ckpt` — that mutable alias has held
+checkpoints from different datasets over time and is unauditable.
 
 ## Code Style
 

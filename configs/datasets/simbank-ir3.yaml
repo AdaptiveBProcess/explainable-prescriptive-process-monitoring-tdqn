@@ -53,7 +53,7 @@ mdp:
     path: "data/{dataset_name}/processed/D_offline.npz"
 
 xai:
-  checkpoint_path: "artifacts/models/tdqn/20260806_121535/Q_theta.ckpt"
+  checkpoint_path: "artifacts/models/tdqn/20260807_211812/Q_theta.ckpt"  # v2 (fase2 auto)
   out_dir: "xai/{dataset_name}"
   n_cases: 500
   selection:
@@ -66,7 +66,7 @@ xai:
         action_id: -1   # sentinel: per-state runner-up (overrides base action_id 0)
 
 experiment:
-  checkpoint_path: "artifacts/models/tdqn/20260806_121535/Q_theta.ckpt"
+  checkpoint_path: "artifacts/models/tdqn/20260807_211812/Q_theta.ckpt"  # v2 (fase2 auto)
   ope_report_path: "artifacts/ope/{dataset_name}/ope_dr.json"
 
 fidelity:

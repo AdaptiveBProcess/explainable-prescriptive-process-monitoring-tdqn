@@ -136,6 +136,7 @@ def main() -> None:
         n_layers=transformer_cfg.get("n_layers", 3),
         dropout=transformer_cfg.get("dropout", 0.1),
         n_actions=len(mdp_cfg.get("actions", {}).get("id2name", [])),
+        encoder_version=training_cfg.get("encoder_version", 2),
         batch_size=training_cfg.get("batch_size", 256),
         learning_rate=tdqn_cfg.get("learning_rate", 3e-4),
         weight_decay=tdqn_cfg.get("weight_decay", 0.0),
@@ -147,6 +148,7 @@ def main() -> None:
         target_update_every=tdqn_cfg.get("target_update_every", 2000),
         grad_clip_norm=tdqn_cfg.get("grad_clip_norm", 10.0),
         loss_type="huber",
+        cql_alpha=tdqn_cfg.get("cql_alpha", 0.0),
         lr_scheduler_enabled=tdqn_cfg.get("lr_scheduler", {}).get("enabled", True),
         lr_scheduler_type=tdqn_cfg.get("lr_scheduler", {}).get("type", "cosine"),
         warmup_steps=tdqn_cfg.get("lr_scheduler", {}).get("warmup_steps", 2000),
@@ -245,12 +247,11 @@ def main() -> None:
             vocab_hash=vocab_hash,
         )
 
-        # Write stable checkpoint for DVC and downstream scripts.
-        # The versioned copy stays in checkpoint_dir; this is the fixed path all stages depend on.
-        stable_ckpt_dir = artifacts_dir / "checkpoints"
-        ensure_dir(stable_ckpt_dir)
-        shutil.copy(checkpoint_paths["q_theta"], stable_ckpt_dir / "Q_theta.ckpt")
-        logger.info("Stable checkpoint written to %s", stable_ckpt_dir / "Q_theta.ckpt")
+        # NOTE: the old "stable checkpoint" copy to artifacts/checkpoints/Q_theta.ckpt
+        # was removed deliberately: with per-dataset runs the mutable alias held
+        # whichever dataset trained last, making every artifact that recorded that
+        # path unauditable. Downstream stages must pin the versioned run directory
+        # (configs/datasets/*.yaml experiment.checkpoint_path).
 
         # Copy artifacts to checkpoint directory
         shutil.copy(args.config, checkpoint_dir / "config.yaml")

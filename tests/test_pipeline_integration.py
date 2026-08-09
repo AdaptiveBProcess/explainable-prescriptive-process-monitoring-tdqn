@@ -22,29 +22,32 @@ from xppm.data.preprocess import preprocess_event_log
 
 
 def _mdp_config(output_path: Path) -> dict:
-    """Minimal MDP config matching the structure of configs/config.yaml."""
+    """Minimal MDP config: the *mdp section* of configs/config.yaml.
+
+    build_mdp_dataset receives the section directly (as scripts/03 passes
+    ``cfg["mdp"]``), not the full nested config -- wrapping it under an
+    ``"mdp"`` key silently produces zero transitions.
+    """
     return {
-        "mdp": {
-            "behavior_trigger_activity": "contact_headquarters",
-            "decision_points": {"mode": "all"},
-            "actions": {
-                "id2name": ["do_nothing", "contact_headquarters"],
-                "noop_action": "do_nothing",
+        "behavior_trigger_activity": "contact_headquarters",
+        "decision_points": {"mode": "all"},
+        "actions": {
+            "id2name": ["do_nothing", "contact_headquarters"],
+            "noop_action": "do_nothing",
+        },
+        "action_mask": {
+            "default_valid": ["do_nothing"],
+            "by_last_activity": {
+                "start_standard": ["do_nothing", "contact_headquarters"],
+                "validate_application": ["do_nothing", "contact_headquarters"],
             },
-            "action_mask": {
-                "default_valid": ["do_nothing"],
-                "by_last_activity": {
-                    "start_standard": ["do_nothing", "contact_headquarters"],
-                    "validate_application": ["do_nothing", "contact_headquarters"],
-                },
-            },
-            "reward": {
-                "type": "terminal_profit_delayed",
-                "intermediate_reward": 0.0,
-                "terminal_column": "outcome",
-            },
-            "output": {"path": str(output_path)},
-        }
+        },
+        "reward": {
+            "type": "terminal_profit_delayed",
+            "intermediate_reward": 0.0,
+            "terminal_column": "outcome",
+        },
+        "output": {"path": str(output_path)},
     }
 
 

@@ -38,10 +38,15 @@ def activity_counts(states: np.ndarray, vocab_size: int, pad_id: int = 0) -> np.
 
 
 def last_activity(states: np.ndarray, pad_id: int = 0) -> np.ndarray:
-    """Token id at the pooling position (last non-PAD), shape (N,)."""
+    """Token id at the last non-PAD position, shape (N,).
+
+    Index of the last real token, valid under left- or right-padding (the
+    count-based ``mask.sum()-1`` lands in the PAD region under left padding).
+    """
     mask = states != pad_id
-    lengths = np.clip(mask.sum(axis=1) - 1, 0, states.shape[1] - 1)
-    return states[np.arange(len(states)), lengths]
+    positions = np.where(mask, np.arange(states.shape[1]), -1)
+    idx = positions.max(axis=1).clip(min=0)
+    return states[np.arange(len(states)), idx]
 
 
 def discretize_values(values: np.ndarray, n_levels: int = 5, seed: int = 0) -> np.ndarray:

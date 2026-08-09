@@ -10,7 +10,9 @@ from pathlib import Path
 import numpy as np
 import torch
 
-REPO = Path(__file__).resolve().parent.parent
+REPO = Path(
+    "/home/andrew/Documents/docs/3-resolver-problema-subtema/algorithms-explainability/xppm-tdqn"
+)
 sys.path.insert(0, str(REPO / "src"))
 from xppm.rl.train_tdqn import load_dataset_with_splits  # noqa: E402
 from xppm.xai.fidelity_tests import (  # noqa: E402
@@ -22,12 +24,6 @@ from xppm.xai.fidelity_tests import (  # noqa: E402
 DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 SEED, N_RANDOM, P_LIST = 123, 20, [0.1, 0.2]
 DS = {
-    "simbank": ("data/simbank/processed", "artifacts/ope/ope_dr.json", "artifacts/xai"),
-    "bpi2017": (
-        "data/bpi2017/processed",
-        "artifacts/ope/bpi2017/ope_dr.json",
-        "artifacts/xai/bpi2017",
-    ),
     "bpi2012": (
         "data/bpi2012/processed",
         "artifacts/ope/bpi2012/ope_dr.json",
@@ -61,8 +57,8 @@ def run(ds):
     out = {}
     sources = {
         "ig": REPO / xai_ig,
-        "saliency": REPO / "artifacts/xai/baselines/saliency" / ds,
-        "attention": REPO / "artifacts/xai/baselines/attention" / ds,
+        "saliency": Path("artifacts/xai/baselines/saliency") / ds,
+        "attention": Path("artifacts/xai/baselines/attention") / ds,
     }
     for method, src in sources.items():
         risk = json.load(open(src / "risk_explanations.json"))
@@ -124,7 +120,14 @@ def run(ds):
 
 
 results = {ds: run(ds) for ds in DS}
-json.dump(results, open(REPO / "artifacts/fidelity/baselines/absgap_compare.json", "w"), indent=1)
+json.dump(
+    results,
+    open(
+        Path("%sabsgap_compare_fase0.json" % "artifacts/reports/fase0/"),
+        "w",
+    ),
+    indent=1,
+)
 for ds, r in results.items():
     print(f"== {ds}")
     for m, res in r.items():

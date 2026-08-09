@@ -10,7 +10,9 @@ from pathlib import Path
 import numpy as np
 import torch
 
-REPO = Path(__file__).resolve().parent.parent
+REPO = Path(
+    "/home/andrew/Documents/docs/3-resolver-problema-subtema/algorithms-explainability/xppm-tdqn"
+)
 sys.path.insert(0, str(REPO / "src"))
 
 from xppm.rl.train_tdqn import load_dataset_with_splits  # noqa: E402
@@ -56,6 +58,18 @@ DATASETS = {
         "splits": REPO / "data/simbank-ir3/processed/splits.json",
         "ope": REPO / "artifacts/ope/simbank-ir3/ope_dr.json",
         "xai_ig": REPO / "artifacts/xai/simbank-ir3",
+    },
+    "bpi2012-offertes": {
+        "npz": REPO / "data/bpi2012-offertes/processed/D_offline.npz",
+        "splits": REPO / "data/bpi2012-offertes/processed/splits.json",
+        "ope": REPO / "artifacts/ope/bpi2012-offertes/ope_dr.json",
+        "xai_ig": REPO / "artifacts/xai/bpi2012-offertes",
+    },
+    "sepsis": {
+        "npz": REPO / "data/sepsis/processed/D_offline.npz",
+        "splits": REPO / "data/sepsis/processed/splits.json",
+        "ope": REPO / "artifacts/ope/sepsis/ope_dr.json",
+        "xai_ig": REPO / "artifacts/xai/sepsis",
     },
 }
 CONFIG = {"training": {"transformer": {}}}
@@ -154,22 +168,17 @@ def main():
         results[name] = {}
         methods = {
             "ig": p["xai_ig"] / "deltaQ_explanations.json",
-            "saliency": REPO
-            / "artifacts/xai/baselines/saliency"
+            "saliency": Path("artifacts/xai/baselines/saliency")
             / name
             / "deltaQ_explanations.json",
-            "attention": REPO
-            / "artifacts/xai/baselines/attention"
+            "attention": Path("artifacts/xai/baselines/attention")
             / name
             / "deltaQ_explanations.json",
         }
         for method, path in methods.items():
             print(f"== {name} / {method}")
-            if not Path(path).exists():
-                print(f"   -- {name}/{method}: no artifact, skipped")
-                continue
             results[name][method] = margin_drop(q_net, test, path)
-    outpath = REPO / "artifacts/fidelity/baselines/margin_drop_compare.json"
+    outpath = Path("artifacts/reports/fase0/margin_drop_compare_fase0.json")
     outpath.parent.mkdir(parents=True, exist_ok=True)
     json.dump(results, open(outpath, "w"), indent=1)
     print("saved ->", outpath)
