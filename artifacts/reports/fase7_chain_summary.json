@@ -1,0 +1,110 @@
+{
+ "simbank/05-encoder": {
+  "started": "2026-08-09T12:01:09",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:04:35"
+ },
+ "simbank-ir3/05-encoder": {
+  "started": "2026-08-09T12:04:35",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:08:25"
+ },
+ "bpi2012/05-encoder": {
+  "started": "2026-08-09T12:08:25",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:09:05"
+ },
+ "bpi2017/05-encoder": {
+  "started": "2026-08-09T12:09:05",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:11:52"
+ },
+ "bpi2017ct/05-encoder": {
+  "started": "2026-08-09T12:11:52",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:15:26"
+ },
+ "bpi2020-rfp/05-encoder": {
+  "started": "2026-08-09T12:15:26",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:15:51"
+ },
+ "bpi2020-int-decl/05-encoder": {
+  "started": "2026-08-09T12:15:51",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:16:34"
+ },
+ "bpi2020-travel/05-encoder": {
+  "started": "2026-08-09T12:16:34",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:17:26"
+ },
+ "bpi2012-offertes/05-encoder": {
+  "started": "2026-08-09T12:17:26",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:18:41"
+ },
+ "sepsis/05-encoder": {
+  "started": "2026-08-09T12:18:41",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:19:02"
+ },
+ "paper/23_margin_drop_compare": {
+  "started": "2026-08-09T12:19:02",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:20:10"
+ },
+ "paper/24_absgap_compare": {
+  "started": "2026-08-09T12:20:10",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:24:35"
+ },
+ "paper/25_absgap_final": {
+  "started": "2026-08-09T12:24:35",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:25:57"
+ },
+ "paper/26_fidelity_bpi2017ct": {
+  "started": "2026-08-09T12:25:57",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:26:08"
+ },
+ "paper/26_fidelity_simbank-ir3": {
+  "started": "2026-08-09T12:26:08",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:26:55"
+ },
+ "paper/28_cross_level_tests": {
+  "started": "2026-08-09T12:26:55",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:27:26"
+ },
+ "paper/32_evaluability": {
+  "started": "2026-08-09T12:27:26",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:28:27"
+ },
+ "audit/34": {
+  "started": "2026-08-09T12:28:27",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T12:28:32"
+ }
+}

@@ -1,0 +1,66 @@
+{
+ "bpi2012": {
+  "n_margin_cases": 56,
+  "spearman_median": 0.7380952380952382,
+  "n_spearman": 16,
+  "jaccard3_median": 1.0,
+  "jaccard3_mean": 0.9017857142857143,
+  "n_jaccard": 56
+ },
+ "simbank": {
+  "n_margin_cases": 69,
+  "spearman_median": 0.9757575757575757,
+  "n_spearman": 69,
+  "jaccard3_median": 0.5,
+  "jaccard3_mean": 0.4739130434782609,
+  "n_jaccard": 69
+ },
+ "simbank-ir3": {
+  "n_margin_cases": 206,
+  "spearman_median": 0.7833333333333333,
+  "n_spearman": 167,
+  "jaccard3_median": 0.5,
+  "jaccard3_mean": 0.5524271844660195,
+  "n_jaccard": 206
+ },
+ "bpi2017": {
+  "n_margin_cases": 34,
+  "spearman_median": 0.8916666666666666,
+  "n_spearman": 34,
+  "jaccard3_median": 0.75,
+  "jaccard3_mean": 0.75,
+  "n_jaccard": 34
+ },
+ "bpi2017-sla": {
+  "n_margin_cases": 200,
+  "spearman_median": 0.6333333333333333,
+  "n_spearman": 200,
+  "jaccard3_median": 0.5,
+  "jaccard3_mean": 0.5455,
+  "n_jaccard": 200
+ },
+ "bpi2020-rfp": {
+  "n_margin_cases": 9,
+  "spearman_median": 0.3,
+  "n_spearman": 1,
+  "jaccard3_median": 1.0,
+  "jaccard3_mean": 0.9444444444444444,
+  "n_jaccard": 9
+ },
+ "bpi2020-int-decl": {
+  "n_margin_cases": 6,
+  "spearman_median": 0.8452380952380953,
+  "n_spearman": 6,
+  "jaccard3_median": 1.0,
+  "jaccard3_mean": 0.8333333333333334,
+  "n_jaccard": 6
+ },
+ "bpi2020-travel": {
+  "n_margin_cases": 9,
+  "spearman_median": 0.8333333333333333,
+  "n_spearman": 8,
+  "jaccard3_median": 0.5,
+  "jaccard3_mean": 0.7222222222222222,
+  "n_jaccard": 9
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "encoder_version": 2,
+ "n_prefixes": 2000,
+ "mean_abs_delta_q": 0.031226372346282005,
+ "relative_delta_q": 0.032704830169677734,
+ "action_flip_rate": 0.0775,
+ "identical_q_fraction": 0.023,
+ "verdict": "USES ORDER",
+ "ckpt": "artifacts/models/tdqn/20260808_132956/Q_theta.ckpt",
+ "n_requested": 2000,
+ "seed": 123
+}

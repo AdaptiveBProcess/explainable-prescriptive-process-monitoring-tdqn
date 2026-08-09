@@ -230,10 +230,9 @@ ope:
   # trajectory-weight ESS fraction falls below it are reported with
   # on_support=false; they are never silently dropped.
   min_ess_fraction: 0.10
+  # Hyperparameters of the tdqn_encoder behavior head (robustness variant);
+  # the primary boa_logreg estimator has no tunables beyond sklearn defaults.
   behavior_model:
-    type: "multiclass_logreg"  # multiclass_logreg | mlp
-    features: "state"          # state | tabular
-    calibrate: true
     batch_size: 1024
     epochs: 1
     learning_rate: 1e-3
@@ -260,6 +259,10 @@ xai:
   seed: 123
   split: "test"
   n_cases: 200
+  # At-risk membership threshold tau = this percentile of V over the explained
+  # pool; computed by 06_explain_policy and recorded in
+  # risk_explanations.json -> metadata.risk_threshold (each item gets at_risk).
+  risk_threshold_percentile: 50
   selection:
     strategy: "random"                      # random | stratified
     by: "reward_bin"                        # reward_bin | stage (only if stratified)
@@ -270,7 +273,6 @@ xai:
       baseline: "pad"                       # pad | zero_emb
       n_steps_ig: 128                       # IG interpolation steps (increased for better completeness)
       top_k: 10
-      target: "Q_star"                      # "V" (max Q) or "Q_star" (Q(s,a*)) - Q_star is smoother for IG
     intervention:
       contrast:
         baseline_action: "NOOP"             # a' para deltaQ

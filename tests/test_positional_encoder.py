@@ -121,3 +121,31 @@ def test_env_guard_rejects_unexpected_encoder_version(monkeypatch):
 
     monkeypatch.delenv("XPPM_EXPECT_ENCODER_VERSION")
     _enforce_expected_encoder_version("fake/Q_theta.ckpt", actual=1)  # inactive
+
+
+def test_pooled_state_composes_to_the_deployed_forward():
+    """encode() must be exactly q_head(pooled_state(...)) for both versions."""
+    for use_positional in (True, False):
+        net = build(use_positional)
+        emb = net.embedding(PREFIX)
+        assert torch.allclose(net(PREFIX, MASK), net.q_head(net.pooled_state(emb, MASK)), atol=1e-6)
+
+
+def test_behavior_model_encoding_matches_the_deployed_forward():
+    """The OPE behavior head must see the same z the Q-head sees.
+
+    Regression test for the bug where _encode_states replayed the forward
+    without positional embeddings, without the attention padding mask, and
+    with the v1 pooling rule (which lands in the PAD region under left
+    padding).
+    """
+    net = build(use_positional=True)
+    # junk in the PAD region: inert for the deployed forward, but the old
+    # manual replay attended over it and pooled inside it
+    noisy = PREFIX.clone()
+    noisy[0, :5] = torch.tensor([9, 8, 7, 6, 2])
+    with torch.no_grad():
+        z_clean = net.pooled_state(net.embedding(PREFIX), MASK)
+        z_noisy = net.pooled_state(net.embedding(noisy), MASK)
+    assert torch.allclose(z_clean, z_noisy, atol=1e-6)
+    assert torch.allclose(net.q_head(z_clean), net(PREFIX, MASK), atol=1e-6)

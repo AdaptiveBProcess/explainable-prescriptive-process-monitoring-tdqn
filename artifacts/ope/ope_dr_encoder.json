@@ -1,0 +1,118 @@
+{
+  "metadata": {
+    "run_id": null,
+    "behavior_estimator": "tdqn_encoder",
+    "ckpt_path": "artifacts/models/tdqn/20260807_170819/Q_theta.ckpt",
+    "dataset_path": "data/simbank/processed/D_offline.npz",
+    "splits_path": "data/simbank/processed/splits.json",
+    "vocab_path": "artifacts/models/tdqn/20260807_170819/vocab_activity.json",
+    "config_hash": "9dd5e4cb8901bac7",
+    "dataset_hash": null
+  },
+  "results": {
+    "tdqn_dr_mean": 6994.296899564039,
+    "tdqn_wis_mean": 6632.621391061036,
+    "tdqn_wis_ci95": [
+      6473.9726155592225,
+      6799.788866679577
+    ],
+    "tdqn_on_support": true,
+    "tdqn_stepwise": {
+      "wis_per_decision": 373.7559814453125,
+      "dr_per_decision": 726.6646728515625,
+      "ess_fraction": 0.5524239548266391
+    },
+    "behavior_empirical_return_mean": 3085.055022616577,
+    "baselines": {
+      "noop": {
+        "dr_mean": 4877.850932779662,
+        "wis_mean": 631.4129264486482,
+        "wis_ci95": [
+          583.752574976541,
+          678.6931998377761
+        ],
+        "ess_fraction": 0.6188740233803834,
+        "on_support": true,
+        "stepwise": {
+          "wis_per_decision": 298.05804443359375,
+          "dr_per_decision": 526.5597534179688,
+          "ess_fraction": 0.9604021848890273
+        }
+      },
+      "always_intervene": {
+        "dr_mean": 5721.684408148264,
+        "wis_mean": 16517.12112135361,
+        "wis_ci95": [
+          16146.151898645438,
+          16897.709558052604
+        ],
+        "ess_fraction": 0.06755,
+        "on_support": false,
+        "stepwise": {
+          "wis_per_decision": 736.8831176757812,
+          "dr_per_decision": 2497.670166015625,
+          "ess_fraction": 0.15811458867156133
+        }
+      }
+    }
+  },
+  "diagnostics": {
+    "estimator": "trajectory (per-decision cumulative IS), reported per case",
+    "gamma": 1.0,
+    "rho_step_cap": 20.0,
+    "cum_rho_cap": null,
+    "pi_e_temperature": 1.0,
+    "min_ess_fraction": 0.1,
+    "support_gate": "declared in config as ope.min_ess_fraction and applied identically to every arm; arms below it are reported with on_support=false, never dropped",
+    "rho_step_percentiles": [
+      1.0,
+      1.0675914287567139,
+      1.0704987049102783,
+      1.1921625137329102,
+      4.626946449279785
+    ],
+    "ess": 5103.6428050357545,
+    "ess_fraction": 0.2551821402517877,
+    "on_support": true,
+    "n_test_transitions": 199692,
+    "n_test_cases": 20000,
+    "arms_on_support": {
+      "policy": true,
+      "noop": true,
+      "always_intervene": false
+    },
+    "q_values_stats": {
+      "q_sa_mean": 3765.7705078125,
+      "q_sa_std": 2532.63818359375,
+      "v_s_mean": 4055.783935546875,
+      "v_s_std": 2416.584228515625
+    },
+    "behavior_model": {
+      "val_nll": 0.11732742191016832,
+      "val_acc": 0.9657917900296071,
+      "val_mean_entropy": 0.2053391267175511
+    }
+  },
+  "paired_diff": {
+    "vs_noop": {
+      "mean": 6005.212267017295,
+      "ci95": [
+        5857.826134425311,
+        6162.996931452714
+      ],
+      "p_gt_0": 1.0,
+      "baseline_on_support": true
+    },
+    "vs_always_intervene": {
+      "mean": -9868.046635509028,
+      "ci95": [
+        -10275.216070200913,
+        -9424.995409086176
+      ],
+      "p_gt_0": 0.0,
+      "baseline_on_support": false
+    },
+    "note": "case-level paired bootstrap on trajectory WIS; the same resample scores policy and baseline. Differences against an off-support baseline (on_support=false) are reported but not interpretable."
+  },
+  "n_bootstrap": 200
+}

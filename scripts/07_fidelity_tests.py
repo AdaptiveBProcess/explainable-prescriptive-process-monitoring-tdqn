@@ -1,4 +1,11 @@
-"""Phase 3 - Step 7: Fidelity Tests (Q-drop, Action-flip, Rank-consistency)."""
+"""Phase 3 - Step 7: Fidelity Tests (Q-drop, Action-flip, Rank-consistency).
+
+NOTE (paper provenance): this script's fidelity.csv uses the original SIGNED
+Q-drop convention and is NOT the source of any number in the ICPM paper. The
+paper's fidelity/evaluability artifacts use the |displacement| convention of
+Defs. 3-4 and come from scripts 23-26/28 and 32 (see docs/paper/MAPPING.md,
+`make paper-tables`). Kept as the pipeline's operational smoke test.
+"""
 
 import argparse
 

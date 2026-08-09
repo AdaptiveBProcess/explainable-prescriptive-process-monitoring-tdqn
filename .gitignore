@@ -23,5 +23,24 @@ artifacts/**/*
 # and small; they travel with the code.
 !artifacts/generality/
 !artifacts/generality/*.json
+# Every JSON the ICPM paper cites is versioned with the code so the git
+# history shows thresholds and results frozen together (docs/paper/MAPPING.md).
+!artifacts/ope/
+!artifacts/ope/**/
+!artifacts/ope/**/ope_dr_boa.json
+!artifacts/ope/**/ope_dr_encoder.json
+!artifacts/ope/ope_dr_boa.json
+!artifacts/ope/ope_dr_encoder.json
+!artifacts/fidelity/
+!artifacts/fidelity/**/
+!artifacts/fidelity/**/*.json
+!artifacts/reports/
+!artifacts/reports/order_sensitivity/
+!artifacts/reports/order_sensitivity/*.json
+!artifacts/reports/selection_effect_bpi2012.json
+!artifacts/reports/ranking_separation.json
+!artifacts/reports/paper_stats.json
+!artifacts/reports/fase6_chain_summary.json
+!artifacts/reports/fase7_chain_summary.json
 mlruns/**/*
 .wandb/

@@ -32,44 +32,46 @@ def _entry(proc: str, ope: str, xai: str) -> dict[str, str]:
 
 
 DATASETS: dict[str, dict[str, str]] = {
-    "simbank": _entry("data/simbank/processed", "artifacts/ope/ope_dr.json", "artifacts/xai"),
+    "simbank": _entry("data/simbank/processed", "artifacts/ope/ope_dr_boa.json", "artifacts/xai"),
     "simbank-ir3": _entry(
         "data/simbank-ir3/processed",
-        "artifacts/ope/simbank-ir3/ope_dr.json",
+        "artifacts/ope/simbank-ir3/ope_dr_boa.json",
         "artifacts/xai/simbank-ir3",
     ),
     "bpi2012": _entry(
-        "data/bpi2012/processed", "artifacts/ope/bpi2012/ope_dr.json", "artifacts/xai/bpi2012"
+        "data/bpi2012/processed", "artifacts/ope/bpi2012/ope_dr_boa.json", "artifacts/xai/bpi2012"
     ),
     "bpi2017ct": _entry(
-        "data/bpi2017ct/processed", "artifacts/ope/bpi2017ct/ope_dr.json", "artifacts/xai/bpi2017ct"
+        "data/bpi2017ct/processed",
+        "artifacts/ope/bpi2017ct/ope_dr_boa.json",
+        "artifacts/xai/bpi2017ct",
     ),
     "bpi2017": _entry(
-        "data/bpi2017/processed", "artifacts/ope/bpi2017/ope_dr.json", "artifacts/xai/bpi2017"
+        "data/bpi2017/processed", "artifacts/ope/bpi2017/ope_dr_boa.json", "artifacts/xai/bpi2017"
     ),
     "bpi2020-rfp": _entry(
         "data/bpi2020-rfp/processed",
-        "artifacts/ope/bpi2020-rfp/ope_dr.json",
+        "artifacts/ope/bpi2020-rfp/ope_dr_boa.json",
         "artifacts/xai/bpi2020-rfp",
     ),
     "bpi2020-int-decl": _entry(
         "data/bpi2020-int-decl/processed",
-        "artifacts/ope/bpi2020-int-decl/ope_dr.json",
+        "artifacts/ope/bpi2020-int-decl/ope_dr_boa.json",
         "artifacts/xai/bpi2020-int-decl",
     ),
     "bpi2020-travel": _entry(
         "data/bpi2020-travel/processed",
-        "artifacts/ope/bpi2020-travel/ope_dr.json",
+        "artifacts/ope/bpi2020-travel/ope_dr_boa.json",
         "artifacts/xai/bpi2020-travel",
     ),
     "bpi2012-offertes": _entry(
         "data/bpi2012-offertes/processed",
-        "artifacts/ope/bpi2012-offertes/ope_dr.json",
+        "artifacts/ope/bpi2012-offertes/ope_dr_boa.json",
         "artifacts/xai/bpi2012-offertes",
     ),
     "sepsis": _entry(
         "data/sepsis/processed",
-        "artifacts/ope/sepsis/ope_dr.json",
+        "artifacts/ope/sepsis/ope_dr_boa.json",
         "artifacts/xai/sepsis",
     ),
 }

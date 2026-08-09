@@ -470,6 +470,19 @@ def explain_policy(
         dq_completeness=dq_completeness,
     )
 
+    # At-risk membership: tau = configured percentile of V over the explained
+    # pool (paper: tau = p50). Declared in config, computed here, recorded in
+    # the artifact so the threshold is part of the pipeline, not prose.
+    risk_pct = float(xai_cfg.get("risk_threshold_percentile", 50))
+    v_pool = np.asarray(risk_results["v_s"], dtype=float)
+    tau_v = float(np.percentile(v_pool, risk_pct))
+    metadata["risk_threshold"] = {
+        "percentile": risk_pct,
+        "tau_value": tau_v,
+        "n_at_risk": int((v_pool < tau_v).sum()),
+        "n_pool": int(v_pool.shape[0]),
+    }
+
     output_paths: dict[str, Path] = {}
 
     # 7a. risk_explanations.json
@@ -492,6 +505,7 @@ def explain_policy(
                 "a_star": int(risk_results["a_star"][i]),
                 "a_star_name": action_names[int(risk_results["a_star"][i])],
                 "V": q_star_val,
+                "at_risk": bool(q_star_val < tau_v),
                 "q_star": q_star_val,  # Explicit q_star for consistency with deltaQ
                 "q_values": [float(x) for x in risk_results["q_values"][i]],
                 "top_tokens": [

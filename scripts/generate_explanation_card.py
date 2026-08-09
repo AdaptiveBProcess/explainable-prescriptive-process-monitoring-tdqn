@@ -45,6 +45,12 @@ def load_case(case_id: int):
     dq = json.load(open(REPO / "artifacts/xai/deltaQ_explanations.json"))
     r = next(it for it in risk["items"] if it["case_id"] == case_id)
     q = next(it for it in dq["items"] if it["case_id"] == case_id)
+    # mid-rank percentile of this case's V within the explained pool (ties are
+    # heavy; the paper reports all three tie conventions in paper_stats.json)
+    pool = [it["V"] for it in risk["items"]]
+    below = sum(v < r["V"] for v in pool)
+    at = sum(v == r["V"] for v in pool)
+    r["_percentile_midrank"] = (below + at / 2) / len(pool) * 100
     ev_r = sorted(r["top_tokens"], key=lambda t: t["position"])
     ev_q = {t["position"]: t["importance"] for t in q["top_drivers"]}
     events = [
@@ -120,8 +126,9 @@ def main() -> None:
     ax.text(
         17,
         37.3,
-        f"Value estimate V = {v_case:,.0f} (ordinal)  ·  percentile 48.5, "
-        "below the $\\tau = p_{50}$ at-risk threshold",
+        f"Value estimate V = {v_case:,.0f} (ordinal)  ·  percentile "
+        f"{r['_percentile_midrank']:.1f} (mid-rank), "
+        "at the $\\tau = p_{50}$ at-risk threshold (tie resolved by mode structure)",
         color="#b8c0cd",
         fontsize=8.2,
         va="center",

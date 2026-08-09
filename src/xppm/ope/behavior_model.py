@@ -116,8 +116,10 @@ def fit_behavior_policy_tdqn_encoder(
     d_model = q_net.d_model
     head = _BehaviorHead(d_model=d_model, n_actions=n_actions, dropout=0.1).to(device)
 
-    # Training hyperparameters (can be tuned later)
-    behavior_cfg = config.get("behavior_model", {})
+    # Training hyperparameters, read from ope.behavior_model (the documented
+    # location; a root-level "behavior_model" key was never in any config, so
+    # the old lookup silently fell back to the defaults below)
+    behavior_cfg = config.get("ope", {}).get("behavior_model", {})
     batch_size = int(behavior_cfg.get("batch_size", 1024))
     epochs = int(behavior_cfg.get("epochs", 1))
     lr = float(behavior_cfg.get("learning_rate", 1e-3))
@@ -164,20 +166,15 @@ def fit_behavior_policy_tdqn_encoder(
         s_batch: torch.Tensor,
         s_mask_batch: torch.Tensor,
     ) -> torch.Tensor:
-        """Encode states using frozen TDQN encoder to get state representation z."""
+        """Encode states with the frozen TDQN network's own deployed forward.
+
+        Delegates to ``q_net.pooled_state`` so positional embeddings, the
+        attention padding mask and the pooling rule always match the checkpoint
+        being explained — never reimplement that path here.
+        """
         with torch.no_grad():
             states_clamped = torch.clamp(s_batch, min=0, max=q_net.vocab_size - 1)
-            x = q_net.embedding(states_clamped)
-            encoded = q_net.encoder(x)
-
-            # Use same pooling as TransformerQNetwork
-            lengths = s_mask_batch.sum(dim=1).long() - 1
-            lengths = torch.clamp(lengths, min=0, max=q_net.max_len - 1)
-            batch_indices = torch.arange(encoded.size(0), device=encoded.device)
-            state_repr = encoded[batch_indices, lengths]
-            state_repr = q_net.state_proj(state_repr)
-            state_repr = torch.relu(state_repr)
-        return state_repr
+            return q_net.pooled_state(q_net.embedding(states_clamped), s_mask_batch)
 
     def _evaluate(loader: DataLoader) -> tuple[float, float, float]:
         head.eval()

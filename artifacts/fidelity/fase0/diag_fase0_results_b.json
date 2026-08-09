@@ -1,0 +1,724 @@
+{
+ "simbank": {
+  "n_test_transitions": 199692,
+  "prefix_len_mean_test": 5.688330028243495,
+  "prefix_len_p50_test": 6.0,
+  "n_test_cases": 20000,
+  "v_case_percentiles": {
+   "1": -1750.1641845703125,
+   "5": -1741.866943359375,
+   "10": -1741.866943359375,
+   "25": -264.7686767578125,
+   "50": 532.5341796875,
+   "75": 5133.81640625,
+   "90": 5133.81640625,
+   "99": 17932.568359375
+  },
+  "v_case_mean": 1961.2462158203125,
+  "v_case_std": 4713.92919921875,
+  "lowest_V_explained": [
+   {
+    "case_id": 17177,
+    "V": 525.2647705078125,
+    "pctile": 44.535000000000004,
+    "delta_q": 824.0938720703125,
+    "a_star": "contact_headquarters",
+    "top_tokens": [
+     "skip_contact",
+     "validate_application",
+     "validate_application"
+    ],
+    "top_drivers": [
+     "skip_contact",
+     "call_customer",
+     "call_customer"
+    ]
+   },
+   {
+    "case_id": 24170,
+    "V": 525.2647705078125,
+    "pctile": 44.535000000000004,
+    "delta_q": 824.0938720703125,
+    "a_star": "contact_headquarters",
+    "top_tokens": [
+     "skip_contact",
+     "validate_application",
+     "validate_application"
+    ],
+    "top_drivers": [
+     "skip_contact",
+     "call_customer",
+     "call_customer"
+    ]
+   },
+   {
+    "case_id": 26918,
+    "V": 525.2647705078125,
+    "pctile": 44.535000000000004,
+    "delta_q": 824.0938720703125,
+    "a_star": "contact_headquarters",
+    "top_tokens": [
+     "skip_contact",
+     "validate_application",
+     "validate_application"
+    ],
+    "top_drivers": [
+     "skip_contact",
+     "call_customer",
+     "call_customer"
+    ]
+   }
+  ],
+  "nearest_5th_pct_explained": {
+   "case_id": 17177,
+   "V": 525.2647705078125,
+   "pctile": 44.535000000000004,
+   "delta_q": 824.0938720703125,
+   "a_star": "contact_headquarters",
+   "top_tokens": [
+    "skip_contact",
+    "validate_application",
+    "validate_application"
+   ],
+   "top_drivers": [
+    "skip_contact",
+    "call_customer",
+    "call_customer"
+   ]
+  },
+  "case_552": {
+   "case_id": 552,
+   "V": 532.5341796875,
+   "pctile": 48.504999999999995,
+   "delta_q": 797.3028564453125,
+   "a_star": "contact_headquarters",
+   "top_tokens": [
+    "skip_contact",
+    "validate_application",
+    "validate_application"
+   ],
+   "top_drivers": [
+    "skip_contact",
+    "validate_application",
+    "validate_application"
+   ]
+  },
+  "n_dq_items": 69,
+  "dq_margin_drop": {
+   "0.1": {
+    "red_guided": 34.16762161254883,
+    "red_random": 2.750164747238159,
+    "red_anti": 0.16769011318683624,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0,
+    "mean_abs_dq_orig": 799.632568359375,
+    "abs_red_guided": 34.16762161254883,
+    "abs_red_random": 3.162881851196289,
+    "abs_red_anti": 0.16769011318683624,
+    "prefix_len_mean_items": 10.0,
+    "k_mean": 1.0
+   },
+   "0.2": {
+    "red_guided": -3.66499400138855,
+    "red_random": -18.334501266479492,
+    "red_anti": -0.2832508981227875,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.011594202898550725,
+    "mean_abs_dq_orig": 799.632568359375,
+    "abs_red_guided": 5.07545804977417,
+    "abs_red_random": 18.334501266479492,
+    "abs_red_anti": 0.73032546043396,
+    "prefix_len_mean_items": 10.0,
+    "k_mean": 2.0
+   },
+   "0.3": {
+    "red_guided": -407.7359924316406,
+    "red_random": -164.4737548828125,
+    "red_anti": -4.09187650680542,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.056521739130434775,
+    "mean_abs_dq_orig": 799.632568359375,
+    "abs_red_guided": 407.7359924316406,
+    "abs_red_random": 164.4737548828125,
+    "abs_red_anti": 4.09187650680542,
+    "prefix_len_mean_items": 10.0,
+    "k_mean": 3.0
+   },
+   "0.5": {
+    "red_guided": -919.93115234375,
+    "red_random": -488.33428955078125,
+    "red_anti": -9.29850959777832,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.2072463768115942,
+    "mean_abs_dq_orig": 799.632568359375,
+    "abs_red_guided": 919.93115234375,
+    "abs_red_random": 488.33428955078125,
+    "abs_red_anti": 9.29850959777832,
+    "prefix_len_mean_items": 10.0,
+    "k_mean": 5.0
+   }
+  }
+ },
+ "bpi2017": {
+  "n_test_transitions": 88459,
+  "prefix_len_mean_test": 8.276828813348557,
+  "prefix_len_p50_test": 8.0,
+  "n_test_cases": 6303,
+  "v_case_percentiles": {
+   "1": 0.9995923042297363,
+   "5": 1.000651240348816,
+   "10": 1.0014383792877197,
+   "25": 1.0019795894622803,
+   "50": 1.0028858184814453,
+   "75": 1.0037974119186401,
+   "90": 1.003866195678711,
+   "99": 1.0055687427520752
+  },
+  "v_case_mean": 1.002525806427002,
+  "v_case_std": 0.004332559183239937,
+  "lowest_V_explained": [
+   {
+    "case_id": 23954,
+    "V": 1.0037885904312134,
+    "pctile": 74.18689512930351,
+    "delta_q": 0.00019633769989013672,
+    "a_star": "W_Call after offers",
+    "top_tokens": [
+     "O_Accepted",
+     "A_Complete",
+     "O_Returned"
+    ],
+    "top_drivers": [
+     "O_Accepted",
+     "A_Pending",
+     "A_Complete"
+    ]
+   },
+   {
+    "case_id": 22983,
+    "V": 1.0038164854049683,
+    "pctile": 81.9292400444233,
+    "delta_q": 0.00027167797088623047,
+    "a_star": "W_Call after offers",
+    "top_tokens": [
+     "O_Accepted",
+     "A_Complete",
+     "O_Returned"
+    ],
+    "top_drivers": [
+     "O_Accepted",
+     "A_Pending",
+     "A_Complete"
+    ]
+   },
+   {
+    "case_id": 5334,
+    "V": 1.0040245056152344,
+    "pctile": 93.32064096462003,
+    "delta_q": 0.0003305673599243164,
+    "a_star": "W_Call after offers",
+    "top_tokens": [
+     "A_Cancelled",
+     "A_Complete",
+     "O_Returned"
+    ],
+    "top_drivers": [
+     "A_Cancelled",
+     "O_Cancelled",
+     "A_Complete"
+    ]
+   }
+  ],
+  "nearest_5th_pct_explained": {
+   "case_id": 23954,
+   "V": 1.0037885904312134,
+   "pctile": 74.18689512930351,
+   "delta_q": 0.00019633769989013672,
+   "a_star": "W_Call after offers",
+   "top_tokens": [
+    "O_Accepted",
+    "A_Complete",
+    "O_Returned"
+   ],
+   "top_drivers": [
+    "O_Accepted",
+    "A_Pending",
+    "A_Complete"
+   ]
+  },
+  "n_dq_items": 15,
+  "dq_margin_drop": {
+   "0.1": {
+    "red_guided": -0.016181591898202896,
+    "red_random": -0.0013031091075390577,
+    "red_anti": -0.0007691264036111534,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.3533333333333334,
+    "mean_abs_dq_orig": 0.0007729132776148617,
+    "abs_red_guided": 0.016181591898202896,
+    "abs_red_random": 0.0013031091075390577,
+    "abs_red_anti": 0.0007741490844637156,
+    "prefix_len_mean_items": 18.133333333333333,
+    "k_mean": 2.2
+   },
+   "0.2": {
+    "red_guided": -0.01689092256128788,
+    "red_random": -0.0025151639711111784,
+    "red_anti": -0.001520005869679153,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.48,
+    "mean_abs_dq_orig": 0.0007729132776148617,
+    "abs_red_guided": 0.01689092256128788,
+    "abs_red_random": 0.0025151639711111784,
+    "abs_red_anti": 0.0015840609557926655,
+    "prefix_len_mean_items": 18.133333333333333,
+    "k_mean": 3.933333333333333
+   },
+   "0.3": {
+    "red_guided": -0.016586173325777054,
+    "red_random": -0.004435064271092415,
+    "red_anti": -0.0019402026664465666,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.6866666666666666,
+    "mean_abs_dq_orig": 0.0007729132776148617,
+    "abs_red_guided": 0.016586173325777054,
+    "abs_red_random": 0.004435064271092415,
+    "abs_red_anti": 0.001946910168044269,
+    "prefix_len_mean_items": 18.133333333333333,
+    "k_mean": 5.933333333333334
+   },
+   "0.5": {
+    "red_guided": -0.016087090596556664,
+    "red_random": -0.006734825205057859,
+    "red_anti": -0.001328671001829207,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.6866666666666666,
+    "mean_abs_dq_orig": 0.0007729132776148617,
+    "abs_red_guided": 0.016087090596556664,
+    "abs_red_random": 0.006734825205057859,
+    "abs_red_anti": 0.0013857006561011076,
+    "prefix_len_mean_items": 18.133333333333333,
+    "k_mean": 9.333333333333334
+   }
+  }
+ },
+ "bpi2020-rfp": {
+  "n_test_transitions": 6006,
+  "prefix_len_mean_test": 2.9064269064269066,
+  "prefix_len_p50_test": 3.0,
+  "n_test_cases": 1364,
+  "v_case_percentiles": {
+   "1": 1.0094414949417114,
+   "5": 1.010003685951233,
+   "10": 1.01193368434906,
+   "25": 1.0125441551208496,
+   "50": 1.012561321258545,
+   "75": 1.012567162513733,
+   "90": 1.012567162513733,
+   "99": 1.0127986669540405
+  },
+  "v_case_mean": 1.0123679637908936,
+  "v_case_std": 0.0009449059143662453,
+  "lowest_V_explained": [
+   {
+    "case_id": 2990,
+    "V": 1.0094414949417114,
+    "pctile": 0.0,
+    "delta_q": 0.4479411244392395,
+    "a_star": "Request Payment",
+    "top_tokens": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ],
+    "top_drivers": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ]
+   },
+   {
+    "case_id": 3564,
+    "V": 1.0094414949417114,
+    "pctile": 0.0,
+    "delta_q": 0.4479411244392395,
+    "a_star": "Request Payment",
+    "top_tokens": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ],
+    "top_drivers": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ]
+   },
+   {
+    "case_id": 3730,
+    "V": 1.0094414949417114,
+    "pctile": 0.0,
+    "delta_q": 0.4479411244392395,
+    "a_star": "Request Payment",
+    "top_tokens": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ],
+    "top_drivers": [
+     "Request For Payment REJECTED by ADMINISTRATION",
+     "Request For Payment SUBMITTED by EMPLOYEE"
+    ]
+   }
+  ],
+  "nearest_5th_pct_explained": {
+   "case_id": 190,
+   "V": 1.010003685951233,
+   "pctile": 4.9853372434017595,
+   "delta_q": 0.4445750117301941,
+   "a_star": "Request Payment",
+   "top_tokens": [
+    "Request For Payment REJECTED by SUPERVISOR",
+    "Request For Payment SUBMITTED by EMPLOYEE"
+   ],
+   "top_drivers": [
+    "Request For Payment REJECTED by SUPERVISOR",
+    "Request For Payment SUBMITTED by EMPLOYEE"
+   ]
+  },
+  "n_dq_items": 8,
+  "dq_margin_drop": {
+   "0.1": {
+    "red_guided": 0.4467970132827759,
+    "red_random": 0.20107312500476837,
+    "red_anti": 0.0009242147207260132,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0,
+    "mean_abs_dq_orig": 0.44918501377105713,
+    "abs_red_guided": 0.4467970132827759,
+    "abs_red_random": 0.20107312500476837,
+    "abs_red_anti": 0.0009242147207260132,
+    "prefix_len_mean_items": 2.0,
+    "k_mean": 1.0
+   },
+   "0.2": {
+    "red_guided": 0.4467970132827759,
+    "red_random": 0.19077131152153015,
+    "red_anti": 0.0009242147207260132,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0,
+    "mean_abs_dq_orig": 0.44918501377105713,
+    "abs_red_guided": 0.4467970132827759,
+    "abs_red_random": 0.19077131152153015,
+    "abs_red_anti": 0.0009242147207260132,
+    "prefix_len_mean_items": 2.0,
+    "k_mean": 1.0
+   },
+   "0.3": {
+    "red_guided": 0.4467970132827759,
+    "red_random": 0.2075604647397995,
+    "red_anti": 0.0009242147207260132,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0,
+    "mean_abs_dq_orig": 0.44918501377105713,
+    "abs_red_guided": 0.4467970132827759,
+    "abs_red_random": 0.2075604647397995,
+    "abs_red_anti": 0.0009242147207260132,
+    "prefix_len_mean_items": 2.0,
+    "k_mean": 1.0
+   },
+   "0.5": {
+    "red_guided": 0.4467970132827759,
+    "red_random": 0.18485479056835175,
+    "red_anti": 0.0009242147207260132,
+    "signflip_guided": 0.0,
+    "signflip_random": 0.0,
+    "mean_abs_dq_orig": 0.44918501377105713,
+    "abs_red_guided": 0.4467970132827759,
+    "abs_red_random": 0.18485479056835175,
+    "abs_red_anti": 0.0009242147207260132,
+    "prefix_len_mean_items": 2.0,
+    "k_mean": 1.0
+   }
+  }
+ },
+ "bpi2020-int-decl": {
+  "n_test_transitions": 13227,
+  "prefix_len_mean_test": 6.012020866409617,
+  "prefix_len_p50_test": 6.0,
+  "n_test_cases": 1291,
+  "v_case_percentiles": {
+   "1": 0.5966817140579224,
+   "5": 1.0100678205490112,
+   "10": 1.011807918548584,
+   "25": 1.012555480003357,
+   "50": 1.0132073163986206,
+   "75": 1.0133745670318604,
+   "90": 1.0136164426803589,
+   "99": 1.0161205530166626
+  },
+  "v_case_mean": 1.0051120519638062,
+  "v_case_std": 0.07125519216060638,
+  "lowest_V_explained": [
+   {
+    "case_id": 2286,
+    "V": 0.9506908059120178,
+    "pctile": 1.1618900077459333,
+    "delta_q": 0.01730954647064209,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "End trip",
+     "Declaration REJECTED by ADMINISTRATION",
+     "Permit APPROVED by ADMINISTRATION"
+    ],
+    "top_drivers": [
+     "End trip",
+     "Declaration REJECTED by ADMINISTRATION",
+     "Permit APPROVED by ADMINISTRATION"
+    ]
+   },
+   {
+    "case_id": 2690,
+    "V": 0.9506908059120178,
+    "pctile": 1.1618900077459333,
+    "delta_q": 0.01730954647064209,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "End trip",
+     "Declaration REJECTED by ADMINISTRATION",
+     "Permit APPROVED by ADMINISTRATION"
+    ],
+    "top_drivers": [
+     "End trip",
+     "Declaration REJECTED by ADMINISTRATION",
+     "Permit APPROVED by ADMINISTRATION"
+    ]
+   },
+   {
+    "case_id": 4612,
+    "V": 0.9506908059120178,
+    "pctile": 1.1618900077459333,
+    "delta_q": 0.01730954647064209,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "End trip",
+     "Declaration REJECTED by ADMINISTRATION",
+     "Permit APPROVED by ADMINISTRATION"
+    ],
+    "top_drivers": [
+     "End trip",
+     "Declaration REJECTED by ADMINISTRATION",
+     "Permit APPROVED by ADMINISTRATION"
+    ]
+   }
+  ],
+  "nearest_5th_pct_explained": {
+   "case_id": 2286,
+   "V": 0.9506908059120178,
+   "pctile": 1.1618900077459333,
+   "delta_q": 0.01730954647064209,
+   "a_star": "Send Reminder",
+   "top_tokens": [
+    "End trip",
+    "Declaration REJECTED by ADMINISTRATION",
+    "Permit APPROVED by ADMINISTRATION"
+   ],
+   "top_drivers": [
+    "End trip",
+    "Declaration REJECTED by ADMINISTRATION",
+    "Permit APPROVED by ADMINISTRATION"
+   ]
+  },
+  "n_dq_items": 3,
+  "dq_margin_drop": {
+   "0.1": {
+    "red_guided": -0.0005906820297241211,
+    "red_random": -0.008693779818713665,
+    "red_anti": -0.0049166083335876465,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.7,
+    "mean_abs_dq_orig": 0.01730966567993164,
+    "abs_red_guided": 0.0005906820297241211,
+    "abs_red_random": 0.008693779818713665,
+    "abs_red_anti": 0.0049166083335876465,
+    "prefix_len_mean_items": 7.0,
+    "k_mean": 1.0
+   },
+   "0.2": {
+    "red_guided": 0.002993464469909668,
+    "red_random": -0.021202052012085915,
+    "red_anti": -0.013300180435180664,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.8333333333333334,
+    "mean_abs_dq_orig": 0.01730966567993164,
+    "abs_red_guided": 0.002993464469909668,
+    "abs_red_random": 0.021202052012085915,
+    "abs_red_anti": 0.013300180435180664,
+    "prefix_len_mean_items": 7.0,
+    "k_mean": 2.0
+   },
+   "0.3": {
+    "red_guided": -0.00787574052810669,
+    "red_random": -0.03837339207530022,
+    "red_anti": -0.01457434892654419,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.9666666666666666,
+    "mean_abs_dq_orig": 0.01730966567993164,
+    "abs_red_guided": 0.00787574052810669,
+    "abs_red_random": 0.03837339207530022,
+    "abs_red_anti": 0.01457434892654419,
+    "prefix_len_mean_items": 7.0,
+    "k_mean": 3.0
+   },
+   "0.5": {
+    "red_guided": -0.0006601810455322266,
+    "red_random": -0.035888414829969406,
+    "red_anti": -0.023766517639160156,
+    "signflip_guided": 0.0,
+    "signflip_random": 1.0,
+    "mean_abs_dq_orig": 0.01730966567993164,
+    "abs_red_guided": 0.0006601810455322266,
+    "abs_red_random": 0.035888414829969406,
+    "abs_red_anti": 0.023766517639160156,
+    "prefix_len_mean_items": 7.0,
+    "k_mean": 4.0
+   }
+  }
+ },
+ "bpi2020-travel": {
+  "n_test_transitions": 15723,
+  "prefix_len_mean_test": 7.329835273166698,
+  "prefix_len_p50_test": 6.0,
+  "n_test_cases": 1414,
+  "v_case_percentiles": {
+   "1": 0.9686402678489685,
+   "5": 0.9939398169517517,
+   "10": 0.9939398765563965,
+   "25": 1.011765480041504,
+   "50": 1.0130283832550049,
+   "75": 1.0134422779083252,
+   "90": 1.0164132118225098,
+   "99": 1.035494327545166
+  },
+  "v_case_mean": 1.0101970434188843,
+  "v_case_std": 0.01605876162648201,
+  "lowest_V_explained": [
+   {
+    "case_id": 760,
+    "V": 0.9686402678489685,
+    "pctile": 0.5657708628005658,
+    "delta_q": 0.0021417737007141113,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "Permit FINAL_APPROVED by SUPERVISOR",
+     "Permit SUBMITTED by EMPLOYEE",
+     "Start trip"
+    ],
+    "top_drivers": [
+     "Permit FINAL_APPROVED by SUPERVISOR",
+     "Permit SUBMITTED by EMPLOYEE",
+     "Start trip"
+    ]
+   },
+   {
+    "case_id": 242,
+    "V": 0.9771458506584167,
+    "pctile": 2.1216407355021216,
+    "delta_q": 0.28898364305496216,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "End trip",
+     "Permit APPROVED by ADMINISTRATION",
+     "Permit SUBMITTED by EMPLOYEE"
+    ],
+    "top_drivers": [
+     "Permit REJECTED by BUDGET OWNER",
+     "Permit SUBMITTED by EMPLOYEE",
+     "Permit APPROVED by ADMINISTRATION"
+    ]
+   },
+   {
+    "case_id": 3913,
+    "V": 0.9839613437652588,
+    "pctile": 2.4045261669024045,
+    "delta_q": 0.9782838821411133,
+    "a_star": "Send Reminder",
+    "top_tokens": [
+     "Permit SAVED by EMPLOYEE",
+     "End trip"
+    ],
+    "top_drivers": [
+     "Permit SAVED by EMPLOYEE",
+     "End trip"
+    ]
+   }
+  ],
+  "nearest_5th_pct_explained": {
+   "case_id": 1243,
+   "V": 0.9874855279922485,
+   "pctile": 2.4752475247524752,
+   "delta_q": 0.02239847183227539,
+   "a_star": "Send Reminder",
+   "top_tokens": [
+    "Permit FINAL_APPROVED by SUPERVISOR",
+    "Start trip",
+    "Permit APPROVED by BUDGET OWNER"
+   ],
+   "top_drivers": [
+    "Permit FINAL_APPROVED by SUPERVISOR",
+    "Start trip",
+    "Permit APPROVED by BUDGET OWNER"
+   ]
+  },
+  "n_dq_items": 5,
+  "dq_margin_drop": {
+   "0.1": {
+    "red_guided": 0.18667027354240417,
+    "red_random": 0.20397134125232697,
+    "red_anti": 0.18553708493709564,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.5,
+    "mean_abs_dq_orig": 0.2682598829269409,
+    "abs_red_guided": 0.2522609233856201,
+    "abs_red_random": 0.21611113846302032,
+    "abs_red_anti": 0.19013012945652008,
+    "prefix_len_mean_items": 4.6,
+    "k_mean": 1.0
+   },
+   "0.2": {
+    "red_guided": 0.18623656034469604,
+    "red_random": 0.17548950016498566,
+    "red_anti": 0.1715168058872223,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.58,
+    "mean_abs_dq_orig": 0.2682598829269409,
+    "abs_red_guided": 0.25269460678100586,
+    "abs_red_random": 0.20715674757957458,
+    "abs_red_anti": 0.20415039360523224,
+    "prefix_len_mean_items": 4.6,
+    "k_mean": 1.2
+   },
+   "0.3": {
+    "red_guided": 0.1970485895872116,
+    "red_random": 0.18654769659042358,
+    "red_anti": 0.22066298127174377,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.8,
+    "mean_abs_dq_orig": 0.2682598829269409,
+    "abs_red_guided": 0.24146778881549835,
+    "abs_red_random": 0.23035967350006104,
+    "abs_red_anti": 0.2635854184627533,
+    "prefix_len_mean_items": 4.6,
+    "k_mean": 2.0
+   },
+   "0.5": {
+    "red_guided": 0.2063126116991043,
+    "red_random": 0.1665591448545456,
+    "red_anti": 0.24507983028888702,
+    "signflip_guided": 1.0,
+    "signflip_random": 0.8800000000000001,
+    "mean_abs_dq_orig": 0.2682598829269409,
+    "abs_red_guided": 0.24481996893882751,
+    "abs_red_random": 0.21091119945049286,
+    "abs_red_anti": 0.2532150149345398,
+    "prefix_len_mean_items": 4.6,
+    "k_mean": 2.6
+   }
+  }
+ }
+}

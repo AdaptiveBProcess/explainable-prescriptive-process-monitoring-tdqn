@@ -24,49 +24,49 @@ DATASETS = {
     "simbank": {
         "npz": REPO / "data/simbank/processed/D_offline.npz",
         "splits": REPO / "data/simbank/processed/splits.json",
-        "ope": REPO / "artifacts/ope/ope_dr.json",
+        "ope": REPO / "artifacts/ope/ope_dr_boa.json",
         "xai_ig": REPO / "artifacts/xai",
     },
     "bpi2017": {
         "npz": REPO / "data/bpi2017/processed/D_offline.npz",
         "splits": REPO / "data/bpi2017/processed/splits.json",
-        "ope": REPO / "artifacts/ope/bpi2017/ope_dr.json",
+        "ope": REPO / "artifacts/ope/bpi2017/ope_dr_boa.json",
         "xai_ig": REPO / "artifacts/xai/bpi2017",
     },
     "bpi2020-rfp": {
         "npz": REPO / "data/bpi2020-rfp/processed/D_offline.npz",
         "splits": REPO / "data/bpi2020-rfp/processed/splits.json",
-        "ope": REPO / "artifacts/ope/bpi2020-rfp/ope_dr.json",
+        "ope": REPO / "artifacts/ope/bpi2020-rfp/ope_dr_boa.json",
         "xai_ig": REPO / "artifacts/xai/bpi2020-rfp",
     },
     "bpi2012": {
         "npz": REPO / "data/bpi2012/processed/D_offline.npz",
         "splits": REPO / "data/bpi2012/processed/splits.json",
-        "ope": REPO / "artifacts/ope/bpi2012/ope_dr.json",
+        "ope": REPO / "artifacts/ope/bpi2012/ope_dr_boa.json",
         "xai_ig": REPO / "artifacts/xai/bpi2012",
     },
     "bpi2017ct": {
         "npz": REPO / "data/bpi2017ct/processed/D_offline.npz",
         "splits": REPO / "data/bpi2017ct/processed/splits.json",
-        "ope": REPO / "artifacts/ope/bpi2017ct/ope_dr.json",
+        "ope": REPO / "artifacts/ope/bpi2017ct/ope_dr_boa.json",
         "xai_ig": REPO / "artifacts/xai/bpi2017ct",
     },
     "simbank-ir3": {
         "npz": REPO / "data/simbank-ir3/processed/D_offline.npz",
         "splits": REPO / "data/simbank-ir3/processed/splits.json",
-        "ope": REPO / "artifacts/ope/simbank-ir3/ope_dr.json",
+        "ope": REPO / "artifacts/ope/simbank-ir3/ope_dr_boa.json",
         "xai_ig": REPO / "artifacts/xai/simbank-ir3",
     },
     "bpi2012-offertes": {
         "npz": REPO / "data/bpi2012-offertes/processed/D_offline.npz",
         "splits": REPO / "data/bpi2012-offertes/processed/splits.json",
-        "ope": REPO / "artifacts/ope/bpi2012-offertes/ope_dr.json",
+        "ope": REPO / "artifacts/ope/bpi2012-offertes/ope_dr_boa.json",
         "xai_ig": REPO / "artifacts/xai/bpi2012-offertes",
     },
     "sepsis": {
         "npz": REPO / "data/sepsis/processed/D_offline.npz",
         "splits": REPO / "data/sepsis/processed/splits.json",
-        "ope": REPO / "artifacts/ope/sepsis/ope_dr.json",
+        "ope": REPO / "artifacts/ope/sepsis/ope_dr_boa.json",
         "xai_ig": REPO / "artifacts/xai/sepsis",
     },
 }
@@ -74,8 +74,17 @@ CONFIG = {"training": {"transformer": {}}}
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH = 1024
 P_LIST = [0.1, 0.2, 0.3, 0.5]
-N_RANDOM = 10
-RNG_SEED = 123
+# Single random-null convention shared with 32_evaluability / 26_fidelity_*:
+# same n_random, seed AND per-(item, rep) position draws, so the same null has
+# one value per configuration across every artifact.
+from xppm.xai.evaluability import (  # noqa: E402
+    DEFAULT_N_RANDOM,
+    DEFAULT_SEED,
+    _random_positions,
+)
+
+N_RANDOM = DEFAULT_N_RANDOM
+RNG_SEED = DEFAULT_SEED
 
 
 def batched_q(q_net, s, sm, va):
@@ -119,7 +128,6 @@ def margin_drop(q_net, test, dq_json_path):
         ]
 
     out = {"n_items": len(items), "mean_abs_dq_orig": float(np.abs(dq_orig).mean())}
-    rng = np.random.default_rng(RNG_SEED)
     for p_rm in P_LIST:
         k_list, top_pos, bot_pos, nonpad = [], [], [], []
         for j, it in enumerate(items):
@@ -133,11 +141,8 @@ def margin_drop(q_net, test, dq_json_path):
         sa, ma = _perturb_states_mask_topk(s_i, sm_i, bot_pos)
         dq_a = margin_after(sa, ma)
         red_r, flip_r = [], []
-        for _ in range(N_RANDOM):
-            rnd = [
-                list(rng.choice(nonpad[j], size=min(k_list[j], len(nonpad[j])), replace=False))
-                for j in range(len(items))
-            ]
+        for rep in range(N_RANDOM):
+            rnd = _random_positions(sm_i, np.array(k_list), RNG_SEED, rep)
             sr, mr = _perturb_states_mask_topk(s_i, sm_i, rnd)
             dq_r = margin_after(sr, mr)
             red_r.append(np.abs(dq_orig) - np.abs(dq_r))

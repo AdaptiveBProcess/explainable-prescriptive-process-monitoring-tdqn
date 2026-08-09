@@ -43,6 +43,8 @@ __all__ = [
     "MIN_CASES",
     "NULL_MARGIN_FACTOR",
     "BAND_FACTOR",
+    "DEFAULT_SEED",
+    "DEFAULT_N_RANDOM",
     "k_of_p",
     "granularity_evidence",
     "random_null",
@@ -122,8 +124,10 @@ def random_null(
 
     out = {"delta_random": float(np.stack(abs_dv).mean(0).mean())}
     if m_terms:
-        # m(p) = |E[ |dQ| - |dQ_masked| ]|, averaged over repetitions
-        out["m_random"] = float(np.abs(np.stack(m_terms).mean(1)).mean())
+        # |d_random(p)| = |E[ |dQ| - |dQ_masked| ]| with the expectation over
+        # items AND repetitions (the signed-drain convention of Def. 3), so
+        # this equals the |red_random| of 23_margin_drop_compare exactly.
+        out["m_random"] = float(abs(np.stack(m_terms).mean()))
         out["mean_abs_dq"] = float(np.abs(dq0).mean())
     return out
 

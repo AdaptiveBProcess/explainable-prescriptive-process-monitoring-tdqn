@@ -100,16 +100,15 @@ def integrated_gradients_embedding(
     diff = input_emb - baseline_emb
     grad_sum = torch.zeros_like(input_emb)
 
-    # Trapezoidal rule: average endpoints and midpoints for better accuracy
+    # Midpoint Riemann sum: gradients evaluated at the midpoint of each of the
+    # n_steps subintervals of [0, 1] (what the paper calls "midpoint steps")
     alphas = torch.linspace(0.0, 1.0, n_steps + 1, device=states.device)
 
     for i in range(n_steps):
-        # Use both endpoints for trapezoidal rule
         alpha_start = alphas[i]
         alpha_end = alphas[i + 1]
         alpha_mid = (alpha_start + alpha_end) / 2.0
 
-        # Compute gradient at midpoint (main contribution)
         interp_mid = baseline_emb + alpha_mid * diff
         interp_mid = interp_mid.detach().requires_grad_(True)
         q_mid = _forward_from_embeddings(q_net, interp_mid, state_mask)
@@ -119,7 +118,7 @@ def integrated_gradients_embedding(
         grad_sum = grad_sum + interp_mid.grad.detach()
         interp_mid.grad = None
 
-    # Average gradients (trapezoidal rule approximation)
+    # Average midpoint gradients
     avg_grad = grad_sum / n_steps
     ig_attr = diff.detach() * avg_grad
 

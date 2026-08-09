@@ -22,21 +22,51 @@ from xppm.xai.fidelity_tests import (  # noqa: E402
 DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 SEED, N_RANDOM, P_LIST = 123, 20, [0.1, 0.2]
 DS = {
-    "simbank": ("data/simbank/processed", "artifacts/ope/ope_dr.json", "artifacts/xai"),
+    "simbank": ("data/simbank/processed", "artifacts/ope/ope_dr_boa.json", "artifacts/xai"),
     "bpi2017": (
         "data/bpi2017/processed",
-        "artifacts/ope/bpi2017/ope_dr.json",
+        "artifacts/ope/bpi2017/ope_dr_boa.json",
         "artifacts/xai/bpi2017",
     ),
     "bpi2012": (
         "data/bpi2012/processed",
-        "artifacts/ope/bpi2012/ope_dr.json",
+        "artifacts/ope/bpi2012/ope_dr_boa.json",
         "artifacts/xai/bpi2012",
     ),
     "bpi2017ct": (
         "data/bpi2017ct/processed",
-        "artifacts/ope/bpi2017ct/ope_dr.json",
+        "artifacts/ope/bpi2017ct/ope_dr_boa.json",
         "artifacts/xai/bpi2017ct",
+    ),
+    "simbank-ir3": (
+        "data/simbank-ir3/processed",
+        "artifacts/ope/simbank-ir3/ope_dr_boa.json",
+        "artifacts/xai/simbank-ir3",
+    ),
+    "bpi2012-offertes": (
+        "data/bpi2012-offertes/processed",
+        "artifacts/ope/bpi2012-offertes/ope_dr_boa.json",
+        "artifacts/xai/bpi2012-offertes",
+    ),
+    "sepsis": (
+        "data/sepsis/processed",
+        "artifacts/ope/sepsis/ope_dr_boa.json",
+        "artifacts/xai/sepsis",
+    ),
+    "bpi2020-rfp": (
+        "data/bpi2020-rfp/processed",
+        "artifacts/ope/bpi2020-rfp/ope_dr_boa.json",
+        "artifacts/xai/bpi2020-rfp",
+    ),
+    "bpi2020-int-decl": (
+        "data/bpi2020-int-decl/processed",
+        "artifacts/ope/bpi2020-int-decl/ope_dr_boa.json",
+        "artifacts/xai/bpi2020-int-decl",
+    ),
+    "bpi2020-travel": (
+        "data/bpi2020-travel/processed",
+        "artifacts/ope/bpi2020-travel/ope_dr_boa.json",
+        "artifacts/xai/bpi2020-travel",
     ),
 }
 

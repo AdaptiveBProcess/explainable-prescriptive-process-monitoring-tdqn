@@ -1,0 +1,182 @@
+{
+ "bpi2017ct/06-512": {
+  "started": "2026-08-09T09:13:26",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:14:41"
+ },
+ "simbank/07": {
+  "started": "2026-08-09T09:14:41",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:15:01"
+ },
+ "bpi2017ct/07": {
+  "started": "2026-08-09T09:15:01",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:15:20"
+ },
+ "bpi2012/05-boa": {
+  "started": "2026-08-09T09:15:20",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:15:37"
+ },
+ "bpi2012-offertes/05-boa": {
+  "started": "2026-08-09T09:15:37",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:15:56"
+ },
+ "bpi2017/05-boa": {
+  "started": "2026-08-09T09:15:56",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:16:26"
+ },
+ "bpi2020-rfp/05-boa": {
+  "started": "2026-08-09T09:16:26",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:16:34"
+ },
+ "bpi2020-int-decl/05-boa": {
+  "started": "2026-08-09T09:16:34",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:16:45"
+ },
+ "bpi2020-travel/05-boa": {
+  "started": "2026-08-09T09:16:45",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:16:57"
+ },
+ "paper/22_fidelity_baselines": {
+  "started": "2026-08-09T09:16:57",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:18:01"
+ },
+ "paper/23_margin_drop_compare": {
+  "started": "2026-08-09T09:18:01",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:18:38"
+ },
+ "paper/24_absgap_compare": {
+  "started": "2026-08-09T09:18:38",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:19:14"
+ },
+ "paper/25_absgap_final": {
+  "started": "2026-08-09T09:19:14",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:20:20"
+ },
+ "paper/26_fidelity_bpi2017ct": {
+  "started": "2026-08-09T09:20:20",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:20:30"
+ },
+ "paper/26_fidelity_simbank-ir3": {
+  "started": "2026-08-09T09:20:30",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:21:13"
+ },
+ "paper/27_build_interp_pairs": {
+  "started": "2026-08-09T09:21:13",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:29:28"
+ },
+ "paper/ranking_separation": {
+  "started": "2026-08-09T09:29:28",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:29:30"
+ },
+ "paper/32_evaluability": {
+  "started": "2026-08-09T09:29:30",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:30:41"
+ },
+ "order_sens/simbank": {
+  "started": "2026-08-09T09:30:41",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:30:52"
+ },
+ "order_sens/simbank-ir3": {
+  "started": "2026-08-09T09:30:52",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:31:04"
+ },
+ "order_sens/bpi2012": {
+  "started": "2026-08-09T09:31:04",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:31:11"
+ },
+ "order_sens/bpi2017": {
+  "started": "2026-08-09T09:31:11",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:31:20"
+ },
+ "order_sens/bpi2017ct": {
+  "started": "2026-08-09T09:31:20",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:31:29"
+ },
+ "order_sens/bpi2020-rfp": {
+  "started": "2026-08-09T09:31:29",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:31:36"
+ },
+ "order_sens/bpi2020-int-decl": {
+  "started": "2026-08-09T09:31:36",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:31:43"
+ },
+ "order_sens/bpi2020-travel": {
+  "started": "2026-08-09T09:31:43",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:31:50"
+ },
+ "order_sens/bpi2012-offertes": {
+  "started": "2026-08-09T09:31:50",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:31:58"
+ },
+ "order_sens/sepsis": {
+  "started": "2026-08-09T09:31:58",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:32:05"
+ },
+ "figs/explanation_card": {
+  "started": "2026-08-09T09:32:05",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:32:08"
+ },
+ "global/34_audit": {
+  "started": "2026-08-09T09:32:08",
+  "rc": 0,
+  "status": "ok",
+  "finished": "2026-08-09T09:32:14"
+ }
+}

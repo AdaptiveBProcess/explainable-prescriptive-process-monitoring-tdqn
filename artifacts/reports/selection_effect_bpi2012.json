@@ -1,0 +1,14 @@
+{
+ "full_log": {
+  "n_cases": 13087,
+  "called_rate": 0.12585008023229158,
+  "approve_given_called": 0.7474195506982392,
+  "approve_given_not_called": 0.08872377622377622
+ },
+ "test_split": {
+  "n_cases": 2619,
+  "called_rate": 0.12905689194348988,
+  "approve_given_called": 0.7396449704142012,
+  "approve_given_not_called": 0.09601052170100834
+ }
+}

@@ -163,6 +163,18 @@ class TransformerQNetwork(nn.Module):
         Integrated Gradients path) varies token content with positions held
         fixed, and the all-PAD reference sits at the same positions as the input.
         """
+        return self.q_head(self.pooled_state(token_emb, state_mask))
+
+    def pooled_state(
+        self, token_emb: torch.Tensor, state_mask: torch.Tensor | None = None
+    ) -> torch.Tensor:
+        """Pooled state representation z (input to the Q-head).
+
+        This is the single implementation of the deployed forward up to the
+        Q-head; anything that needs state embeddings (e.g. the behavior-policy
+        head in OPE) must call this rather than replay embedding/encoder/pooling
+        by hand.
+        """
         x = token_emb
         if self.pos_embedding is not None:
             pos = torch.arange(x.size(1), device=x.device).unsqueeze(0).expand(x.size(0), -1)
@@ -179,8 +191,7 @@ class TransformerQNetwork(nn.Module):
         else:
             state_repr = encoded[:, -1]
 
-        state_repr = torch.relu(self.state_proj(state_repr))
-        return self.q_head(state_repr)
+        return torch.relu(self.state_proj(state_repr))
 
     def forward(self, states: torch.Tensor, state_mask: torch.Tensor | None = None) -> torch.Tensor:
         """Q-values from token ids.

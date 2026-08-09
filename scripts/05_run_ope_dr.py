@@ -69,14 +69,14 @@ def main() -> None:
     parser.add_argument(
         "--rho-cap",
         type=float,
-        default=20.0,
-        help="Truncation cap for IS weights (rho).",
+        default=None,
+        help="Truncation cap for IS weights (rho). Default: ope.dr.clip_importance_weights.",
     )
     parser.add_argument(
         "--bootstrap",
         type=int,
-        default=200,
-        help="Number of bootstrap samples for CI.",
+        default=None,
+        help="Number of bootstrap samples for CI. Default: ope.dr.bootstrap.n.",
     )
     parser.add_argument(
         "--pi-e-temperature",
@@ -166,6 +166,15 @@ def main() -> None:
             cfg["ope"] = {}
         cfg["ope"]["pi_e_temperature"] = float(args.pi_e_temperature)
 
+    # CLI overrides config; config declares the values the paper cites
+    dr_cfg = cfg.get("ope", {}).get("dr", {})
+    rho_cap = args.rho_cap
+    if rho_cap is None:
+        rho_cap = dr_cfg.get("clip_importance_weights", 20.0)
+    n_bootstrap = args.bootstrap
+    if n_bootstrap is None:
+        n_bootstrap = dr_cfg.get("bootstrap", {}).get("n", 200)
+
     metrics = doubly_robust_estimate(
         ckpt_path=ckpt_path,
         dataset_path=dataset_path,
@@ -173,8 +182,8 @@ def main() -> None:
         vocab_path=vocab_path,
         config=cfg,
         behavior=behavior,
-        rho_cap=float(args.rho_cap),
-        n_bootstrap=int(args.bootstrap),
+        rho_cap=float(rho_cap),
+        n_bootstrap=int(n_bootstrap),
     )
 
     # 3) Enrich with metadata (hashes, config) if available
@@ -202,10 +211,15 @@ def main() -> None:
         "n_bootstrap": metrics.get("n_bootstrap", 0),
     }
 
-    # 4) Save report
-    output_path = args.output or cfg.get("experiment", {}).get(
-        "ope_report_path", "artifacts/ope/ope_dr.json"
-    )
+    # 4) Save report. The default filename is derived from the behavior
+    # estimator so the primary and the robustness variant can never silently
+    # overwrite each other (they used to share ope_dr.json).
+    if args.output:
+        output_path = args.output
+    else:
+        configured = cfg.get("experiment", {}).get("ope_report_path", "artifacts/ope/ope_dr.json")
+        default_name = "ope_dr_boa.json" if args.behavior == "boa_logreg" else "ope_dr_encoder.json"
+        output_path = str(Path(configured).parent / default_name)
     save_ope_report(full_report, output_path)
     logger.info("05_run_ope_dr completed. Report saved to %s", output_path)
 

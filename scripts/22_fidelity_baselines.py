@@ -17,9 +17,9 @@ from xppm.utils.config import Config  # noqa: E402
 from xppm.xai.fidelity_tests import run_fidelity_tests  # noqa: E402
 
 OPE_PATHS = {
-    "simbank": REPO / "artifacts/ope/ope_dr.json",
-    "bpi2017": REPO / "artifacts/ope/bpi2017/ope_dr.json",
-    "bpi2020-rfp": REPO / "artifacts/ope/bpi2020-rfp/ope_dr.json",
+    "simbank": REPO / "artifacts/ope/ope_dr_boa.json",
+    "bpi2017": REPO / "artifacts/ope/bpi2017/ope_dr_boa.json",
+    "bpi2020-rfp": REPO / "artifacts/ope/bpi2020-rfp/ope_dr_boa.json",
 }
 
 

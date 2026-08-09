@@ -5,7 +5,8 @@ Usage: 26_fidelity_bpi2017ct.py [bpi2017ct|simbank-ir3]   (default: bpi2017ct)
 Risk test: magnitude-based Q-drop gap |ΔV| with per-item paired SEs — same
 apparatus, seeds and conventions as 25_absgap_final.py (SEED=123, NR=20).
 Intervention test: margin drop + sign flips — same apparatus as
-23_margin_drop_compare.py (N_RANDOM=10, rng seed 123), plus paired SEs.
+23_margin_drop_compare.py (shared null: evaluability.DEFAULT_N_RANDOM,
+DEFAULT_SEED), plus paired SEs.
 For simbank-ir3 the deltaQ contrast recorded per item is the runner-up rate
 (a_star != a_contrast filter keeps only offer decision points).
 
@@ -23,6 +24,11 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "src"))
 
 from xppm.rl.train_tdqn import load_dataset_with_splits  # noqa: E402
+from xppm.xai.evaluability import (  # noqa: E402
+    DEFAULT_N_RANDOM,
+    DEFAULT_SEED,
+    _random_positions,
+)
 from xppm.xai.fidelity_tests import (  # noqa: E402
     _compute_q_values,
     _load_q_network,
@@ -30,9 +36,9 @@ from xppm.xai.fidelity_tests import (  # noqa: E402
 )
 
 DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-SEED = 123
-NR = 20
-N_RANDOM_MARGIN = 10
+SEED = DEFAULT_SEED
+NR = DEFAULT_N_RANDOM
+N_RANDOM_MARGIN = DEFAULT_N_RANDOM
 P_LIST = (0.1, 0.2, 0.3, 0.5)
 BATCH = 1024
 CONFIG = {"training": {"transformer": {}}}
@@ -147,7 +153,6 @@ def margin_drop(q_net, test):
         ]
 
     out = {"n_items": len(items), "mean_abs_dq_orig": float(np.abs(dq_orig).mean())}
-    rng = np.random.default_rng(SEED)
     for p_rm in P_LIST:
         k_list, top_pos, bot_pos, nonpad = [], [], [], []
         for j in range(len(items)):
@@ -161,11 +166,8 @@ def margin_drop(q_net, test):
         sa, ma = _perturb_states_mask_topk(s, sm, bot_pos)
         dq_a = margin_after(sa, ma)
         red_r, flip_r = [], []
-        for _ in range(N_RANDOM_MARGIN):
-            rnd = [
-                list(rng.choice(nonpad[j], size=min(k_list[j], len(nonpad[j])), replace=False))
-                for j in range(len(items))
-            ]
+        for rep in range(N_RANDOM_MARGIN):
+            rnd = _random_positions(sm, np.array(k_list), SEED, rep)
             sr, mr = _perturb_states_mask_topk(s, sm, rnd)
             dq_r = margin_after(sr, mr)
             red_r.append(np.abs(dq_orig) - np.abs(dq_r))
