@@ -62,6 +62,18 @@ DATASETS = {
         "xai": REPO / "artifacts/xai/simbank-ir3",
         "ope": REPO / "artifacts/ope/simbank-ir3/ope_dr.json",
     },
+    "bpi2012-offertes": {
+        "npz": REPO / "data/bpi2012-offertes/processed/D_offline.npz",
+        "splits": REPO / "data/bpi2012-offertes/processed/splits.json",
+        "xai": REPO / "artifacts/xai/bpi2012-offertes",
+        "ope": REPO / "artifacts/ope/bpi2012-offertes/ope_dr.json",
+    },
+    "sepsis": {
+        "npz": REPO / "data/sepsis/processed/D_offline.npz",
+        "splits": REPO / "data/sepsis/processed/splits.json",
+        "xai": REPO / "artifacts/xai/sepsis",
+        "ope": REPO / "artifacts/ope/sepsis/ope_dr.json",
+    },
 }
 
 CONFIG = {"training": {"transformer": {}}}

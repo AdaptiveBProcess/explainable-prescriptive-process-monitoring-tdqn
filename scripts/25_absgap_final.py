@@ -42,6 +42,31 @@ DS = {
         "artifacts/ope/bpi2020-travel/ope_dr.json",
         "artifacts/xai/bpi2020-travel",
     ),
+    "bpi2012": (
+        "data/bpi2012/processed",
+        "artifacts/ope/bpi2012/ope_dr.json",
+        "artifacts/xai/bpi2012",
+    ),
+    "bpi2017ct": (
+        "data/bpi2017ct/processed",
+        "artifacts/ope/bpi2017ct/ope_dr.json",
+        "artifacts/xai/bpi2017ct",
+    ),
+    "simbank-ir3": (
+        "data/simbank-ir3/processed",
+        "artifacts/ope/simbank-ir3/ope_dr.json",
+        "artifacts/xai/simbank-ir3",
+    ),
+    "bpi2012-offertes": (
+        "data/bpi2012-offertes/processed",
+        "artifacts/ope/bpi2012-offertes/ope_dr.json",
+        "artifacts/xai/bpi2012-offertes",
+    ),
+    "sepsis": (
+        "data/sepsis/processed",
+        "artifacts/ope/sepsis/ope_dr.json",
+        "artifacts/xai/sepsis",
+    ),
 }
 out = {}
 for ds, (proc, opep, xai) in DS.items():
