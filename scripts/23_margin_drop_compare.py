@@ -200,7 +200,7 @@ def main():
                 print(f"   -- {name}/{method}: no artifact, skipped")
                 continue
             results[name][method] = margin_drop(q_net, test, path)
-        # exploratory sign-aware ranking of the IG margin attribution (unscored)
+        # corrected criterion: sign-aware ranking of the IG margin attribution
         npz_path = p["xai_ig"] / "ig_grad_attributions.npz"
         if npz_path.exists():
             print(f"== {name} / ig_signed")

@@ -56,7 +56,7 @@ declares the same values (guarded by `tests/test_evaluability.py`).
 
 | Column | Artifact | Generator |
 |---|---|---|
-| n_dQ, Margin, flips | `artifacts/fidelity/baselines/margin_drop_compare.json` (`ig` entry per config) | `scripts/23_margin_drop_compare.py` |
+| n_dQ, Margin (corrected criterion), flips | `artifacts/fidelity/baselines/margin_drop_compare.json` (`ig_signed` = corrected primary; `ig` = original magnitude-ranked, reported alongside) | `scripts/23_margin_drop_compare.py` |
 | Q-drop gap (guided vs random, paired SE) | `artifacts/fidelity/baselines/absgap_final_ig.json` | `scripts/25_absgap_final.py` |
 | band (IQR(V) / E\|Δ_random\|) | `artifacts/fidelity/evaluability.json` | `scripts/32_evaluability.py` |
 | Baseline methods (saliency / attention rollout) | same two files, `saliency` / `attention` entries | `scripts/21_baseline_attributions.py` + 22/23/24 |
@@ -74,14 +74,18 @@ per config: `risk_explanations.json → metadata.ig_completeness_{risk,deltaq}`
 |---|---|---|
 | Order sensitivity (Threats) | `artifacts/reports/order_sensitivity/<name>.json` | `scripts/33_check_order_sensitivity.py --out` |
 | Dossier-call selection effect (use sketch) | `artifacts/reports/selection_effect_bpi2012.json` | `scripts/29_selection_effect_bpi2012.py` |
-| Case 552 card + dossier numbers | `artifacts/interp/pairs.parquet` + `artifacts/explanation_example.pdf` | `scripts/27_build_interp_pairs.py`, `scripts/generate_explanation_card.py` |
+| Fig. 1 card (BPI 2017-SLA case 11005) | `artifacts/explanation_example.pdf` | `scripts/generate_explanation_card.py --dataset bpi2017ct` |
+| SimBank case-552 card (tie-caveat illustration) + dossier numbers | `artifacts/explanation_example_simbank.pdf` + `artifacts/interp/pairs.parquet` | `scripts/generate_explanation_card.py --dataset simbank`, `scripts/27_build_interp_pairs.py` |
 | Prose statistics (l-bar per config, V ranges/median, ties, case-552 percentiles, argmax off-support fractions, V(s0), IG latency) | `artifacts/reports/paper_stats.json` | `scripts/39_paper_stats.py` |
 | Generality (Sec. 4.5, PPO transplant) | `artifacts/generality/{rl-prescriptive-monitoring,when-to-treat}.json` | `scripts/37_ppo_transplant.py` (see `experiments/generality_ppo/README.md`) |
 | Ranking overlap between levels | `artifacts/reports/ranking_separation.json` | `scripts/ranking_separation.py` |
 | Support-gate sensitivity (eps in {.05,.10,.15,.20}) + ratio-cap incidence (Threats) | `artifacts/reports/ope_sensitivity.json` | `scripts/42_ope_sensitivity.py` |
 | SimBank risk-test diagnosis (tie/reference split; intervention-vs-median structure) | `artifacts/reports/simbank_diagnosis.json` | `scripts/43_simbank_diagnosis.py` |
 | Evaluation-temperature sensitivity (SimBank, Sepsis; T in {0.5, 2}) | `artifacts/reports/t_sensitivity/*.json` | `scripts/05_run_ope_dr.py --pi-e-temperature` |
-| Exploratory sign-aware margin drain (unscored; v4 review D1) | `margin_drop_compare.json` -> `ig_signed` entries | `scripts/23_margin_drop_compare.py` |
+| Wait-side margin (why wait?) attribution + corrected test | `artifacts/reports/wait_margin.json` | `scripts/44_wait_margin.py` |
+| Def. 4 constant sensitivity (factors 2-4x, min cases 20-50) | `artifacts/reports/threshold_sensitivity.json` | `scripts/45_threshold_sensitivity.py` |
+| Non-PAD deletion control (token substitution) | `artifacts/reports/alt_deletion_check.json` | `scripts/46_alt_deletion.py` |
+| Seed stability of fidelity verdicts (simbank, bpi2017ct; seeds 43/44) | `artifacts/reports/seed_stability/*.json` | `scripts/47_eval_seed.py` |
 
 ## Historical / non-citable
 

@@ -1,0 +1,338 @@
+{
+ "factors": [
+  2.0,
+  3.0,
+  4.0
+ ],
+ "min_cases": [
+  20,
+  30,
+  50
+ ],
+ "configs": {
+  "simbank": {
+   "target_over_null": 9.95,
+   "cond_iii": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": true
+   },
+   "n_margin_cases": 69,
+   "cond_ii": {
+    "20": true,
+    "30": true,
+    "50": true
+   },
+   "band_ratio": 8.04,
+   "band_resolvable": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": true
+   },
+   "margin_evaluable": {
+    "f=2.0,m=20": true,
+    "f=2.0,m=30": true,
+    "f=2.0,m=50": true,
+    "f=3.0,m=20": true,
+    "f=3.0,m=30": true,
+    "f=3.0,m=50": true,
+    "f=4.0,m=20": true,
+    "f=4.0,m=30": true,
+    "f=4.0,m=50": true
+   }
+  },
+  "simbank-ir3": {
+   "target_over_null": 17.91,
+   "cond_iii": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": true
+   },
+   "n_margin_cases": 206,
+   "cond_ii": {
+    "20": true,
+    "30": true,
+    "50": true
+   },
+   "band_ratio": 1.99,
+   "band_resolvable": {
+    "2.0": false,
+    "3.0": false,
+    "4.0": false
+   },
+   "margin_evaluable": {
+    "f=2.0,m=20": true,
+    "f=2.0,m=30": true,
+    "f=2.0,m=50": true,
+    "f=3.0,m=20": true,
+    "f=3.0,m=30": true,
+    "f=3.0,m=50": true,
+    "f=4.0,m=20": true,
+    "f=4.0,m=30": true,
+    "f=4.0,m=50": true
+   }
+  },
+  "bpi2012": {
+   "target_over_null": 4.57,
+   "cond_iii": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": true
+   },
+   "n_margin_cases": 56,
+   "cond_ii": {
+    "20": true,
+    "30": true,
+    "50": true
+   },
+   "band_ratio": 8.16,
+   "band_resolvable": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": true
+   },
+   "margin_evaluable": {
+    "f=2.0,m=20": true,
+    "f=2.0,m=30": true,
+    "f=2.0,m=50": true,
+    "f=3.0,m=20": true,
+    "f=3.0,m=30": true,
+    "f=3.0,m=50": true,
+    "f=4.0,m=20": true,
+    "f=4.0,m=30": true,
+    "f=4.0,m=50": true
+   }
+  },
+  "bpi2017ct": {
+   "target_over_null": 7.2,
+   "cond_iii": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": true
+   },
+   "n_margin_cases": 200,
+   "cond_ii": {
+    "20": true,
+    "30": true,
+    "50": true
+   },
+   "band_ratio": 3.05,
+   "band_resolvable": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": false
+   },
+   "margin_evaluable": {
+    "f=2.0,m=20": true,
+    "f=2.0,m=30": true,
+    "f=2.0,m=50": true,
+    "f=3.0,m=20": true,
+    "f=3.0,m=30": true,
+    "f=3.0,m=50": true,
+    "f=4.0,m=20": true,
+    "f=4.0,m=30": true,
+    "f=4.0,m=50": true
+   }
+  },
+  "bpi2017": {
+   "target_over_null": 0.66,
+   "cond_iii": {
+    "2.0": false,
+    "3.0": false,
+    "4.0": false
+   },
+   "n_margin_cases": 34,
+   "cond_ii": {
+    "20": true,
+    "30": true,
+    "50": false
+   },
+   "band_ratio": 0.26,
+   "band_resolvable": {
+    "2.0": false,
+    "3.0": false,
+    "4.0": false
+   },
+   "margin_evaluable": {
+    "f=2.0,m=20": false,
+    "f=2.0,m=30": false,
+    "f=2.0,m=50": false,
+    "f=3.0,m=20": false,
+    "f=3.0,m=30": false,
+    "f=3.0,m=50": false,
+    "f=4.0,m=20": false,
+    "f=4.0,m=30": false,
+    "f=4.0,m=50": false
+   }
+  },
+  "bpi2020-rfp": {
+   "target_over_null": 20.1,
+   "cond_iii": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": true
+   },
+   "n_margin_cases": 9,
+   "cond_ii": {
+    "20": false,
+    "30": false,
+    "50": false
+   },
+   "band_ratio": 0.24,
+   "band_resolvable": {
+    "2.0": false,
+    "3.0": false,
+    "4.0": false
+   },
+   "margin_evaluable": {
+    "f=2.0,m=20": false,
+    "f=2.0,m=30": false,
+    "f=2.0,m=50": false,
+    "f=3.0,m=20": false,
+    "f=3.0,m=30": false,
+    "f=3.0,m=50": false,
+    "f=4.0,m=20": false,
+    "f=4.0,m=30": false,
+    "f=4.0,m=50": false
+   }
+  },
+  "bpi2020-int-decl": {
+   "target_over_null": 7.34,
+   "cond_iii": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": true
+   },
+   "n_margin_cases": 6,
+   "cond_ii": {
+    "20": false,
+    "30": false,
+    "50": false
+   },
+   "band_ratio": 0.61,
+   "band_resolvable": {
+    "2.0": false,
+    "3.0": false,
+    "4.0": false
+   },
+   "margin_evaluable": {
+    "f=2.0,m=20": false,
+    "f=2.0,m=30": false,
+    "f=2.0,m=50": false,
+    "f=3.0,m=20": false,
+    "f=3.0,m=30": false,
+    "f=3.0,m=50": false,
+    "f=4.0,m=20": false,
+    "f=4.0,m=30": false,
+    "f=4.0,m=50": false
+   }
+  },
+  "bpi2020-travel": {
+   "target_over_null": 2.12,
+   "cond_iii": {
+    "2.0": true,
+    "3.0": false,
+    "4.0": false
+   },
+   "n_margin_cases": 9,
+   "cond_ii": {
+    "20": false,
+    "30": false,
+    "50": false
+   },
+   "band_ratio": 0.25,
+   "band_resolvable": {
+    "2.0": false,
+    "3.0": false,
+    "4.0": false
+   },
+   "margin_evaluable": {
+    "f=2.0,m=20": false,
+    "f=2.0,m=30": false,
+    "f=2.0,m=50": false,
+    "f=3.0,m=20": false,
+    "f=3.0,m=30": false,
+    "f=3.0,m=50": false,
+    "f=4.0,m=20": false,
+    "f=4.0,m=30": false,
+    "f=4.0,m=50": false
+   }
+  },
+  "bpi2012-offertes": {
+   "target_over_null": 17.38,
+   "cond_iii": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": true
+   },
+   "n_margin_cases": 46,
+   "cond_ii": {
+    "20": true,
+    "30": true,
+    "50": false
+   },
+   "band_ratio": 8.78,
+   "band_resolvable": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": true
+   },
+   "margin_evaluable": {
+    "f=2.0,m=20": true,
+    "f=2.0,m=30": true,
+    "f=2.0,m=50": false,
+    "f=3.0,m=20": true,
+    "f=3.0,m=30": true,
+    "f=3.0,m=50": false,
+    "f=4.0,m=20": true,
+    "f=4.0,m=30": true,
+    "f=4.0,m=50": false
+   }
+  },
+  "sepsis": {
+   "target_over_null": 7.89,
+   "cond_iii": {
+    "2.0": true,
+    "3.0": true,
+    "4.0": true
+   },
+   "n_margin_cases": 74,
+   "cond_ii": {
+    "20": true,
+    "30": true,
+    "50": true
+   },
+   "band_ratio": 2.38,
+   "band_resolvable": {
+    "2.0": true,
+    "3.0": false,
+    "4.0": false
+   },
+   "margin_evaluable": {
+    "f=2.0,m=20": true,
+    "f=2.0,m=30": true,
+    "f=2.0,m=50": true,
+    "f=3.0,m=20": true,
+    "f=3.0,m=30": true,
+    "f=3.0,m=50": true,
+    "f=4.0,m=20": true,
+    "f=4.0,m=30": true,
+    "f=4.0,m=50": true
+   }
+  }
+ },
+ "margin_set_changes_vs_declared": {
+  "2.0": [],
+  "3.0": [],
+  "4.0": []
+ },
+ "band_changes_vs_declared": {
+  "2.0": [
+   "sepsis"
+  ],
+  "3.0": [],
+  "4.0": [
+   "bpi2017ct"
+  ]
+ }
+}

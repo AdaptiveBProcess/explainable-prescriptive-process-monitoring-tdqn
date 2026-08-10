@@ -1,0 +1,74 @@
+{
+ "simbank": {
+  "n_wait_states": 131,
+  "n_evaluable": 0
+ },
+ "simbank-ir3": {
+  "n_wait_states": 4739,
+  "n_evaluable": 0
+ },
+ "bpi2012": {
+  "n_wait_states": 144,
+  "n_evaluable": 144,
+  "n_steps_ig": 128,
+  "mean_wait_margin": 0.007003343664109707,
+  "0.1": {
+   "d_guided": -0.08621081709861755,
+   "d_random": -0.017301134765148163,
+   "d_anti": -0.00021997895964886993,
+   "passes_corrected": false,
+   "drain_fraction": -12.309950828552246
+  },
+  "0.2": {
+   "d_guided": -0.08615604043006897,
+   "d_random": -0.021291039884090424,
+   "d_anti": -0.00045798937208019197,
+   "passes_corrected": false,
+   "drain_fraction": -12.302129745483398
+  }
+ },
+ "bpi2012-offertes": {
+  "n_wait_states": 154,
+  "n_evaluable": 154,
+  "n_steps_ig": 128,
+  "mean_wait_margin": 0.02056155353784561,
+  "0.1": {
+   "d_guided": -0.0023004079703241587,
+   "d_random": -0.0006490341038443148,
+   "d_anti": -0.01057013962417841,
+   "passes_corrected": false,
+   "drain_fraction": -0.11187909543514252
+  },
+  "0.2": {
+   "d_guided": -0.002953994320705533,
+   "d_random": -0.0023105063010007143,
+   "d_anti": -0.012598264962434769,
+   "passes_corrected": false,
+   "drain_fraction": -0.14366590976715088
+  }
+ },
+ "bpi2017ct": {
+  "n_wait_states": 0,
+  "note": "no wait-optimal states in the explained pool"
+ },
+ "sepsis": {
+  "n_wait_states": 126,
+  "n_evaluable": 126,
+  "n_steps_ig": 128,
+  "mean_wait_margin": 0.10661835968494415,
+  "0.1": {
+   "d_guided": 0.013128350488841534,
+   "d_random": -0.004651895258575678,
+   "d_anti": -0.06015343591570854,
+   "passes_corrected": true,
+   "drain_fraction": 0.1231340542435646
+  },
+  "0.2": {
+   "d_guided": 0.014334062114357948,
+   "d_random": -0.006438252981752157,
+   "d_anti": -0.055359724909067154,
+   "passes_corrected": true,
+   "drain_fraction": 0.13444271683692932
+  }
+ }
+}

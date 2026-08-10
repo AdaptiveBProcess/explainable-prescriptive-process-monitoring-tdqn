@@ -1,0 +1,68 @@
+{
+ "simbank": {
+  "p": 0.1,
+  "n": 200,
+  "operator": "token substitution (non-PAD)",
+  "abs_guided": 1895.7440185546875,
+  "abs_random": 1097.7314453125,
+  "abs_anti": 771.2210083007812,
+  "gap": 798.0127563476562,
+  "gap_se": 204.25589025648563,
+  "ordering_holds": true
+ },
+ "simbank-ir3": {
+  "p": 0.1,
+  "n": 4945,
+  "operator": "token substitution (non-PAD)",
+  "abs_guided": 1722.4791259765625,
+  "abs_random": 1040.0362548828125,
+  "abs_anti": 715.9127197265625,
+  "gap": 682.4427490234375,
+  "gap_se": 54.87954550648467,
+  "ordering_holds": true
+ },
+ "bpi2012": {
+  "p": 0.1,
+  "n": 200,
+  "operator": "token substitution (non-PAD)",
+  "abs_guided": 0.5729215741157532,
+  "abs_random": 0.1633724719285965,
+  "abs_anti": 0.046604935079813004,
+  "gap": 0.40954911708831787,
+  "gap_se": 0.03245431457807705,
+  "ordering_holds": true
+ },
+ "bpi2012-offertes": {
+  "p": 0.1,
+  "n": 200,
+  "operator": "token substitution (non-PAD)",
+  "abs_guided": 0.5146529674530029,
+  "abs_random": 0.16253063082695007,
+  "abs_anti": 0.08576755225658417,
+  "gap": 0.35212233662605286,
+  "gap_se": 0.02789494647783828,
+  "ordering_holds": true
+ },
+ "bpi2017ct": {
+  "p": 0.1,
+  "n": 200,
+  "operator": "token substitution (non-PAD)",
+  "abs_guided": 0.0956229716539383,
+  "abs_random": 0.03862050175666809,
+  "abs_anti": 0.021502962335944176,
+  "gap": 0.0570024773478508,
+  "gap_se": 0.004547964216702936,
+  "ordering_holds": true
+ },
+ "sepsis": {
+  "p": 0.1,
+  "n": 200,
+  "operator": "token substitution (non-PAD)",
+  "abs_guided": 0.15500925481319427,
+  "abs_random": 0.10453582555055618,
+  "abs_anti": 0.06477104872465134,
+  "gap": 0.050473421812057495,
+  "gap_se": 0.00899759351380268,
+  "ordering_holds": true
+ }
+}
