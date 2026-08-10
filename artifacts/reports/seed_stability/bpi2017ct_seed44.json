@@ -1,0 +1,27 @@
+{
+ "dataset": "bpi2017ct",
+ "seed_tag": "44",
+ "ckpt": "artifacts/models/tdqn/20260810_082432",
+ "n": 200,
+ "value_test": {
+  "0.1": {
+   "gap": 0.3365197777748108,
+   "gap_se": 0.029115023985243765,
+   "se_ratio": 11.558286125588204,
+   "ordering_holds": true
+  },
+  "0.2": {
+   "gap": 0.28303080797195435,
+   "gap_se": 0.025849930811871487,
+   "se_ratio": 10.948996731626588,
+   "ordering_holds": true
+  }
+ },
+ "margin_test_corrected": {
+  "n_dq": 199,
+  "d_guided": 0.1944591999053955,
+  "d_random": 0.030187219381332397,
+  "d_anti": -0.04814403876662254,
+  "passes": true
+ }
+}

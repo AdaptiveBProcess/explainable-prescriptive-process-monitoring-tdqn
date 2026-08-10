@@ -1,0 +1,27 @@
+{
+ "dataset": "simbank",
+ "seed_tag": "43",
+ "ckpt": "artifacts/models/tdqn/20260810_001438",
+ "n": 200,
+ "value_test": {
+  "0.1": {
+   "gap": 920.4945068359375,
+   "gap_se": 154.71123484020018,
+   "se_ratio": 5.949758644139243,
+   "ordering_holds": true
+  },
+  "0.2": {
+   "gap": 720.59228515625,
+   "gap_se": 135.0212889118832,
+   "se_ratio": 5.336879028213978,
+   "ordering_holds": true
+  }
+ },
+ "margin_test_corrected": {
+  "n_dq": 69,
+  "d_guided": 988.5176391601562,
+  "d_random": 112.9930419921875,
+  "d_anti": 0.3203867971897125,
+  "passes": true
+ }
+}
