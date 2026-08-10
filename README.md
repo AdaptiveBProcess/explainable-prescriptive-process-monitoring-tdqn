@@ -19,6 +19,9 @@ This repository implements the PL-xPsPM framework: a sequential offline interven
 
 ## Reproducing the paper
 
+Paper: *One Step Is Not Enough: Faithful Policy-Level Explanations for
+Prescriptive Process Monitoring* (ICPM).
+
 **Start at [`docs/paper/MAPPING.md`](docs/paper/MAPPING.md)** — it maps every
 number in the ICPM paper to its artifact and generator script, and lists what
 is historical/non-citable. `make paper-tables` regenerates every cited JSON

@@ -1,7 +1,7 @@
 # Paper ↔ repository mapping
 
-Where every number in the ICPM paper ("One Step Is Not Enough: Policy-Level
-Explainability for Prescriptive Process Monitoring") comes from. All artifacts
+Where every number in the ICPM paper ("One Step Is Not Enough: Faithful
+Policy-Level Explanations for Prescriptive Process Monitoring") comes from. All artifacts
 are produced by the v2 (positional) encoder chain; run
 `python scripts/34_audit_chain_versions.py --expect 2` to verify no stale
 checkpoint is referenced.
