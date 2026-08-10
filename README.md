@@ -6,7 +6,7 @@ Pipeline for policy-level explainable prescriptive process monitoring using offl
 
 ## Overview
 
-This repository implements the PL-xPPM framework: a sequential offline intervention policy (Transformer-based Double Q-Network) combined with a dual-level attribution module that separates **why a case is at risk** ($\phi^V$ on $V(s)$) from **why a specific intervention is expected to improve outcomes** ($\phi^{\Delta Q}$ on $\Delta Q$), both computed via Integrated Gradients.
+This repository implements the PL-xPsPM framework: a sequential offline intervention policy (Transformer-based Double Q-Network) combined with a dual-level attribution module that separates **why a case is at risk** ($\phi^V$ on $V(s)$) from **why a specific intervention is expected to improve outcomes** ($\phi^{\Delta Q}$ on $\Delta Q$), both computed via Integrated Gradients.
 
 **Design principles**
 
