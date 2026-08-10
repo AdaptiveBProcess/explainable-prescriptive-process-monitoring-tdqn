@@ -97,13 +97,20 @@ def batched_q(q_net, s, sm, va):
     return np.concatenate(qs)
 
 
-def margin_drop(q_net, test, dq_json_path):
+def margin_drop(q_net, test, dq_json_path, signed_scores=None):
+    """signed_scores: optional (n_all_items, max_len) array of SIGNED per-token
+    margin attributions (npz raw attr summed over embedding dims). When given,
+    rankings come from it (descending = margin supporters first) instead of the
+    JSON's magnitude-ranked top_drivers — the exploratory sign-aware variant of
+    Def. 3 (v4 review, D1). Rows are aligned with dq["items"] order."""
     dq = json.load(open(dq_json_path))
-    items = [
-        it
-        for it in dq["items"]
+    rows_items = [
+        (row, it)
+        for row, it in enumerate(dq["items"])
         if it.get("a_star") != it.get("a_contrast") and abs(it.get("delta_q", 0)) > 0
     ]
+    items = [it for _, it in rows_items]
+    npz_rows = [row for row, _ in rows_items]
     if not items:
         return {"n_items": 0}
     s, sm, va = test["s"], test["s_mask"], test["valid_actions"]
@@ -133,8 +140,15 @@ def margin_drop(q_net, test, dq_json_path):
         for j, it in enumerate(items):
             k = max(1, int(np.ceil(p_rm * int(sm_i[j].sum()))))
             k_list.append(k)
-            top_pos.append(positions(it, "top_drivers")[:k])
-            bot_pos.append(positions(it, "bottom_drivers")[:k])
+            if signed_scores is not None:
+                sc = signed_scores[npz_rows[j]]
+                np_pos = np.nonzero(sm_i[j])[0]
+                order = np_pos[np.argsort(-sc[np_pos])]
+                top_pos.append(list(order[:k]))  # strongest margin supporters
+                bot_pos.append(list(order[::-1][:k]))  # strongest compressors
+            else:
+                top_pos.append(positions(it, "top_drivers")[:k])
+                bot_pos.append(positions(it, "bottom_drivers")[:k])
             nonpad.append(np.nonzero(sm_i[j])[0])
         sg, mg = _perturb_states_mask_topk(s_i, sm_i, top_pos)
         dq_g = margin_after(sg, mg)
@@ -186,6 +200,15 @@ def main():
                 print(f"   -- {name}/{method}: no artifact, skipped")
                 continue
             results[name][method] = margin_drop(q_net, test, path)
+        # exploratory sign-aware ranking of the IG margin attribution (unscored)
+        npz_path = p["xai_ig"] / "ig_grad_attributions.npz"
+        if npz_path.exists():
+            print(f"== {name} / ig_signed")
+            z = np.load(npz_path)
+            signed = z["deltaq_attr"].sum(axis=-1)
+            results[name]["ig_signed"] = margin_drop(
+                q_net, test, methods["ig"], signed_scores=signed
+            )
     outpath = REPO / "artifacts/fidelity/baselines/margin_drop_compare.json"
     outpath.parent.mkdir(parents=True, exist_ok=True)
     json.dump(results, open(outpath, "w"), indent=1)

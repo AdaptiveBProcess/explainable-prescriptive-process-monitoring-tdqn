@@ -78,6 +78,10 @@ per config: `risk_explanations.json → metadata.ig_completeness_{risk,deltaq}`
 | Prose statistics (l-bar per config, V ranges/median, ties, case-552 percentiles, argmax off-support fractions, V(s0), IG latency) | `artifacts/reports/paper_stats.json` | `scripts/39_paper_stats.py` |
 | Generality (Sec. 4.5, PPO transplant) | `artifacts/generality/{rl-prescriptive-monitoring,when-to-treat}.json` | `scripts/37_ppo_transplant.py` (see `experiments/generality_ppo/README.md`) |
 | Ranking overlap between levels | `artifacts/reports/ranking_separation.json` | `scripts/ranking_separation.py` |
+| Support-gate sensitivity (eps in {.05,.10,.15,.20}) + ratio-cap incidence (Threats) | `artifacts/reports/ope_sensitivity.json` | `scripts/42_ope_sensitivity.py` |
+| SimBank risk-test diagnosis (tie/reference split; intervention-vs-median structure) | `artifacts/reports/simbank_diagnosis.json` | `scripts/43_simbank_diagnosis.py` |
+| Evaluation-temperature sensitivity (SimBank, Sepsis; T in {0.5, 2}) | `artifacts/reports/t_sensitivity/*.json` | `scripts/05_run_ope_dr.py --pi-e-temperature` |
+| Exploratory sign-aware margin drain (unscored; v4 review D1) | `margin_drop_compare.json` -> `ig_signed` entries | `scripts/23_margin_drop_compare.py` |
 
 ## Historical / non-citable
 

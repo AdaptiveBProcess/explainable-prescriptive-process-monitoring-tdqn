@@ -1,0 +1,714 @@
+{
+ "epsilons": [
+  0.05,
+  0.1,
+  0.15,
+  0.2
+ ],
+ "cap": 20.0,
+ "configs": {
+  "simbank": {
+   "boa": {
+    "policy_ess": 0.26090549253147,
+    "noop_ess": 0.6373776846689339,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.15": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.2": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     }
+    },
+    "rho_step_percentiles": [
+     1.0,
+     1.000174641609192,
+     1.1753827333450317,
+     1.1753827333450317,
+     9.178057670593262
+    ],
+    "clipped_fraction_bracket": "<1%"
+   },
+   "encoder": {
+    "policy_ess": 0.2551821402517877,
+    "noop_ess": 0.6188740233803834,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.15": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.2": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     }
+    },
+    "rho_step_percentiles": [
+     1.0,
+     1.0675914287567139,
+     1.0704987049102783,
+     1.1921625137329102,
+     4.626946449279785
+    ],
+    "clipped_fraction_bracket": "<1%"
+   }
+  },
+  "simbank-ir3": {
+   "boa": {
+    "policy_ess": 0.3784811272778923,
+    "noop_ess": 0.8616487640704409,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.15": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.2": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     }
+    },
+    "rho_step_percentiles": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "clipped_fraction_bracket": "<1%"
+   },
+   "encoder": {
+    "policy_ess": 0.35705650545775874,
+    "noop_ess": 0.45014991306830104,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.15": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.2": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     }
+    },
+    "rho_step_percentiles": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "clipped_fraction_bracket": "<1%"
+   }
+  },
+  "bpi2012": {
+   "boa": {
+    "policy_ess": 0.002756636500894353,
+    "noop_ess": 0.2968376983993847,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     },
+     "0.1": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     },
+     "0.15": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     },
+     "0.2": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     0.49695008993148804,
+     0.5027697682380676,
+     0.6966960191726685,
+     1.2087327480316161,
+     2.2921357631683303
+    ],
+    "clipped_fraction_bracket": "<1%"
+   },
+   "encoder": {
+    "policy_ess": 0.0004021319537036595,
+    "noop_ess": 0.038605179198019215,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.1": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.15": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.2": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     0.5546811819076538,
+     0.5872946381568909,
+     0.5993856191635132,
+     2.4947891235351562,
+     3.6239514350891113
+    ],
+    "clipped_fraction_bracket": "<1%"
+   }
+  },
+  "bpi2017": {
+   "boa": {
+    "policy_ess": 0.2300065140496845,
+    "noop_ess": 0.9833521805233486,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.15": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.2": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     }
+    },
+    "rho_step_percentiles": [
+     0.5069239735603333,
+     0.5080854296684265,
+     0.5158789157867432,
+     0.5180023312568665,
+     0.5180023312568665
+    ],
+    "clipped_fraction_bracket": "<1%"
+   },
+   "encoder": {
+    "policy_ess": 0.11408777415078365,
+    "noop_ess": 0.7877051692029784,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.15": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     },
+     "0.2": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     0.539971113204956,
+     0.5567225813865662,
+     0.5692567229270935,
+     0.5722276568412781,
+     0.5722276568412781
+    ],
+    "clipped_fraction_bracket": "<1%"
+   }
+  },
+  "bpi2017ct": {
+   "boa": {
+    "policy_ess": 0.17874668585828535,
+    "noop_ess": 0.9833521805233486,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.15": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.2": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     0.5017911195755005,
+     0.5070497989654541,
+     0.5082902908325195,
+     0.5345778882503509,
+     0.5663333249092102
+    ],
+    "clipped_fraction_bracket": "<1%"
+   },
+   "encoder": {
+    "policy_ess": 0.20009126410815378,
+    "noop_ess": 0.9098297494388284,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.15": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.2": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     }
+    },
+    "rho_step_percentiles": [
+     0.5262768864631653,
+     0.530942440032959,
+     0.532192051410675,
+     0.5668730139732361,
+     0.5932792568206787
+    ],
+    "clipped_fraction_bracket": "<1%"
+   }
+  },
+  "bpi2020-rfp": {
+   "boa": {
+    "policy_ess": 0.14019032058171363,
+    "noop_ess": 0.013449602273355345,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.15": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.2": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     0.5030755996704102,
+     0.5051906704902649,
+     0.5092757344245911,
+     0.5092757940292358,
+     0.753941535949707
+    ],
+    "clipped_fraction_bracket": "<1%"
+   },
+   "encoder": {
+    "policy_ess": 0.899230596690492,
+    "noop_ess": 0.03905668459873845,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.15": {
+      "policy_on_support": true,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.2": {
+      "policy_on_support": true,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     0.8007494211196899,
+     0.8095406293869019,
+     1.3228521347045898,
+     1.322852373123169,
+     1.841900110244751
+    ],
+    "clipped_fraction_bracket": "<1%"
+   }
+  },
+  "bpi2020-int-decl": {
+   "boa": {
+    "policy_ess": 0.03265494419974284,
+    "noop_ess": 0.9379921795216688,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     },
+     "0.1": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     },
+     "0.15": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     },
+     "0.2": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     0.508245050907135,
+     0.5127339363098145,
+     0.516714334487915,
+     0.541786253452301,
+     0.5513070225715637
+    ],
+    "clipped_fraction_bracket": "<1%"
+   },
+   "encoder": {
+    "policy_ess": 0.39334190281830295,
+    "noop_ess": 0.24750030563811923,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.15": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.2": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     }
+    },
+    "rho_step_percentiles": [
+     0.674595296382904,
+     0.6809214353561401,
+     0.6866329908370972,
+     0.6894369125366211,
+     0.6947656273841858
+    ],
+    "clipped_fraction_bracket": "<1%"
+   }
+  },
+  "bpi2020-travel": {
+   "boa": {
+    "policy_ess": 0.06052109959696412,
+    "noop_ess": 0.7872804871188674,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     },
+     "0.15": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     },
+     "0.2": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     0.5075993537902832,
+     0.5259438157081604,
+     0.5397595763206482,
+     0.6881439089775085,
+     2.0713435888290426
+    ],
+    "clipped_fraction_bracket": "<1%"
+   },
+   "encoder": {
+    "policy_ess": 0.189795089920597,
+    "noop_ess": 0.0018404390631997164,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.15": {
+      "policy_on_support": true,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.2": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     0.5862957239151001,
+     0.6109595894813538,
+     0.6273251175880432,
+     0.6356770396232605,
+     3.3203623294830322
+    ],
+    "clipped_fraction_bracket": "<1%"
+   }
+  },
+  "bpi2012-offertes": {
+   "boa": {
+    "policy_ess": 0.4202958533485936,
+    "noop_ess": 0.6193200462391449,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.15": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.2": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     }
+    },
+    "rho_step_percentiles": [
+     0.514962375164032,
+     0.642421543598175,
+     0.9833866953849792,
+     1.1503434419631944,
+     1.9475305891036983
+    ],
+    "clipped_fraction_bracket": "<1%"
+   },
+   "encoder": {
+    "policy_ess": 0.03568031929188054,
+    "noop_ess": 0.005067962544777097,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.1": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.15": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.2": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     0.7064874768257141,
+     0.7622706294059753,
+     1.3463536500930786,
+     1.794528603553772,
+     2.688528118133534
+    ],
+    "clipped_fraction_bracket": "<1%"
+   }
+  },
+  "sepsis": {
+   "boa": {
+    "policy_ess": 0.1487756051150638,
+    "noop_ess": 0.22169975331326727,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.1": {
+      "policy_on_support": true,
+      "noop_on_support": true,
+      "comparison_licensed": true
+     },
+     "0.15": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     },
+     "0.2": {
+      "policy_on_support": false,
+      "noop_on_support": true,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     0.5223126411437988,
+     0.5362857580184937,
+     0.657386684417725,
+     0.7327224612236023,
+     4.720015048980713
+    ],
+    "clipped_fraction_bracket": "<1%"
+   },
+   "encoder": {
+    "policy_ess": 0.004761904761904762,
+    "noop_ess": 0.004761904761904762,
+    "verdicts": {
+     "0.05": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.1": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.15": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     },
+     "0.2": {
+      "policy_on_support": false,
+      "noop_on_support": false,
+      "comparison_licensed": false
+     }
+    },
+    "rho_step_percentiles": [
+     1.2037413120269775,
+     1.2923057079315186,
+     1.344400405883789,
+     1.448568344116211,
+     1.8571866858005524
+    ],
+    "clipped_fraction_bracket": "<1%"
+   }
+  }
+ },
+ "licensed_flips_0.10_to_0.15_primary": [
+  "sepsis"
+ ]
+}

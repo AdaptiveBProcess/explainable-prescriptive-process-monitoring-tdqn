@@ -1,0 +1,63 @@
+{
+ "p": 0.1,
+ "n_cases": 200,
+ "all": {
+  "n": 200,
+  "gap": 390.84649658203125,
+  "gap_se": 132.96955712874748,
+  "se_ratio": 2.9393682661031577
+ },
+ "hypothesis_ties": {
+  "median": 416.2214660644531,
+  "n_tied": 61,
+  "tied": {
+   "n": 61,
+   "gap": -228.420166015625,
+   "gap_se": 18.74373686440616,
+   "se_ratio": -12.186479551438252
+  },
+  "untied": {
+   "n": 139,
+   "gap": 662.61083984375,
+   "gap_se": 186.71816979968708,
+   "se_ratio": 3.5487218011755624
+  }
+ },
+ "hypothesis_reference": {
+  "v_pad": 10008.873046875,
+  "tercile_bounds_abs_dist": [
+   9592.651580810547,
+   10264.411148071289
+  ],
+  "near_reference": {
+   "n": 119,
+   "gap": -810.6348876953125,
+   "gap_se": 104.44794638922863,
+   "se_ratio": -7.7611376357219655
+  },
+  "mid": {
+   "n": 45,
+   "gap": 1935.2833251953125,
+   "gap_se": 24.067383043029444,
+   "se_ratio": 80.41104102325002
+  },
+  "far_from_reference": {
+   "n": 36,
+   "gap": 2431.8642578125,
+   "gap_se": 308.96044921875,
+   "se_ratio": 7.8711183388094215
+  }
+ },
+ "hypothesis_integral": {
+  "spearman_rel_err_vs_gap": null,
+  "rel_err_median": NaN
+ },
+ "intervention_cases_vs_median": {
+  "note": "Where the policy's explained intervention cases sit relative to the tied median of V (tolerance 1e-3 for float dust): the margin lives AT the tie mass; below it cases are unrecoverable (dQ=0) and the policy stops acting, so the running example's boundary position is structural, not curation.",
+  "n_intervention_cases": 69,
+  "at_tied_median": 63,
+  "above_median": 6,
+  "below_median": 0,
+  "v_above_value": 497.31
+ }
+}

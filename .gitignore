@@ -40,6 +40,10 @@ artifacts/**/*
 !artifacts/reports/selection_effect_bpi2012.json
 !artifacts/reports/ranking_separation.json
 !artifacts/reports/paper_stats.json
+!artifacts/reports/ope_sensitivity.json
+!artifacts/reports/simbank_diagnosis.json
+!artifacts/reports/t_sensitivity/
+!artifacts/reports/t_sensitivity/*.json
 !artifacts/reports/fase6_chain_summary.json
 !artifacts/reports/fase7_chain_summary.json
 mlruns/**/*
